@@ -23,9 +23,9 @@
 #include "tm.h"
 
 #define     sign( x )   ( x ) >= 0 ? 1:-1
-#define     abs( x )    ( x ) >= 0 ? ( x ): -( x )
+#define     absl( x )   ( x ) >= 0 ? ( x ): -( x )
 
-#define     µ                   0.1
+#define     MU                  0.1
 #define     HALF_PI             3.141596 / 2
 
 #define     VISION_ZSTATE_IHAT  0
@@ -40,7 +40,7 @@
 
 #define     VISION_WIDTH        640
 #define     VISION_HEIGHT       480
-#define     VISION_CENTER_X     VISION_WIDTH / 2
+#define     VISION_CENTER_X     VISION_WIDTH  / 2
 #define     VISION_CENTER_Y     VISION_HEIGHT / 2
 
 //#define     DEBUG
@@ -56,43 +56,43 @@
     [2] - ψ > around Z
  */
 
-struct cartesian_2d
-{
-    uint32_t x,
-    uint32_t y,
-};
-
-struct cartesian_2d   vis[3];
+struct cartesian2   vis[2];
 
 struct kalman   pos_f[3];
 struct kalman   rot_f[3];
 struct kalman   tru_f[3];
-uint32_t        pos[3];
-uint32_t        rot[3];
-uint32_t        tru[3];
+double          pos[3];
+double          rot[3];
+double          tru[3];
 
 uint16_t        acc[3];
 uint16_t        gyro[3];
 uint16_t        temperature;
 
-uint32_t        delta_t;
+double          delta_t;
 
-uint32_t        i2c_data[I2C_BUFFER_LENGTH];
+uint8_t         i2c_data[I2C_BUFFER_LENGTH];
 
-uint8_t i2cRead( uint8_t addr, uint8_t reg );
-void i2cWrite( uint8_t addr, uint8_t reg, uint32_t *val );
+uint8_t i2cRead( uint8_t addr, uint8_t *reg)
+{
+    uint8_t data = 0;
+    return data;
+}
+void i2cWrite( uint8_t addr, uint8_t reg, uint8_t val )
+{
+    return;
+}
 
 void getIMU( void )
 {
-    while (i2cRead(0x3B, i2cData));
-    acc[0]      = ( ( i2cData[0]  << 8 ) | i2cData[1] );
-    acc[1]      = ( ( i2cData[2]  << 8 ) | i2cData[3] );
-    acc[2]      = ( ( i2cData[4]  << 8 ) | i2cData[5] );
-    temperature = (   i2cData[6]  << 8 ) | i2cData[7];
-    gyro[0]     = (   i2cData[8]  << 8 ) | i2cData[9];
-    gyro[1]     = (   i2cData[10] << 8 ) | i2cData[11];
-    gyro[2]     = (   i2cData[12] << 8 ) | i2cData[13];
-     */
+    while (i2cRead(0x3B, i2c_data));
+    acc[0]      = ( ( i2c_data[0]  << 8 ) | i2c_data[1] );
+    acc[1]      = ( ( i2c_data[2]  << 8 ) | i2c_data[3] );
+    acc[2]      = ( ( i2c_data[4]  << 8 ) | i2c_data[5] );
+    temperature = (   i2c_data[6]  << 8 ) | i2c_data[7];
+    gyro[0]     = (   i2c_data[8]  << 8 ) | i2c_data[9];
+    gyro[1]     = (   i2c_data[10] << 8 ) | i2c_data[11];
+    gyro[2]     = (   i2c_data[12] << 8 ) | i2c_data[13];
 }
 void setIMU( uint8_t reg, uint8_t val )
 {
@@ -104,17 +104,17 @@ void getCursor();
 
 /* See - http://www.nxp.com/files/sensors/doc/app_note/AN3461.pdf */
 
-uint32_t getRoll()
+double getRoll()
 {
-    return atan( acc[1] / ( sign( acc[2] ) * sqrt( ( acc[2] * acc[2] ) + ( µ * ( acc[0] * acc[0] ) ) ) ) ); // Eqn. 38
+    return atan( acc[1] / ( sign( acc[2] ) * sqrt( ( acc[2] * acc[2] ) + ( MU * ( acc[0] * acc[0] ) ) ) ) ); // Eqn. 38
 }
 
-uint32_t getPitch()
+double getPitch()
 {
     return atan( -acc[0] / sqrt( ( acc[1] * acc[1] ) + ( acc[2] * acc[2] ) ) ); // Eqn. 37
 }
 
-uint32_t getYaw()
+double getYaw()
 {
     return atan( -acc[2] / sqrt( ( acc[0] * acc[0] ) + ( acc[1] * acc[1] ) ) ); // Eqn. 37
 }
@@ -128,17 +128,16 @@ struct vec3 * getNonGravAcceleration()
     tba.b = rot_f[1].value;
     tba.c = rot_f[2].value;
     
-    /* Create v vector for zero state */
-    struct vec3 avec;       // Vision system vector
-    vvec.ihat = acc[0];
-    vvec.jhat = acc[1];
-    vvec.khat = acc[2]; // Defualt is (0,0,-1) or facing down (towards center of gravity)
+    /* Create a vector of accelerometer values */
+    struct vec3 avec;
+    avec.ihat = acc[0];
+    avec.jhat = acc[1];
+    avec.khat = acc[2];
     
     /* Transform and normalize v vector by given angles to get unit vector from camera */
-    struct vec3 atru = zxyTransform( avec, tba, 1 );
-    normalizeVec3(atru);
+    struct vec3 * atru = zxyTransform( &avec, &tba, 1 );
     
-    atru.khat += 1; // Negate gravity
+    atru->khat += 1; // Negate gravity
     return atru;
 }
 
@@ -149,9 +148,9 @@ void initFilters( void )
     initKalman( &rot_f[2], getYaw()   );
 }
 
-bool initIMU( void )
+uint8_t initIMU( void )
 {
-    i2cRead(0x75, i2c_data));
+    i2cRead(0x75, i2c_data);
     if (i2c_data[0] != 0x68) { // Read "WHO_AM_I" register
         
 #ifdef DEBUG
@@ -185,7 +184,7 @@ void imuEvent()
         rot[1] = rot_f[1].value;
     }
 
-    kalman_temp = abs(rot_f[1].value);
+    kalman_temp = absl(rot_f[1].value);
     if (kalman_temp > HALF_PI)
     {
         gyro[0] = -gyro[0]; // Invert rate, so it fits the restriced accelerometer reading
@@ -196,9 +195,14 @@ void imuEvent()
     updateKalman( &rot_f[2], ψ, gyro[2], delta_t ); // Calculate the true yaw using a Kalman filter
 }
 
-uint32_t get2dDistance( struct cartesian_2d *a, struct cartesian_2d *b )
+uint32_t get2dDistance( struct cartesian2 *a, struct cartesian2 *b )
 {
-    return sqrt( ( ( b.x * b.x ) - ( a.x * a.x ) ) + ( ( b.y * b.y ) - ( a.y * a.y ) ) );
+    uint32_t a_x = a->x;
+    uint32_t a_y = a->y;
+    uint32_t b_x = b->x;
+    uint32_t b_y = b->y;
+    
+    return sqrt( ( ( b_x * b_x ) - ( a_x * a_x ) ) + ( ( b_y * b_y ) - ( a_y * a_y ) ) );
 }
 
 void getVision()
@@ -211,30 +215,30 @@ void visionEvent()
     getVision(); // Update vis[] array
 }
 
-struct vec3 * dAugment(struct vec3 * d, struct ang3 * a)
+struct vec3 * dAugment(struct vec3 * dvec, struct ang3 * a)
 {
     /* Create v vector for zero state */
     struct vec3 vvec;       // Vision system vector
     vvec.ihat = VISION_ZSTATE_IHAT;
     vvec.jhat = VISION_ZSTATE_JHAT;
     vvec.khat = VISION_ZSTATE_KHAT; // Defualt is (0,0,-1) or facing down (towards center of gravity)
-    
+    //normalizeVec3(vvec); // normalize if vvec inital isn't of length 1
     /* Transform and normalize v vector by given angles to get unit vector from camera */
-    struct vec3 vtru = zxyTransform( vvec, a, 0 );
-    normalizeVec3(vtru);
+    struct vec3 *vtru = zxyTransform( &vvec, a, 0 );
+    
     
     /* Transform d vector by given angles to get true vector between beacons */
-    struct vec3 dtru = zxyTransform( d, a, 0 );
+    struct vec3 *dtru = zxyTransform( dvec, a, 0 );
     
     /* Calculate estimated augmentation of v vector 
-     by ratio of transformed true d estimation a real (BEACON_DISTANCE) */
-    uint32_t aug = ( BEACON_DISTANCE * ( 1 + D_AUG ) ) / lengthOfVec3( dtru ) ;
+     by ratio of transformed true d estimation and real (BEACON_DISTANCE) */
+    double aug = ( BEACON_DISTANCE * ( 1 + D_AUG ) ) / lengthOfVec3( dtru ) ;
     
     /* Apply augmentation and return */
-    vtru.ihat *= aug;
-    vtru.jhat *= aug;
-    vtru.khat *= aug;
-    return &vtru;
+    vtru->ihat *= aug;
+    vtru->jhat *= aug;
+    vtru->khat *= aug;
+    return vtru;
 }
 
 void getAbsolutePosition()
@@ -252,7 +256,7 @@ void getAbsolutePosition()
     dvec.khat = 0;                             // d is only on XY plane (surface of beacons)
     
     /* Create r vector (camera -TO-> vision center) from augment generated true d and vision d */
-    struct vec3 rvec = *( dAugment( dvec, tba ) );
+    struct vec3 rvec = *( dAugment( &dvec, &tba ) );
     
     /* vector between vision center -TO-> B1 */
     struct vec3 evec;
@@ -267,10 +271,10 @@ void getAbsolutePosition()
     fvec.khat = 0;                             // f is only on XY plane (surface of beacons)
     
     /* Transform e vector (vision center -TO-> B1) to true e vector (transformed vision center -TO-> true B1) */
-    struct vec3 etru = zxyTransform( evec, tba, 1 );
+    struct vec3 etru = *( zxyTransform( &evec, &tba, 1 ) );
     
     /* Subract true e vector from augmented r vector */
-    subtractVec3bs(rvec, etru);
+    subtractVec3s(&rvec, &etru);
     
     tru[0] = rvec.ihat;
     tru[1] = rvec.jhat;
@@ -278,13 +282,13 @@ void getAbsolutePosition()
     
     /* Filter calculated absolute position and with integrated acceleration (velocity) */
     struct vec3 ngacc = *( getNonGravAcceleration() );
-    uint32_t delta_time = 0;
+    double delta_time = 0;
     //= now() - tru_f[0].timestamp;
-    uint32_t x_vel = ngacc.ihat * delta_time;
+    double x_vel = ngacc.ihat * delta_time;
     updateKalman( &tru_f[0], tru[0], x_vel, delta_time);
-    uint32_t y_vel = ngacc.jhat * delta_time;
+    double y_vel = ngacc.jhat * delta_time;
     updateKalman( &tru_f[1], tru[1], y_vel, delta_time);
-    uint32_t z_vel = ngacc.khat * delta_time;
+    double z_vel = ngacc.khat * delta_time;
     updateKalman( &tru_f[2], tru[2], z_vel, delta_time);
 }
 

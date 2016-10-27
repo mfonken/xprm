@@ -19,16 +19,16 @@
 
 struct kalman
 {
-    uint32_t K[2];                  // Kalman gain
-    uint32_t P_k[2][2];             // Error covariance matrix
-    uint32_t rate;
-    uint32_t bias;
-    uint32_t value;
-    uint32_t timestamp;
+    double K[2];                  // Kalman gain
+    double P_k[2][2];             // Error covariance matrix
+    double rate;
+    double bias;
+    double value;
+    double timestamp;
 };
 
 void initKalman( struct kalman *k,
-                 uint32_t v )
+                 double v )
 {
     k->K[0]        = 0;
     k->K[1]        = 0;
@@ -42,9 +42,9 @@ void initKalman( struct kalman *k,
 }
 
 void updateKalman( struct kalman *k,
-                   uint32_t value_new,
-                   uint32_t rate_new,
-                   uint32_t delta_time )
+                   double value_new,
+                   double rate_new,
+                   double delta_time )
 {
     /* =-----= PREDICT =-----= */
     /* Predict values */
@@ -52,9 +52,10 @@ void updateKalman( struct kalman *k,
     k->value     += delta_time * k->rate;
     
     /* Predict error covariance */
-    uint32_t P_k_diag = delta_time * k->P_k[1][1];
-    k->P_k[0][0] += delta_time *
-                    ( delta_time * k->P_k[1][1] -
+    double P_k_diag = delta_time * k->P_k[1][1];
+    k->P_k[0][0] +=   delta_time *
+                    ( delta_time *
+                      k->P_k[1][1] -
                       k->P_k[0][1] -
                       k->P_k[1][0] +
                       VALUE_UNCERTAINTY );
@@ -64,10 +65,10 @@ void updateKalman( struct kalman *k,
     
     /* =-----= UPDATE =-----= */
     /* Update values */
-    float S       = k->P_k[0][0] + SENSOR_UNCERTAINTY;
+    double S      = k->P_k[0][0] + SENSOR_UNCERTAINTY;
     k->K[0]       = k->P_k[0][0] / S;
     k->K[1]       = k->P_k[1][0] / S;
-    uint32_t delta_value = value_new - k->value;
+    double delta_value = value_new - k->value;
     k->value     += k->K[0] * delta_value;
     k->bias      += k->K[1] * delta_value;
     
