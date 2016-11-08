@@ -4,12 +4,14 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/Users/matthewfonken/Desktop/marbl/xprm/Programs/Combinations/Image Testing/Camera Test/webcam.cpp" "/Users/matthewfonken/Desktop/marbl/xprm/Programs/Combinations/Image Testing/Camera Test/CMakeFiles/Webcam.dir/webcam.cpp.o"
+  "/Users/matthewfonken/Desktop/marbl/xprm/Programs/Combinations/Image Testing/Camera Test/webcam.cpp" "/Users/matthewfonken/Desktop/marbl/xprm/Programs/Combinations/Image Testing/Camera Test/CMakeFiles/webcam.dir/webcam.cpp.o"
   )
-set(CMAKE_CXX_COMPILER_ID "Clang")
+set(CMAKE_CXX_COMPILER_ID "AppleClang")
 
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
+  "/usr/local/include/opencv"
+  "/usr/local/include"
   )
 
 # Targets to which this target links.

@@ -5,7 +5,7 @@
 #include <sstream>
 #include "types.h"
 #include "unfisheye.h"
-#include "centroid.c"
+#include "centroid.h"
 #include <sys/time.h>
 
 #define WIDTH  620
@@ -39,7 +39,7 @@ double performTest( const char* input_file, const char* output_file, char invers
     file.seekg (0, file.end);
     int length = file.tellg();
     
-    //    file.seekg(0, file.beg);
+    file.seekg(0);
     file.seekg(18);
     char width_c[4];
     file.read(width_c, 4);
@@ -71,21 +71,21 @@ double performTest( const char* input_file, const char* output_file, char invers
             switch( method )
             {
                 case 'n':
-                    if(inverse)
+                    if(inverse == 'i')
                         inverseFisheye(&temp_c, width, height);
-                    else
+                    else if(inverse == 'n')
                         fisheye(&temp_c, width, height);
                     break;
                 case 'c':
-                    if(inverse)
+                    if(inverse == 'i')
                         inverseFisheyeCordic(&temp_c, width, height);
-                    else
+                    else if(inverse == 'n')
                         fisheyeCordic(&temp_c, width, height);
                     break;
                 case 's':
-                    if(inverse)
+                    if(inverse == 'i')
                         inverseFisheyeStd(&temp_c, width, height);
-                    else
+                    else if(inverse == 'n')
                         fisheyeStd(&temp_c, width, height);
                     break;
                 default:
@@ -108,7 +108,7 @@ double performTest( const char* input_file, const char* output_file, char invers
         }
     }
     
-    int num_blobs = 0;
+    int num_centroids = 0;
     for(int y = 0; y < height * 0.9; y++)
     {
         char p[width];
@@ -129,17 +129,17 @@ double performTest( const char* input_file, const char* output_file, char invers
             }
         }
         
-        num_blobs = getCentroids(p, width, y );
+        num_centroids = getCentroids(p, width, y );
     }
     t2 = clock();
     diff = ((double)(t2 - t1) / 1000000.0F ) * 1000;
 #ifdef OUTPUT
-    cout << num_blobs << " centroids returned" << endl;
+    cout << num_centroids << " centroids returned" << endl;
 #endif
-    for(int b = 0; b < num_blobs; b++)
+    for(int b = 0; b < num_centroids; b++)
     {
-        int X = blobs[b].X;
-        int Y = blobs[b].Y;
+        int X = centroids[b].X;
+        int Y = centroids[b].Y;
 #ifdef OUTPUT
         cout << " " << b << ": (" << X << ", " << Y << ")" << endl;
 #endif
@@ -181,7 +181,7 @@ double performTest( const char* input_file, const char* output_file, char invers
         image[Y+2][X][2] = -1;
     }
     
-    file.seekg(0, file.beg);
+    file.seekg(0);
     char byte[54];
     file.read(byte, 54);
     outfile.write(byte, 54);
@@ -208,7 +208,7 @@ int main(int argc, char *args[])
         OUTPUT_FILENAME = "output_image.bmp";
         if(argc >= 3)
         {
-            inverse = atoi(args[2]);
+            inverse = args[2][0];
             if(argc >= 4)
             {
                 method = args[3][0];
