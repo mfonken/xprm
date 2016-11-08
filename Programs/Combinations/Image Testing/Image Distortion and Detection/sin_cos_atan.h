@@ -1,16 +1,29 @@
 //
-//  sin_cos_atan.h
+//
 //  
 //
-//  Created by Matthew Fonken on 11/2/16.
 //
 //
+//
+
+/*! \file sin_cos_atan.h
+ \brief Trig shortcut for fisheye.
+ 
+ Created by Matthew Fonken on 11/2/16.
+ */
 
 #ifndef sin_cos_atan_h
 #define sin_cos_atan_h
 
 #include "types.h"
 
+/*! s_c_a - Sine/Cosine of Arctan\r\n
+ 
+ \f{eqnarray*}{
+    *s &=& \frac{z}{\sqrt{z^2+1}} &=& \sin(\tan^{-1}(z)) \\
+    *c &=& \frac{1}{\sqrt{z^2+1}} &=& \cos(\tan^{-1}(z))
+ \f}
+ */
 void s_c_a( coord * z, double * s, double * c )
 {
     double x = ( *z ).x;

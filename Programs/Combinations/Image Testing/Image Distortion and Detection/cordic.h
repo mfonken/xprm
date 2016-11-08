@@ -9,8 +9,10 @@
 #ifndef cordic_h
 #define cordic_h
 
-/* Simple 32-bit CORDIC Algorithm - See http://www.dcs.gla.ac.uk/~jhw/cordic/ */
-
+/*! Simple 32-bit CORDIC Algorithm
+ 
+ - See http://www.dcs.gla.ac.uk/~jhw/cordic/
+ */
 //Cordic in 32 bit signed fixed point math
 //Function is valid for arguments in range -pi/2 -- pi/2
 //for values pi/2--pi: value = half_pi-(theta-half_pi) and similarly for values -pi---pi/2

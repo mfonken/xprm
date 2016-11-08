@@ -1,41 +1,49 @@
-//
-//  tm.h
-//
-//  Transformation Matrix
-//
-//  Created by Matthew Fonken on 10/10/16.
-//
-//
+/*! \file tm.h
+\brief Transformation Matrix
+
+Created by Matthew Fonken on 10/10/16.
+*/
 
 #ifndef tm_h
 #define tm_h
 
 /* Tait-Bryan Angles */
-struct ang3
+struct typedef _ang3
 {
     double    a;
     double    b;
     double    c;
-};
+}ang3;
 
 /* Simple 3d Vector */
-struct vec3
+struct typedef _vec3
 {
     double    ihat;
     double    jhat;
     double    khat;
-};
+}vec3;
 
-struct cartesian2
+struct typedef _cartesian2
 {
     double x;
     double y;
-};
+}cartesion2;
 
-/* Transformation Function - Tait Bryan ZXY */
-struct vec3 * zxyTransform( struct vec3 * x,
-                            struct ang3 * rot,
-                            uint8_t reverse)
+/*! Tait-Bryan ZXY Transformation Function\r\n
+ \f{eqnarray*}{
+     &\mathbf{A} = \left[
+         \begin{matrix}
+         \cos(a)\cos(c) - \sin(a)\sin(b)\sin(c) & -\cos(b)\sin(a) & \cos(a)\sin(c) + \cos(c)\sin(a)\sin(b)\\
+         \cos(c)sin(a) + cos(a)\sin(b)\sin(c) & \cos(a)\cos(b) & \sin(a)\sin(c) - \cos(a)\cos(c)\sin(b) \\
+         -\cos(b)\sin(c) & \sin(b) & \cos(b)\cos(c)\\
+         \end{matrix}
+         \right] \\
+     &\mathbf{y} = \mathbf{A}\mathbf{x}
+ \f}
+ */
+vec3 * zxyTransform( vec3 * x,
+                     ang3 * rot,
+                     uint8_t reverse)
 {
     /* Extract angles */
     double a = rot->a;
@@ -73,10 +81,22 @@ struct vec3 * zxyTransform( struct vec3 * x,
     return yvec;
 }
 
-/* Transformation Function - Tait Bryan YXZ */
-struct vec3 * yxzTransform( struct vec3 * x,
-                            struct ang3 * rot,
-                            uint8_t reverse)
+
+/*! Tait-Bryan YXZ Transformation Function\r\n
+ \f{eqnarray*}{
+    &\mathbf{A} = \left[
+     \begin{matrix}
+        \cos(a)\cos(c) + \sin(a)\sin(b)\sin(c) & \cos(c)\sin(a)\sin(b) - \cos(a)\sin(c) & \cos(b)\sin(a) \\
+        \cos(b)\sin(c) & \cos(b)\cos(c) & -\sin(b) \\
+        \cos(a)sin(b)sin(c) - \cos(c)\sin(a) & \cos(a)\cos(c)\cos(b) + \sin(a)\sin(c) & \cos(a)\cos(b) \\
+     \end{matrix}
+    \right] \\
+    &\mathbf{y} = \mathbf{A}\mathbf{x}
+ \f}
+ */
+vec3 * yxzTransform( vec3 * x,
+                     ang3 * rot,
+                     uint8_t reverse)
 {
     /* Extract angles */
     double a = rot->a;
@@ -114,20 +134,37 @@ struct vec3 * yxzTransform( struct vec3 * x,
     return yvec;
 }
 
-void subtractVec3s( struct vec3 * x,
-                    struct vec3 * y )
+/*! Difference of 3D Vectors\r\n
+ \f{eqnarray*}{
+    &x_\hat{i} = x_\hat{i} - y_\hat{i} \\
+    &x_\hat{j} = x_\hat{j} - y_\hat{j} \\
+    &x_\hat{k} = x_\hat{k} - y_\hat{k}
+ \f}
+ */
+void subtractVec3s( vec3 * x,
+                    vec3 * y )
 {
     x->ihat = x->ihat - y->ihat;
     x->jhat = x->jhat - y->jhat;
     x->khat = x->khat - y->khat;
 }
 
-double lengthOfVec3( struct vec3 * vec )
+/*! Length of a 3D Vector\r\n
+ \f{eqnarray*}{
+    ||\mathbf{v}|| = \sqrt{v_\hat{i}^2 + v_\hat{j}^2 + v_\hat{k}^2}\\
+ \f}
+ */
+double lengthOfVec3( vec3 * vec )
 {
     return sqrt( ( vec->ihat * vec->ihat ) + ( vec->jhat * vec->jhat ) + ( vec->khat * vec->khat ) );
 }
 
-void normalizeVec3( struct vec3 * vec )
+/*! Normal of a 3D Vector\r\n
+ \f{eqnarray*}{
+    \mathbf{v_{norm}} = \frac{\mathbf{v}}{||\mathbf{v}||}
+ \f}
+ */
+void normalizeVec3( vec3 * vec )
 {
     double length = lengthOfVec3( vec );
     vec->ihat /= length;

@@ -1,0 +1,4 @@
+/*! \mainpage Welcome to xprm Documentation
+<div><img style="float:center;display: block; margin-left: auto; margin-right: auto;" src="images/marbl_icon_mercury.png" alt="" width="256" height="256" />
+</div>
+ */

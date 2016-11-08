@@ -26,9 +26,9 @@ int main() {
   while (true) {
     Mat cam0Frame, cam1Frame;
     cam0.read(cam0Frame);
-    cam1.read(cam1Frame);
+    //cam1.read(cam1Frame);
     imshow("cam0", cam0Frame);
-    imshow("cam1", cam1Frame);
+    ///imshow("cam1", cam1Frame);
     if (waitKey(30) >= 0)
     break;
   }

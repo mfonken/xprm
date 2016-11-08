@@ -1,16 +1,14 @@
-//
-//  spatial.h
-//  
-//
-//  Created by Matthew Fonken on 10/8/16.
-//
-//
-
-/* NOTES - 
-    - IMU is for rotational data ONLY!
-    - Positional data comes from camera triangulation module and beacons
-    - Right-handed rotation
+/*! \file spatial.h
+    \brief Spatial Orientation Main\r\n
+ 
+ NOTES:
+ - IMU is for rotational data ONLY!
+ - Positional data comes from camera triangulation module and beacons
+ - Right-handed rotation
+ 
+  Created by Matthew Fonken on 10/8/16.
  */
+
 
 #ifndef spatial_h
 #define spatial_h
@@ -18,6 +16,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <math.h>
+#include <sys/time.h>
 
 #include "kf.h"
 #include "tm.h"
@@ -73,6 +72,21 @@ double          delta_t;
 
 uint8_t         i2c_data[I2C_BUFFER_LENGTH];
 
+/*! Distance between to Cartesian coordinates
+ \f{eqnarray*}{
+ d = \sqrt{(x_b^2 - x_a^2) + (y_b^2 - y_a^2)}
+ \f}
+ */
+uint32_t get2dDistance( struct cartesian2 *a, struct cartesian2 *b )
+{
+    uint32_t a_x = a->x;
+    uint32_t a_y = a->y;
+    uint32_t b_x = b->x;
+    uint32_t b_y = b->y;
+    
+    return sqrt( ( ( b_x * b_x ) - ( a_x * a_x ) ) + ( ( b_y * b_y ) - ( a_y * a_y ) ) );
+}
+
 uint8_t i2cRead( uint8_t addr, uint8_t *reg)
 {
     uint8_t data = 0;
@@ -83,6 +97,7 @@ void i2cWrite( uint8_t addr, uint8_t reg, uint8_t val )
     return;
 }
 
+/*! Get IMU data using I2C */
 void getIMU( void )
 {
     while (i2cRead(0x3B, i2c_data));
@@ -94,6 +109,8 @@ void getIMU( void )
     gyro[1]     = (   i2c_data[10] << 8 ) | i2c_data[11];
     gyro[2]     = (   i2c_data[12] << 8 ) | i2c_data[13];
 }
+
+/*! Set IMU register using I2C */
 void setIMU( uint8_t reg, uint8_t val )
 {
     i2cWrite(IMU_ADDR, reg, val);
@@ -104,22 +121,25 @@ void getCursor();
 
 /* See - http://www.nxp.com/files/sensors/doc/app_note/AN3461.pdf */
 
+/*! Get roll from IMU data */
 double getRoll()
 {
     return atan( acc[1] / ( sign( acc[2] ) * sqrt( ( acc[2] * acc[2] ) + ( MU * ( acc[0] * acc[0] ) ) ) ) ); // Eqn. 38
 }
 
+/*! Get pitch from IMU data */
 double getPitch()
 {
     return atan( -acc[0] / sqrt( ( acc[1] * acc[1] ) + ( acc[2] * acc[2] ) ) ); // Eqn. 37
 }
 
+/*! Get yaw from IMU data */
 double getYaw()
 {
     return atan( -acc[2] / sqrt( ( acc[0] * acc[0] ) + ( acc[1] * acc[1] ) ) ); // Eqn. 37
 }
 
-/*                      */
+/*! Find acceleration apart from gravity */
 struct vec3 * getNonGravAcceleration()
 {
     /* Tait-Bryan angles of vision */
@@ -141,6 +161,7 @@ struct vec3 * getNonGravAcceleration()
     return atru;
 }
 
+/*! Filter Initializer */
 void initFilters( void )
 {
     initKalman( &rot_f[0], getRoll()  );
@@ -148,6 +169,7 @@ void initFilters( void )
     initKalman( &rot_f[2], getYaw()   );
 }
 
+/*! IMU Initializer */
 uint8_t initIMU( void )
 {
     i2cRead(0x75, i2c_data);
@@ -164,6 +186,7 @@ uint8_t initIMU( void )
     return 0;
 }
 
+/*! IMU even handler */
 void imuEvent()
 {
     getIMU();
@@ -195,26 +218,32 @@ void imuEvent()
     updateKalman( &rot_f[2], ψ, gyro[2], delta_t ); // Calculate the true yaw using a Kalman filter
 }
 
-uint32_t get2dDistance( struct cartesian2 *a, struct cartesian2 *b )
-{
-    uint32_t a_x = a->x;
-    uint32_t a_y = a->y;
-    uint32_t b_x = b->x;
-    uint32_t b_y = b->y;
-    
-    return sqrt( ( ( b_x * b_x ) - ( a_x * a_x ) ) + ( ( b_y * b_y ) - ( a_y * a_y ) ) );
-}
-
+/*! Get data from vision module */
 void getVision()
 {
     return;
 }
 
+/*! Vision module event handler */
 void visionEvent()
 {
     getVision(); // Update vis[] array
 }
 
+/*! Augment vision data
+ \f{eqnarray*}{
+    &\mathbf{v} =
+    \begin{cases}
+        &v_{\hat{i}} = VZ_{\hat{i}} \\
+        &v_{\hat{j}} = VZ_{\hat{j}} \\
+        &v_{\hat{k}} = VZ_{\hat{k}} \\
+    \end{cases} \\
+    &\mathbf{v_{true}} = \text{zxyTranform}(\mathbf{v}, \mathbf{a}, 1) \\
+    &\mathbf{d_{true}} = \text{zxyTranform}(\mathbf{d}, \mathbf{a}, 1) \\
+    &c_{augment} = \frac{D_{beacon}(1 + D_{augment})}{||\mathbf{d_{true}}||} \\
+    &\mathbf{v_{return}} =c_{augment}\mathbf{v_{true}}
+ \f}
+ */
 struct vec3 * dAugment(struct vec3 * dvec, struct ang3 * a)
 {
     /* Create v vector for zero state */
@@ -225,7 +254,6 @@ struct vec3 * dAugment(struct vec3 * dvec, struct ang3 * a)
     //normalizeVec3(vvec); // normalize if vvec inital isn't of length 1
     /* Transform and normalize v vector by given angles to get unit vector from camera */
     struct vec3 *vtru = zxyTransform( &vvec, a, 0 );
-    
     
     /* Transform d vector by given angles to get true vector between beacons */
     struct vec3 *dtru = zxyTransform( dvec, a, 0 );
@@ -241,6 +269,35 @@ struct vec3 * dAugment(struct vec3 * dvec, struct ang3 * a)
     return vtru;
 }
 
+/*! Get absolute position 
+ \f{eqnarray*}{
+    &a_a = rot_{f_0}, a_b = rot_{f_1}, a_c = rot_{f_2} \\
+ 
+    &\mathbf{d} =
+    \begin{cases}
+        &d_{\hat{i}} = vis_{1_x} - vis_{0_x} \\
+        &d_{\hat{j}} = vis_{1_y} - vis_{0_y} \\ 
+        &d_{\hat{k}} = 0 \\
+    \end{cases} \\
+    &\mathbf{r} = \text{dAugment}(\mathbf{d}, \mathbf{a}) \\
+    &\mathbf{e} =
+    \begin{cases}
+        &e_{\hat{i}} = V_{center_x} - vis_{0_x} \\
+        &e_{\hat{j}} = V_{center_y} - vis_{0_y} \\
+        &e_{\hat{k}} = 0 \\
+    \end{cases} \\
+    &\mathbf{e_{true}} = \text{zxyTranform}(\mathbf{e}, \mathbf{a}, 1) \\
+    &\mathbf{p_{true}} = \mathbf{r} - \mathbf{e_{true}} \\
+    &\mathbf{n} = \text{getNonGravAcceleration()} \\
+    &\mathbf{v} =
+    \begin{cases}
+        &v_x = &n_{\hat{i}}\Delta{t} \\
+        &v_y = &n_{\hat{j}}\Delta{t} \\
+        &v_z = &n_{\hat{k}}\Delta{t} \\
+    \end{cases} \\
+    &\text{Update all position Kalmans with } \mathbf{p_{true}}, \mathbf{v}, \text{ and } \Delta{t}
+ \f}
+ */
 void getAbsolutePosition()
 {
     /* Tait-Bryan angles of vision */
@@ -282,8 +339,7 @@ void getAbsolutePosition()
     
     /* Filter calculated absolute position and with integrated acceleration (velocity) */
     struct vec3 ngacc = *( getNonGravAcceleration() );
-    double delta_time = 0;
-    //= now() - tru_f[0].timestamp;
+    double delta_time = ((double)(clock() - tru_f[0].timestamp) / 1000000.0F ) * 1000;
     double x_vel = ngacc.ihat * delta_time;
     updateKalman( &tru_f[0], tru[0], x_vel, delta_time);
     double y_vel = ngacc.jhat * delta_time;
