@@ -111,17 +111,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named Webcam
+# Target rules for targets named webcam
 
 # Build rule for target.
-Webcam: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 Webcam
-.PHONY : Webcam
+webcam: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 webcam
+.PHONY : webcam
 
 # fast build rule for target.
-Webcam/fast:
-	$(MAKE) -f CMakeFiles/Webcam.dir/build.make CMakeFiles/Webcam.dir/build
-.PHONY : Webcam/fast
+webcam/fast:
+	$(MAKE) -f CMakeFiles/webcam.dir/build.make CMakeFiles/webcam.dir/build
+.PHONY : webcam/fast
 
 webcam.o: webcam.cpp.o
 
@@ -129,7 +129,7 @@ webcam.o: webcam.cpp.o
 
 # target to build an object file
 webcam.cpp.o:
-	$(MAKE) -f CMakeFiles/Webcam.dir/build.make CMakeFiles/Webcam.dir/webcam.cpp.o
+	$(MAKE) -f CMakeFiles/webcam.dir/build.make CMakeFiles/webcam.dir/webcam.cpp.o
 .PHONY : webcam.cpp.o
 
 webcam.i: webcam.cpp.i
@@ -138,7 +138,7 @@ webcam.i: webcam.cpp.i
 
 # target to preprocess a source file
 webcam.cpp.i:
-	$(MAKE) -f CMakeFiles/Webcam.dir/build.make CMakeFiles/Webcam.dir/webcam.cpp.i
+	$(MAKE) -f CMakeFiles/webcam.dir/build.make CMakeFiles/webcam.dir/webcam.cpp.i
 .PHONY : webcam.cpp.i
 
 webcam.s: webcam.cpp.s
@@ -147,7 +147,7 @@ webcam.s: webcam.cpp.s
 
 # target to generate assembly for a file
 webcam.cpp.s:
-	$(MAKE) -f CMakeFiles/Webcam.dir/build.make CMakeFiles/Webcam.dir/webcam.cpp.s
+	$(MAKE) -f CMakeFiles/webcam.dir/build.make CMakeFiles/webcam.dir/webcam.cpp.s
 .PHONY : webcam.cpp.s
 
 # Help Target
@@ -158,7 +158,7 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... Webcam"
+	@echo "... webcam"
 	@echo "... webcam.o"
 	@echo "... webcam.i"
 	@echo "... webcam.s"

@@ -10,7 +10,7 @@
 #define centroid_h
 
 #define MAX_CENTROIDS   10          /**< Maximun number of centroids to track */
-#define MAX_GAP         50          /**< Maximun gap between detected pixels */
+#define MAX_GAP         20          /**< Maximun gap between detected pixels */
 
 using namespace std;
 

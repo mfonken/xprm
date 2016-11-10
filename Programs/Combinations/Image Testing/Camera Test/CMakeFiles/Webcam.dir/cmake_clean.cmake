@@ -1,10 +1,10 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/Webcam.dir/webcam.cpp.o"
-  "Webcam.pdb"
-  "Webcam"
+  "CMakeFiles/webcam.dir/webcam.cpp.o"
+  "webcam.pdb"
+  "webcam"
 )
 
 # Per-language clean rules from dependency scanning.
 foreach(lang CXX)
-  include(CMakeFiles/Webcam.dir/cmake_clean_${lang}.cmake OPTIONAL)
+  include(CMakeFiles/webcam.dir/cmake_clean_${lang}.cmake OPTIONAL)
 endforeach()
