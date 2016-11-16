@@ -1,13 +1,13 @@
-/*! \file tm.h
-\brief Transformation Matrix
+/*! \file matrix.h
+\brief Matrix Math
 
 Created by Matthew Fonken on 10/10/16.
 */
 
-#ifndef tm_h
-#define tm_h
+#ifndef matrix_h
+#define matrix_h
 
-/* Tait-Bryan Angles */
+/*! Tait-Bryan Angles */
 struct typedef _ang3
 {
     double    a;
@@ -15,7 +15,7 @@ struct typedef _ang3
     double    c;
 }ang3;
 
-/* Simple 3d Vector */
+/*! Simple 3d Vector */
 struct typedef _vec3
 {
     double    ihat;
@@ -172,4 +172,4 @@ void normalizeVec3( vec3 * vec )
     vec->khat /= length;
 }
 
-#endif /* tm_h */
+#endif /* matrix_h */

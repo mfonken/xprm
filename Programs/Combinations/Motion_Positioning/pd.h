@@ -1,8 +1,7 @@
 /*! \file pd.h
- \brief Polynomial Degression
+    \brief Polynomial Degression
  
-  Created by Matthew Fonken on 10/15/16.
-
+    Created by Matthew Fonken on 10/15/16.
 */
 
 #ifndef pd_h

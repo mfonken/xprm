@@ -1,4 +1,4 @@
-/*! \file kf.h
+/*! \file kalman.h
     \brief Quick Kalman Filter
  
   Created by Matthew Fonken on 10/6/16.
@@ -8,8 +8,8 @@
 #include <stdint.h>
 #include <sys/time.h>
 
-#ifndef kf_h
-#define kf_h
+#ifndef kalman_h
+#define kalman_h
 
 #define VALUE_UNCERTAINTY   0.001 /**< Uncertainty of value */
 #define BIAS_UNCERTAINTY    0.003 /**< Uncertainty of bias */
@@ -105,4 +105,4 @@ void updateKalman( struct kalman *k,
     timestamp = clock();
 };
 
-#endif /* kf_h */
+#endif /* kalman_h */
