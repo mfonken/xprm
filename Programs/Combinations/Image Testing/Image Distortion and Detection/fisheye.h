@@ -1,12 +1,12 @@
-/*! \file unfisheye.h
+/*! \file fisheye.h
  \brief Fisheye and Inverse Algorithm
  
 Created by Matthew Fonken on 10/30/16.
  */
 
 
-#ifndef unfisheye_h
-#define unfisheye_h
+#ifndef fisheye_h
+#define fisheye_h
 
 #include <stdint.h>
 #include <math.h>
@@ -150,4 +150,4 @@ void fisheyeStd(coord *img_c, double image_width, double image_height )
     img_c->y        = ( ( deproj_c.y + 1 ) * image_height ) / 2;
 }
 
-#endif /* unfisheye_h */
+#endif /* fisheye_h */
