@@ -15,10 +15,14 @@ byte newByte;
 
 boolean hasByte = false;
 
-int bmp[] = new int[4000];
+char bmp[] = new char[4000];
+  
+PrintWriter file;
+
+char frame[][][] = new char[32][32][3];
 
 void setup() {
-  size(25, 32);
+  size(32, 32);
   background(245);
   println(width + "x" + height);
   println( Serial.list() );
@@ -26,17 +30,34 @@ void setup() {
 
   println("Waiting for data");
   noStroke();
+  
+  file = createWriter("frame.csv"); 
 }
 
 void draw()
 {
 }
 
+void saveFrame()
+{
+  for(int y = 0; y < height; y++)
+  {
+    for(int x = 0; x < width; x++)
+    {
+      file.print("{" + (int)frame[y][x][0] + "|" + (int)frame[y][x][1] + "|" +  + (int)frame[y][x][2] + "},"); // Write the coordinate to the file
+    }
+    file.println();
+  }
+  file.flush(); // Writes the remaining data to the file
+  file.close(); // Finishes the file
+  println("Frame has been saved.");
+}
+
 void serialEvent(Serial s)
 {
   try {
-    bmp[x] = s.read();
-    if (x > 1 && bmp[x-1] == 0xfa && bmp[x] == 0xa1)
+    bmp[x] = s.readChar();
+    if (x > 1 && bmp[x-1] == 0xfa && bmp[x] == 0xa1 && x < 4000)
     {
       background(245);
       x = 0;
@@ -45,7 +66,12 @@ void serialEvent(Serial s)
       {
         int y = p % x_l;
         int x = (int)( p / x_l );
-        set(x, y, color(bmp[i], bmp[i+1], bmp[i+2]));
+        set(x, y, color(bmp[i]));
+        fill(color(bmp[i]));
+        //rect(x*10,y*10,10,10);
+        //char pix[] = {bmp[i], bmp[i+1], bmp[i+2]};
+        //frame[y][x] = pix;
+        //println("{" + frame[y][x][0] + "|" + frame[y][x][1] + "|" +  + frame[y][x][2] + "}");
       }
       x = 0;
       s.clear();
@@ -53,7 +79,7 @@ void serialEvent(Serial s)
     x++;
   }
   catch(Exception e) {
-    println("error");
+    //println("error");
   }
   if ( x > 4000)
   {
@@ -76,6 +102,9 @@ void keyPressed() {
     break;
   case 'd':
     y_l = y_l + 1;
+    break;
+  case 'f':
+    saveFrame();
     break;
   default:
     while (true);
