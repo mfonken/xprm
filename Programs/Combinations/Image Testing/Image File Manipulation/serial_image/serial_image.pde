@@ -1,92 +1,89 @@
 import processing.serial.*;
 
-Serial myPort;
+Serial myPort, com;
 PrintWriter output;
 
-int pixel = 0;
 int x_l = 32;
-int y_l = 30;
-int x = 0;
-int limit;
-
-byte header[] = new byte[4];
-byte header_check[] = { 0x06, 0x08, 0x07 };
-byte newByte;
-
-boolean hasByte = false;
+int y_l = 27;
+int k = 0;
 
 char bmp[] = new char[4000];
-  
+
 PrintWriter file;
 
 char frame[][][] = new char[32][32][3];
 
+int frame_counter = 0;
+int num_pixels = x_l * 2 * y_l;
+
+int NUM_FRAMES = 30;
+
 void setup() {
-  size(32, 32);
+  size(32, 27);
   background(245);
   println(width + "x" + height);
   println( Serial.list() );
   myPort = new Serial( this, Serial.list()[3], 921600);
+  com = new Serial( this, Serial.list()[4], 115200);
 
   println("Waiting for data");
   noStroke();
-  
-  file = createWriter("frame.csv"); 
+
+  file = createWriter("frame.csv");
 }
 
 void draw()
 {
+  while (myPort.available() > 0)
+  {
+    bmp[k] = myPort.readChar();
+    //println("Current k is " + k + " and bmp[k] is " + bmp[k]);
+    if ( k > 0 && bmp[k-1] == 0xab && bmp[k] == 0x34)
+    {
+      myPort.clear();
+      com.write('y');
+      readImage();
+    }
+    k++;
+    if (k >= 4000) k = 0;
+  }
+  
 }
 
-void saveFrame()
+void readImage()
 {
-  for(int y = 0; y < height; y++)
+  for (int y = 0; y < y_l; y++)
   {
-    for(int x = 0; x < width; x++)
+    byte line[] = new byte[4000];
+    int ln = 0xef12;
+    myPort.readBytesUntil(ln, line);
+    myPort.clear();
+    com.write('x');
+    for (int x = 0; x < x_l; x++)
     {
-      file.print("{" + (int)frame[y][x][0] + "|" + (int)frame[y][x][1] + "|" +  + (int)frame[y][x][2] + "},"); // Write the coordinate to the file
+      int p = x * 2;
+      char a = (char)line[p];
+      char b = (char)line[p+1];
+      int br = ( a + b) / 2;
+      set(x, y, color(br));
+      //println("<(" + x + ", " + y + "> " + (int)a + "|" + (int)b + "=" + br);
     }
-    file.println();
   }
-  file.flush(); // Writes the remaining data to the file
-  file.close(); // Finishes the file
-  println("Frame has been saved.");
+  frame_counter++;
+  println(">" + frame_counter);
+  if( frame_counter >= NUM_FRAMES ) 
+  {
+    println("Frames are done.");
+    exit();
+    while(true);
+  }
+  myPort.clear();
 }
 
-void serialEvent(Serial s)
-{
-  try {
-    bmp[x] = s.readChar();
-    if (x > 1 && bmp[x-1] == 0xfa && bmp[x] == 0xa1 && x < 4000)
-    {
-      background(245);
-      x = 0;
-      int i, p;
-      for (i = 0, p = 0; i < (x_l * 3 * y_l); i+=3, p++)
-      {
-        int y = p % x_l;
-        int x = (int)( p / x_l );
-        set(x, y, color(bmp[i]));
-        fill(color(bmp[i]));
-        //rect(x*10,y*10,10,10);
-        //char pix[] = {bmp[i], bmp[i+1], bmp[i+2]};
-        //frame[y][x] = pix;
-        //println("{" + frame[y][x][0] + "|" + frame[y][x][1] + "|" +  + frame[y][x][2] + "}");
-      }
-      x = 0;
-      s.clear();
-    }
-    x++;
-  }
-  catch(Exception e) {
-    //println("error");
-  }
-  if ( x > 4000)
-  {
-    x = 0;
-    s.clear();
-  }
-}
+
+
+
+
 
 void keyPressed() {
   switch(key)
@@ -111,4 +108,21 @@ void keyPressed() {
   }
   background(245);
   println("New x is " + x_l + " and y is " + y_l);
+  num_pixels = x_l * 2 * y_l;
+}
+
+
+void saveFrame()
+{
+  for (int y = 0; y < height; y++)
+  {
+    for (int x = 0; x < width; x++)
+    {
+      file.print("{" + (int)frame[y][x][0] + "|" + (int)frame[y][x][1] + "|" +  + (int)frame[y][x][2] + "},"); // Write the coordinate to the file
+    }
+    file.println();
+  }
+  file.flush(); // Writes the remaining data to the file
+  file.close(); // Finishes the file
+  println("Frame has been saved.");
 }
