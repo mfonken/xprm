@@ -5,11 +5,9 @@ PrintWriter output;
  
 int MAX_CD = 20;
  
-int RES = 10;
- 
 int pixel = 0; 
-int x_l = 10; 
-int y_l = 22; 
+int x_l = 20; 
+int y_l = 25; 
 int x = 0; 
 int limit; 
  
@@ -22,15 +20,14 @@ boolean hasByte = false;
 int bmp[] = new int[4000]; 
  
 void setup() { 
-  size(100, 220); 
+  size(32, 27); 
   background(245); 
   println(width + "x" + height); 
   println( Serial.list() ); 
   myPort = new Serial( this, Serial.list()[3], 921600); 
  
   println("Waiting for data"); 
-  stroke(245);
-  fill(0,255,0);
+  noStroke();
 } 
  
 void draw() 
@@ -39,7 +36,7 @@ void draw()
  
 void getData()
 {
-  if(x < 300) return;
+  if(x < 1600) return;
   int max_b = x-MAX_CD;
   //println(max_b);
   int i;
@@ -48,19 +45,18 @@ void getData()
     if(bmp[i] == 0xee)
     {
       int n = bmp[i+1];
-      
+      if(n > 0) println(n + " centroids found.");
       for(int j = 0; j < n; j++)
       {
         int k = i + 2 + j*2;
-        int x = bmp[k]/2;
-        int y = bmp[k+1];
+        int x = width - bmp[k];
+        int y = height - bmp[k+1];
         println(j+1 + ": (" + x + ", " + y + ")");
-        drawX(x, y, color(255, 0, 0));
-      }
-      if(n > 0) 
-      {
-        text(n + " centroids found.", 100, 100);
-        println(n + " centroids found.");
+        set(x, y, color(255,0,0));
+        set(x-1, y, color(255,0,0));
+        set(x+1, y, color(255,0,0));
+        set(x, y-1, color(255,0,0));
+        set(x, y+1, color(255,0,0));
       }
       return;
     }
@@ -78,13 +74,12 @@ void serialEvent(Serial s)
       int i, p; 
       for (i = 0, p = 0; i < (x_l * 2 * y_l); i+=2, p++) 
       { 
-        int x = p % x_l; 
-        int y = (int)( p / x_l ); 
+        int x = width - p % x_l; 
+        int y = height - (int)( p / x_l ); 
         int a = bmp[i];
         int b = bmp[i+1];
         int br = (a + b)/2;
-        //set(x, y, color(br));
-        drawSquare(x, y, color(br));
+        set(x, y, color(br)); 
       } 
       getData();
       x = 0; 
@@ -101,29 +96,6 @@ void serialEvent(Serial s)
     s.clear(); 
   } 
 } 
- 
-void drawSquare( int x, int y, color b )
-{
-  int xl = width - RES - x*RES; 
-  int yl = height - RES - y*RES; 
-  for(int i = xl; i < xl + RES; i++ )
-  {
-    for(int j = yl; j < yl + RES; j++ )
-    {
-        set(i, j, b);
-    }
-  }
-}
-
-void drawX( int x, int y, color b )
-{
-  drawSquare(x, y, b);
-  //drawSquare(x-1, y, b);
-  //drawSquare(x+1, y, b);
-  //drawSquare(x, y-1, b);
-  //drawSquare(x, y+1, b);
-}
-  
  
 void keyPressed() { 
   switch(key) 
