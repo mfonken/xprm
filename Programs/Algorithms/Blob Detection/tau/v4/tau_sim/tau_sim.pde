@@ -4,8 +4,8 @@ Capture cam;
 
 BufferedReader file;
 
-int uni_w = 50;
-int uni_h = 50;
+int uni_w = 250;
+int uni_h = 250;
 
 float xyscale = 1.5;
 float zscale = 0.05;
@@ -16,7 +16,7 @@ float rot_x, rot_y, rot_z;
 
 int xi, yi, xm, ym;
 
-float cam_thresh = 0.95;
+float cam_thresh = 0.9;
 
 float in[][];
 int map[][];
@@ -175,38 +175,37 @@ void drawCamImage(PImage cam)
 
 void drawCentroids()
 {
+  int max = 0;
   int max_x = 0;
   int max_y = 0;
+  stroke(255,0,100);
   for (int i = 0; i < ypn; i++ )
   {
-    if(yp[i] > max_y) max_y = yp[i];
-  }
-  for (int j = 0; j < xpn; j++ )
-  {
-    if(xp[j] > max_x) max_x = xp[j];
-  }
-  
-  for(int i = 0; i < ypn; i++ )
-  {
-    float ypc = yp[i] * yscale;
-    for(int j = 0; j < xpn; j++ )
+    for (int j = 0; j < xpn; j++ )
     {
-      stroke(255,0,0);
+      if(map[yp[i]][xp[j]] > max && yp[i] != 0 && xp[j] != 0) 
+      {
+        max = map[yp[i]][xp[j]];
+        max_x = xp[j];
+        max_y = yp[i];
+      }
       float xpc = xp[j] * xscale;
+      float ypc = yp[i] * yscale;
       translate(xpc, ypc, map[yp[i]][xp[j]]);
-      sphere(1);
+      sphere(2);
       translate(-xpc, -ypc, -map[yp[i]][xp[j]]);
     }
   }
- 
+  
+  println("Peaks found: x-" + xpn + " and y-" + ypn); 
+  println("Max is " + max + " at (" + max_x + ", " + max_y + ")");
+  
   stroke(0, 255, 0);
   float xpc = max_x * xscale;
   float ypc = max_y * yscale;
-  translate(xpc, ypc, map[max_y][max_x]);
+  translate(xpc, ypc, max);
   sphere(2);
-  translate(-xpc, -ypc, -map[max_y][max_x]);
-  
-  println("Max peak at (" + max_x + ", " + max_y + ")");
+  translate(-xpc, -ypc, -max);
 }
 
 void drawInput()

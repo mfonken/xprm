@@ -84,6 +84,8 @@ void calculatePeaks()
   yp = new int[max_peaks];
   double prev, diff;
   prev = xc[0];
+  xpn = 0;
+  ypn = 0;
   for (int j = 1; j < xcl; j++ )
   {
     diff = xc[j] - prev;
