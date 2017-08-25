@@ -33,8 +33,6 @@ const char* OUTPUT_FILENAME = "images/output.bmp";
 
 using namespace std;
 
-
-
 void convolve(const double Signal[], size_t SignalLen,
               const double Kernel[], size_t KernelLen,
               double Result[])
