@@ -23,6 +23,8 @@ int map[][];
 
 boolean debug = false;
 
+int max_height = 110;
+
 boolean ready = false;
 void fileSelected(File selection) {
   if (selection == null) {
@@ -178,7 +180,7 @@ void drawCentroids()
   int max = 0;
   int max_x = 0;
   int max_y = 0;
-  stroke(255,0,100);
+  stroke(0,0,255);
   for (int i = 0; i < ypn; i++ )
   {
     for (int j = 0; j < xpn; j++ )
@@ -200,7 +202,7 @@ void drawCentroids()
   println("Peaks found: x-" + xpn + " and y-" + ypn); 
   println("Max is " + max + " at (" + max_x + ", " + max_y + ")");
   
-  stroke(0, 255, 0);
+  stroke(150, 0, 255);
   float xpc = max_x * xscale;
   float ypc = max_y * yscale;
   translate(xpc, ypc, max);
@@ -248,14 +250,13 @@ void drawDensityMaps()
 
 void drawMap()
 {
-  stroke(255, 255, 0);
   strokeWeight(1);
   for (int i = 0; i < ym-1; i++)
   {
-
     float is = i * yscale;
     for (int j = 0; j < xm-1; j++)
     {
+      stroke(map(map[i][j],0,max_height,150,255), map(map[i][j],0,max_height,255,100), 0);
       float js = j * xscale;
       line(js, is, map[i][j], js+xscale, is, map[i][j+1]);
       line(js, is, map[i][j], js, is+yscale, map[i+1][j]);
@@ -286,7 +287,7 @@ void drawMaps()
   
   drawCam();
   drawInput();
-  //drawMap();
+  drawMap();
   drawDensityMaps();
   drawCentroids();
   popMatrix();
