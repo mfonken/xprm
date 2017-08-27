@@ -12,6 +12,7 @@
 		497681B01F4DF29800324190 /* sigma.c in Sources */ = {isa = PBXBuildFile; fileRef = 497681AC1F4DF29800324190 /* sigma.c */; };
 		497B556F1F4E9B7F00485AF3 /* ring_buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 497B556D1F4E9B7F00485AF3 /* ring_buffer.c */; };
 		49A6DE541F5139E70025C4DF /* tau.c in Sources */ = {isa = PBXBuildFile; fileRef = 49A6DE521F5139E70025C4DF /* tau.c */; };
+		49D187101F53771000494379 /* tau_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49D1870E1F53771000494379 /* tau_test.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -38,6 +39,8 @@
 		497B556E1F4E9B7F00485AF3 /* ring_buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ring_buffer.h; sourceTree = "<group>"; };
 		49A6DE521F5139E70025C4DF /* tau.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tau.c; sourceTree = "<group>"; };
 		49A6DE531F5139E70025C4DF /* tau.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau.h; sourceTree = "<group>"; };
+		49D1870E1F53771000494379 /* tau_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tau_test.cpp; sourceTree = "<group>"; };
+		49D1870F1F53771000494379 /* tau_test.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = tau_test.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +74,8 @@
 			isa = PBXGroup;
 			children = (
 				497681A91F4DF29800324190 /* main.cpp */,
+				49D1870E1F53771000494379 /* tau_test.cpp */,
+				49D1870F1F53771000494379 /* tau_test.hpp */,
 				497681A81F4DF29800324190 /* global_types.h */,
 				49A6DE521F5139E70025C4DF /* tau.c */,
 				49A6DE531F5139E70025C4DF /* tau.h */,
@@ -142,6 +147,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				49D187101F53771000494379 /* tau_test.cpp in Sources */,
 				497681AE1F4DF29800324190 /* main.cpp in Sources */,
 				497681B01F4DF29800324190 /* sigma.c in Sources */,
 				497681AF1F4DF29800324190 /* rho.c in Sources */,

@@ -19,7 +19,7 @@ extern "C" {
 #define ABS(X)      ((X>=0)?X:-X)
 
 /***PROBABILITY BIASES***/
-#define LOCATION_BIAS   0.9
+#define LOCATION_BIAS   0.5
 #define DENSITY_BIAS    1 - LOCATION_BIAS
 /************************/
 

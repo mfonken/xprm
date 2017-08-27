@@ -67,20 +67,22 @@ void generatePeakListPair( density_map_pair_t * density_pair, peak_list_pair_t *
 
 void generatePeakList( density_map_t * density_map, peak_list_t * peaks )
 {
+    printf("peaks %d\n", peaks->length);
+    
     uint8_t peak_index = 0;
     uint16_t l = density_map->length, a,b,c,d,e;
     a = density_map->map[0];
     b = density_map->map[1];
     c = density_map->map[2];
     d = density_map->map[3];
-
     for( int i = 4; i < l; i++)
     {
         e = density_map->map[i];
-        if( b > a && c > b && c > d && d > e )
+        if( b > a && c >= b && c >= d && d >= e )
         {
             peaks->locations[peak_index] = i - 1;
-            peaks->peaks[peak_index++] = c;
+            peaks->peaks[peak_index] = c;
+            peak_index++;
         }
         a = b;
         b = c;
@@ -103,14 +105,14 @@ void generateProbabilityList( peak_list_t * peaks, probability_list_t * probabil
     probability->length = length;
     for( uint16_t i = 0; i < length; i++ )
     {
-        primary_location_probability    = 1 - fabs( (FLOAT)last_locations->primary - (FLOAT)peaks->locations[i] ) / image_width;
-        primary_height_probability      = 1 - fabs( (FLOAT)last_densities->primary - (FLOAT)peaks->peaks[i]     ) / image_height;
+        primary_location_probability    = 1 - fabs( (FLOAT)last_locations->primary   - (FLOAT)peaks->locations[i] ) / image_width;
+        primary_height_probability      = 1 - fabs( (FLOAT)last_densities->primary   - (FLOAT)peaks->peaks[i]     ) / image_height;
         
         secondary_location_probability  = 1 - fabs( (FLOAT)last_locations->secondary - (FLOAT)peaks->locations[i] ) / image_height;
         secondary_height_probability    = 1 - fabs( (FLOAT)last_densities->secondary - (FLOAT)peaks->peaks[i]     ) / image_width;
         
-        probability->primary[i]    = ( LOCATION_BIAS * primary_location_probability )   * ( DENSITY_BIAS * primary_height_probability );
-        probability->secondary[i]  = ( LOCATION_BIAS * secondary_location_probability ) * ( DENSITY_BIAS * secondary_height_probability );
+        probability->primary[i]    = ( LOCATION_BIAS * primary_location_probability )   + ( DENSITY_BIAS * primary_height_probability );
+        probability->secondary[i]  = ( LOCATION_BIAS * secondary_location_probability ) + ( DENSITY_BIAS * secondary_height_probability );
     }
 }
 
