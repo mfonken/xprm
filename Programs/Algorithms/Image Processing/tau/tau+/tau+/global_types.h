@@ -6,6 +6,10 @@
 //  Copyright © 2017 Marbl. All rights reserved.
 //
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef global_types_h
 #define global_types_h
 
@@ -15,7 +19,7 @@
 #define ABS(X)      ((X>=0)?X:-X)
 
 /***PROBABILITY BIASES***/
-#define LOCATION_BIAS   0.3
+#define LOCATION_BIAS   0.9
 #define DENSITY_BIAS    1 - LOCATION_BIAS
 /************************/
 
@@ -74,8 +78,8 @@ typedef struct
 typedef struct
 {
     uint16_t  length;
-    uint16_t* primary_list;
-    uint16_t* secondary_list;
+    FLOAT* primary;
+    FLOAT* secondary;
 }probability_list_t;
 typedef struct
 {
@@ -84,3 +88,7 @@ typedef struct
 }probability_list_pair_t;
 
 #endif /* global_types_h */
+    
+#ifdef __cplusplus
+}
+#endif

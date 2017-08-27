@@ -6,6 +6,10 @@
 //  Copyright © 2017 Marbl. All rights reserved.
 //
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef sigma_h
 #define sigma_h
 
@@ -23,3 +27,7 @@ void getLinearExtrapolation( prediction_t * prediction, prediction_t * last, pre
 void getAngularExtrapolation( prediction_t * prediction, prediction_t * last, prediction_t * result );
 
 #endif /* sigma_h */
+
+#ifdef __cplusplus
+}
+#endif
