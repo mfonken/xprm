@@ -11,6 +11,8 @@
 		497681AF1F4DF29800324190 /* rho.c in Sources */ = {isa = PBXBuildFile; fileRef = 497681AA1F4DF29800324190 /* rho.c */; };
 		497681B01F4DF29800324190 /* sigma.c in Sources */ = {isa = PBXBuildFile; fileRef = 497681AC1F4DF29800324190 /* sigma.c */; };
 		497B556F1F4E9B7F00485AF3 /* ring_buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 497B556D1F4E9B7F00485AF3 /* ring_buffer.c */; };
+		49A6DE541F5139E70025C4DF /* tau.c in Sources */ = {isa = PBXBuildFile; fileRef = 49A6DE521F5139E70025C4DF /* tau.c */; };
+		49D187101F53771000494379 /* tau_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49D1870E1F53771000494379 /* tau_test.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -35,6 +37,10 @@
 		497681AD1F4DF29800324190 /* sigma.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sigma.h; sourceTree = "<group>"; };
 		497B556D1F4E9B7F00485AF3 /* ring_buffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ring_buffer.c; sourceTree = "<group>"; };
 		497B556E1F4E9B7F00485AF3 /* ring_buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ring_buffer.h; sourceTree = "<group>"; };
+		49A6DE521F5139E70025C4DF /* tau.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tau.c; sourceTree = "<group>"; };
+		49A6DE531F5139E70025C4DF /* tau.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau.h; sourceTree = "<group>"; };
+		49D1870E1F53771000494379 /* tau_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tau_test.cpp; sourceTree = "<group>"; };
+		49D1870F1F53771000494379 /* tau_test.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = tau_test.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,8 +73,12 @@
 		497681971F4DF21200324190 /* tau+ */ = {
 			isa = PBXGroup;
 			children = (
-				497681A81F4DF29800324190 /* global_types.h */,
 				497681A91F4DF29800324190 /* main.cpp */,
+				49D1870E1F53771000494379 /* tau_test.cpp */,
+				49D1870F1F53771000494379 /* tau_test.hpp */,
+				497681A81F4DF29800324190 /* global_types.h */,
+				49A6DE521F5139E70025C4DF /* tau.c */,
+				49A6DE531F5139E70025C4DF /* tau.h */,
 				497681AA1F4DF29800324190 /* rho.c */,
 				497681AB1F4DF29800324190 /* rho.h */,
 				497B556D1F4E9B7F00485AF3 /* ring_buffer.c */,
@@ -137,9 +147,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				49D187101F53771000494379 /* tau_test.cpp in Sources */,
 				497681AE1F4DF29800324190 /* main.cpp in Sources */,
 				497681B01F4DF29800324190 /* sigma.c in Sources */,
 				497681AF1F4DF29800324190 /* rho.c in Sources */,
+				49A6DE541F5139E70025C4DF /* tau.c in Sources */,
 				497B556F1F4E9B7F00485AF3 /* ring_buffer.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -238,6 +250,55 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEVELOPMENT_TEAM = RAUFW7M7KN;
+				HEADER_SEARCH_PATHS = "/usr/local/Cellar/opencv3/**";
+				LIBRARY_SEARCH_PATHS = "/usr/local/Cellar/opencv3/**";
+				OTHER_LDFLAGS = (
+					"-I/usr/local/Cellar/opencv/3.3.0_3/include/opencv",
+					"-I/usr/local/Cellar/opencv/3.3.0_3/include",
+					"-L/usr/local/Cellar/opencv/3.3.0_3/lib",
+					"-lopencv_stitching",
+					"-lopencv_superres",
+					"-lopencv_videostab",
+					"-lopencv_photo",
+					"-lopencv_aruco",
+					"-lopencv_bgsegm",
+					"-lopencv_bioinspired",
+					"-lopencv_ccalib",
+					"-lopencv_dpm",
+					"-lopencv_face",
+					"-lopencv_fuzzy",
+					"-lopencv_img_hash",
+					"-lopencv_line_descriptor",
+					"-lopencv_optflow",
+					"-lopencv_reg",
+					"-lopencv_rgbd",
+					"-lopencv_saliency",
+					"-lopencv_stereo",
+					"-lopencv_structured_light",
+					"-lopencv_phase_unwrapping",
+					"-lopencv_surface_matching",
+					"-lopencv_tracking",
+					"-lopencv_datasets",
+					"-lopencv_text",
+					"-lopencv_dnn",
+					"-lopencv_plot",
+					"-lopencv_ml",
+					"-lopencv_xfeatures2d",
+					"-lopencv_shape",
+					"-lopencv_video",
+					"-lopencv_ximgproc",
+					"-lopencv_calib3d",
+					"-lopencv_features2d",
+					"-lopencv_highgui",
+					"-lopencv_videoio",
+					"-lopencv_flann",
+					"-lopencv_xobjdetect",
+					"-lopencv_imgcodecs",
+					"-lopencv_objdetect",
+					"-lopencv_xphoto",
+					"-lopencv_imgproc",
+					"-lopencv_core",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -246,6 +307,55 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEVELOPMENT_TEAM = RAUFW7M7KN;
+				HEADER_SEARCH_PATHS = "/usr/local/Cellar/opencv3/**";
+				LIBRARY_SEARCH_PATHS = "/usr/local/Cellar/opencv3/**";
+				OTHER_LDFLAGS = (
+					"-I/usr/local/Cellar/opencv/3.3.0_3/include/opencv",
+					"-I/usr/local/Cellar/opencv/3.3.0_3/include",
+					"-L/usr/local/Cellar/opencv/3.3.0_3/lib",
+					"-lopencv_stitching",
+					"-lopencv_superres",
+					"-lopencv_videostab",
+					"-lopencv_photo",
+					"-lopencv_aruco",
+					"-lopencv_bgsegm",
+					"-lopencv_bioinspired",
+					"-lopencv_ccalib",
+					"-lopencv_dpm",
+					"-lopencv_face",
+					"-lopencv_fuzzy",
+					"-lopencv_img_hash",
+					"-lopencv_line_descriptor",
+					"-lopencv_optflow",
+					"-lopencv_reg",
+					"-lopencv_rgbd",
+					"-lopencv_saliency",
+					"-lopencv_stereo",
+					"-lopencv_structured_light",
+					"-lopencv_phase_unwrapping",
+					"-lopencv_surface_matching",
+					"-lopencv_tracking",
+					"-lopencv_datasets",
+					"-lopencv_text",
+					"-lopencv_dnn",
+					"-lopencv_plot",
+					"-lopencv_ml",
+					"-lopencv_xfeatures2d",
+					"-lopencv_shape",
+					"-lopencv_video",
+					"-lopencv_ximgproc",
+					"-lopencv_calib3d",
+					"-lopencv_features2d",
+					"-lopencv_highgui",
+					"-lopencv_videoio",
+					"-lopencv_flann",
+					"-lopencv_xobjdetect",
+					"-lopencv_imgcodecs",
+					"-lopencv_objdetect",
+					"-lopencv_xphoto",
+					"-lopencv_imgproc",
+					"-lopencv_core",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

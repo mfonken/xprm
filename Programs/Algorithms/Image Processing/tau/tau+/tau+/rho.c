@@ -8,132 +8,144 @@
 
 /* Own Include */
 #include "rho.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 ring_buffer_t peak_buffer;
-prediction_pair_t last_locations;
-prediction_pair_t last_densities;
+prediction_pair_t last_locations, last_densities;
+uint16_t image_width, image_height;
 
-void performTauA( cimage_t * img, uint16_t width, uint16_t height, prediction_pair_t * result )
+void initRho( prediction_pair_t * locations, prediction_pair_t * densities, uint16_t img_width, uint16_t img_height )
 {
-    prediction_pair_t rho_result;
-    performRho(img, width, height, &rho_result, &last_densities );
-    performSigma( &rho_result, &last_locations, result);
-    last_locations = *result;
+    printf("Init-ing rho: (%d, %d)\n", img_width, img_height);
+    last_locations = *locations;
+    last_densities = *densities;
+    image_width = img_width;
+    image_height = img_height;
 }
 
-void performRho( cimage_t * img, uint16_t width, uint16_t height, prediction_pair_t * location_predictions, prediction_pair_t * density_prediction )
+void performRho( pixel_base_t ** img, prediction_pair_t * location_predictions, prediction_pair_t * density_prediction )
 {
-    density_map_pair_t      density_map_pair;
+    density_map_pair_t*     density_map_pair = (density_map_pair_t *)malloc(sizeof(density_map_pair_t));
+    density_map_pair->x.map = malloc (image_width * sizeof (uint16_t));
+    density_map_pair->y.map = malloc (image_height * sizeof (uint16_t));
     peak_list_pair_t        peak_list_pair;
     probability_list_pair_t probability_list_pair;
     
-    generateDensityMap(     img, width, height,     &density_map_pair );
-    getPeakListPair(        &density_map_pair,      &peak_list_pair );
-    getProbabilityListPair( &peak_list_pair,        &probability_list_pair );
-    getPredictions(         &probability_list_pair, &peak_list_pair, location_predictions, density_prediction);
+    generateDensityMap(          img,                    density_map_pair );
+    generatePeakListPair(        density_map_pair,       &peak_list_pair );
+    generateProbabilityListPair( &peak_list_pair,        &probability_list_pair );
+    generatePredictions(         &probability_list_pair, &peak_list_pair, location_predictions, density_prediction);
 }
 
-void generateDensityMap( cimage_t * img, uint16_t width, uint16_t height, density_map_pair_t * density_maps )
+void generateDensityMap( pixel_base_t ** img, density_map_pair_t * density_maps )
 {
     image_dimension_base_t p = 0;
     uint16_t row_sum;
-    for( uint16_t i = 0; i < height; i++ )
+    memset(density_maps->x.map, 0, sizeof(uint16_t)*density_maps->x.length);
+    memset(density_maps->y.map, 0, sizeof(uint16_t)*density_maps->y.length);
+    for( uint16_t i = 0; i < image_height; i++ )
     {
         row_sum = 0;
-        for( uint16_t j = 0; j < width; j++ )
+        for( uint16_t j = 0; j < image_width; j++ )
         {
-            p = *img[i][j];
+            p = img[i][j];
             row_sum += p;
             density_maps->y.map[j] += p;
         }
         density_maps->x.map[i] += row_sum;
     }
-    density_maps->x.length = height;
-    density_maps->y.length = width;
+    density_maps->x.length = image_height;
+    density_maps->y.length = image_width;
 }
 
-void getPeakListPair( density_map_pair_t * density_pair, peak_list_pair_t * peaks )
+void generatePeakListPair( density_map_pair_t * density_pair, peak_list_pair_t * peaks )
 {
-    getPeakList( &density_pair->x, &peaks->x );
-    getPeakList( &density_pair->y, &peaks->y );
+    generatePeakList( &density_pair->x, &peaks->x );
+    generatePeakList( &density_pair->y, &peaks->y );
 }
 
-void getPeakList( density_map_t * density_map, peak_list_t * peaks )
+void generatePeakList( density_map_t * density_map, peak_list_t * peaks )
 {
+    printf("peaks %d\n", peaks->length);
+    
     uint8_t peak_index = 0;
-    uint16_t l = density_map->length, a,b,c;
-    ringBufferAdd( &peak_buffer, density_map->map[0] );
-    ringBufferAdd( &peak_buffer, density_map->map[1] );
-    for( int i = 2; i < l; i++)
+    uint16_t l = density_map->length, a,b,c,d,e;
+    a = density_map->map[0];
+    b = density_map->map[1];
+    c = density_map->map[2];
+    d = density_map->map[3];
+    for( int i = 4; i < l; i++)
     {
-        c = density_map->map[i];
-        uint8_t last_index = ringBufferAdd( &peak_buffer, c );
-        a = ringBufferRead( &peak_buffer, last_index-2 );
-        b = ringBufferRead( &peak_buffer, last_index-1 );
-        if( a < b && b < c )
+        e = density_map->map[i];
+        if( b > a && c >= b && c >= d && d >= e )
         {
             peaks->locations[peak_index] = i - 1;
-            peaks->peaks[peak_index++] = b;
+            peaks->peaks[peak_index] = c;
+            peak_index++;
         }
+        a = b;
+        b = c;
+        c = d;
+        d = e;
     }
     peaks->length = peak_index;
 }
 
-void getProbabilityListPair( peak_list_pair_t * peak_list_pair, probability_list_pair_t * probability_pair )
+void generateProbabilityListPair( peak_list_pair_t * peak_list_pair, probability_list_pair_t * probability_pair )
 {
-    getProbabilityList( &peak_list_pair->x, &probability_pair->x, &last_locations.x, &last_densities.x );
-    getProbabilityList( &peak_list_pair->y, &probability_pair->y, &last_locations.y, &last_densities.y );
+    generateProbabilityList( &peak_list_pair->x, &probability_pair->x, &last_locations.x, &last_densities.x );
+    generateProbabilityList( &peak_list_pair->y, &probability_pair->y, &last_locations.y, &last_densities.y );
 }
 
-void getProbabilityList( peak_list_t * peaks, probability_list_t * probability, prediction_t* last_locations, prediction_t * last_densities )
+void generateProbabilityList( peak_list_t * peaks, probability_list_t * probability, prediction_t* last_locations, prediction_t * last_densities )
 {
     uint16_t length = peaks->length;
-    double primary_location_probability, secondary_location_probability, primary_height_probability, secondary_height_probability;
+    FLOAT primary_location_probability, secondary_location_probability, primary_height_probability, secondary_height_probability;
     probability->length = length;
     for( uint16_t i = 0; i < length; i++ )
     {
-        primary_location_probability    = 1 - ABS( 1 - ( last_locations->primary   / peaks->locations[i] ) );
-        primary_height_probability      = 1 - ABS( 1 - ( last_densities->primary   / peaks->peaks[i] ) );
+        primary_location_probability    = 1 - fabs( (FLOAT)last_locations->primary   - (FLOAT)peaks->locations[i] ) / image_width;
+        primary_height_probability      = 1 - fabs( (FLOAT)last_densities->primary   - (FLOAT)peaks->peaks[i]     ) / image_height;
         
-        secondary_location_probability  = 1 - ABS( 1 - ( last_locations->secondary / peaks->locations[i] ) );
-        secondary_height_probability    = 1 - ABS( 1 - ( last_densities->secondary / peaks->peaks[i] ) );
+        secondary_location_probability  = 1 - fabs( (FLOAT)last_locations->secondary - (FLOAT)peaks->locations[i] ) / image_height;
+        secondary_height_probability    = 1 - fabs( (FLOAT)last_densities->secondary - (FLOAT)peaks->peaks[i]     ) / image_width;
         
-        probability->primary_list[i]    = primary_location_probability   + DENSITY_BIAS * ( primary_height_probability   - primary_location_probability   );
-        probability->secondary_list[i]  = secondary_location_probability + DENSITY_BIAS * ( secondary_height_probability - secondary_location_probability );
+        probability->primary[i]    = ( LOCATION_BIAS * primary_location_probability )   + ( DENSITY_BIAS * primary_height_probability );
+        probability->secondary[i]  = ( LOCATION_BIAS * secondary_location_probability ) + ( DENSITY_BIAS * secondary_height_probability );
     }
 }
 
-void getPredictions( probability_list_pair_t * probability, peak_list_pair_t * peak_list_pair, prediction_pair_t * location_predictions, prediction_pair_t * density_predictions )
+void generatePredictions( probability_list_pair_t * probability, peak_list_pair_t * peak_list_pair, prediction_pair_t * location_predictions, prediction_pair_t * density_predictions )
 {
-    getPredictionPair( &probability->x, &peak_list_pair->x, &location_predictions->x, &density_predictions->x );
-    getPredictionPair( &probability->y, &peak_list_pair->y, &location_predictions->y, &density_predictions->y );
+    generatePredictionPair( &probability->x, &peak_list_pair->x, &location_predictions->x, &density_predictions->x );
+    generatePredictionPair( &probability->y, &peak_list_pair->y, &location_predictions->y, &density_predictions->y );
 }
 
-void getPredictionPair( probability_list_t * probability, peak_list_t * peak_list, prediction_t * location_predictions, prediction_t * density_prediction )
+void generatePredictionPair( probability_list_t * probability, peak_list_t * peak_list, prediction_t * location_predictions, prediction_t * density_prediction )
 {
-    uint16_t max_primary, max_secondary, current;
+    FLOAT max_primary, max_secondary, current;
     uint16_t index_primary = 0, index_secondary = 0;
-    max_primary = probability->primary_list[0];
-    max_secondary = probability->secondary_list[0];
+    max_primary = probability->primary[0];
+    max_secondary = probability->secondary[0];
+    
     for( uint16_t i = 1; i < probability->length; i++ )
     {
-        current = probability->primary_list[i];
+        current = probability->primary[i];
         if( current > max_primary )
         {
             max_primary = current;
             index_primary = i;
         }
-        
-        current = probability->secondary_list[i];
+        current = probability->secondary[i];
         if( current > max_secondary )
         {
             max_secondary = current;
             index_secondary = i;
         }
     }
-
-    location_predictions->primary   = max_primary;
-    location_predictions->secondary = max_secondary;
+    location_predictions->primary   = peak_list->locations[index_primary];
+    location_predictions->secondary = peak_list->locations[index_secondary];
     density_prediction->primary     = peak_list->peaks[index_primary];
     density_prediction->secondary   = peak_list->peaks[index_secondary];
 }
