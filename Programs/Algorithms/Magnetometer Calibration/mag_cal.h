@@ -1,6 +1,6 @@
 //
 //  mag_cal.h
-//  
+//
 //
 //  Created by Matthew Fonken on 12/21/16.
 //
@@ -65,13 +65,6 @@ double determinant(double a[4][4], double k)
     return det;
 }
 
-void invert( double *matrix[4][4] )
-{
-    
-}
-
-    
-
 /* Eq. 27: Error residual vector r = Y - Xß */
 /* Eq. 34: Ordinary Least Squares Solution vector ß = (X^T*X)^-1 * X^T*Y = [2Vx; 2Vy; 2Vz; B^2-Vx^2-Vy^2-Vz^2] */
 /* Returns hard-iron offset[0-2] and geomagnetic field strength B[3] */
@@ -80,10 +73,10 @@ void performCalibration( double V[4], mag_cal_t * samples )
     uint16_t n = samples->n;
     if( n > MAX_SAMPLES )
         n = MAX_SAMPLES;
-    
+
     /* Vector Y - Known dependent variables */
     double Y[n];
-    
+
     for(int i = 0; i < n; i++ )
     {
         double Bpx = samples->s[i][0];
@@ -92,19 +85,19 @@ void performCalibration( double V[4], mag_cal_t * samples )
         Y[i] = ( Bpx * Bpx ) + ( Bpy * Bpy ) + ( Bpz * Bpz );
 //        printf("(%f,%f,%f)>%d:%f\n", Bpx, Bpy, Bpz, i, Y[i]);
     }
-    
+
     /* Transposed Measurement Matrix X */
     double X_T[4][n];
     for( int i = 0; i < n; i++ )
     {
         for( int j = 0; j < 3; j++ )
         {
-            
+
             X_T[j][i] = samples->s[i][j];
         }
         X_T[3][i] = 1;
     }
-    
+
     double X_T_X[4][4];
     for( int j = 0; j < 4; j++ )
     {
@@ -120,9 +113,9 @@ void performCalibration( double V[4], mag_cal_t * samples )
             X_T_X[j][i] = product;
         }
     }
-    
+
     double d =  determinant(X_T_X,4);
-    
+
     /* Calculate Inverse */
     double b[4][4], c[4][4];
     double X_T_X_INV[4][4];
@@ -155,11 +148,11 @@ void performCalibration( double V[4], mag_cal_t * samples )
             c[q][p] = pow( -1, q + p ) * determinant(b,3);
             X_T_X_INV[p][q] = c[q][p] / d;
         }
-        
+
     }
-    
-    
-    
+
+
+
     double X_T_Y[4];
     for( int j = 0; j < 4; j++ )
     {
@@ -170,7 +163,7 @@ void performCalibration( double V[4], mag_cal_t * samples )
         }
         X_T_Y[j] = product;
     }
-    
+
     double beta[4];
     for( int j = 0; j < 4; j++ )
     {
@@ -181,7 +174,7 @@ void performCalibration( double V[4], mag_cal_t * samples )
         }
         beta[j] = product;
     }
-    
+
     /* Extract Hard Iron Offset */
     double HIO[4];
     for(int i = 0; i < 3; i++ )
@@ -189,7 +182,7 @@ void performCalibration( double V[4], mag_cal_t * samples )
         HIO[i] = beta[i] / 2;
     }
     HIO[3] = sqrt( beta[3] + ( HIO[0] * HIO[0] ) + ( HIO[1] * HIO[1] ) + ( HIO[2] * HIO[2] ) );
-    
+
     for( int i = 0; i < 4; i++ )
     {
         V[i] = HIO[i];

@@ -38,8 +38,7 @@ void setup()
   size(600, 600, P3D);
   try {
     printArray(Serial.list());
-    if (Serial.list().length < 3) throw new Exception();
-    myPort = new Serial(this, Serial.list()[3], 115200);
+    myPort = new Serial(this, Serial.list()[0], 115200);
   }
   catch (Exception e) {
     println("Could not open serial port.");
