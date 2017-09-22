@@ -14,6 +14,7 @@ extern "C" {
 #define global_types_h
 
 #include <stdint.h>
+#include "kalman.h"
 
 #define ABSINV(X)   ((X<1)?1-X:X-1)
 #define ABS(X)      ((X>=0)?X:-X)
@@ -26,7 +27,7 @@ extern "C" {
 /*******PEAK TUNING******/
 /************************/
 
-typedef uint16_t        image_dimension_base_t;
+typedef int16_t         image_dimension_base_t;
 typedef uint8_t         pixel_base_t;
 typedef pixel_base_t**  cimage_t;
 
@@ -34,9 +35,15 @@ typedef double          FLOAT;
 
 typedef struct
 {
-    image_dimension_base_t primary;
-    image_dimension_base_t secondary;
-} data_pair_t;
+    image_dimension_base_t x;
+    image_dimension_base_t y;
+} coordinate_t;
+
+typedef struct
+{
+    image_dimension_base_t i;
+    image_dimension_base_t j;
+} vector_t;
 
 typedef struct
 {
@@ -49,10 +56,25 @@ typedef struct
     prediction_t x;
     prediction_t y;
 } prediction_pair_t;
+    
+typedef struct
+{
+    kalman_t primary;
+    kalman_t secondary;
+} prediction_kalman_t;
 
 typedef struct
 {
-    uint16_t*       map;
+    prediction_kalman_t x;
+    prediction_kalman_t y;
+} prediction_kalman_pair_t;
+
+typedef struct
+{
+    float*          map;
+    float*          vel;
+    float*          acc;
+    float*          jnc;
     uint16_t        length;
 }density_map_t;
 
