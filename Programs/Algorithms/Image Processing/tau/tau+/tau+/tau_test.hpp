@@ -18,12 +18,12 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
 
-#define THRESHOLD   254
+#define THRESHOLD   250
 #define BRIGHTNESS  100
 #define DRAW_HEIGHT 300
 #define MAP_INSET   80
-#define MAP_SCALE   12
-#define FNL_RESIZE  1000
+#define MAP_SCALE   13
+#define FNL_RESIZE  800
 
 using namespace cv;
 

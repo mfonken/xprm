@@ -10,12 +10,17 @@
 
 using namespace cv;
 
-Vec3b mp = { 255,   0, 255};
-Vec3b np = {   0, 255, 255};
-Vec3b op = { 255, 255,   0};
-Vec3b pp = {   0,   0, 255};
-Vec3b ap = { 255,   0,   0};
-Vec3b bp = {   0, 255,   0};
+Vec3b pos_color = { 255,   0, 255};
+Vec3b vel_color = { 255, 255,   0};
+Vec3b acc_color = {   0, 255,   0};
+Vec3b jrk_color = {   0, 255, 255};
+Vec3b jnc_color = {   0,   0, 255};
+
+Vec3b ap = { 150, 255, 150};
+Vec3b bp = { 150, 150, 255};
+Vec3b white = { 255, 255, 255};
+Vec3b red   = {   0,   0, 255};
+Vec3b blue  = { 255,   0,   0};
 
 void drawTau(Mat M, density_map_pair_t * m, peak_list_pair_t * p, probability_list_pair_t * r, prediction_pair_t * e)
 {
@@ -27,10 +32,10 @@ void drawTau(Mat M, density_map_pair_t * m, peak_list_pair_t * p, probability_li
     if( h > width )  h = width;
     if( w > height ) w = height;
     
-    FLOAT x_scale = 0.5;
-    FLOAT y_scale = 0.5;
+    FLOAT x_scale = 1;
+    FLOAT y_scale = 1;
     
-    int pos = 0, vel = 0, acc = 0, jnc = 0;
+    uint16_t pos = 0, vel = 0, acc = 0, jrk = 0, jnc = 0;
     
     int xp = e->x.primary;
     int xs = e->x.secondary;
@@ -41,17 +46,42 @@ void drawTau(Mat M, density_map_pair_t * m, peak_list_pair_t * p, probability_li
     {
         pos = m->x.map[x] * x_scale * 2;
         vel = m->x.vel[x] * x_scale * MAP_SCALE + MAP_INSET;
-        acc = m->x.acc[x] * x_scale * MAP_SCALE*4 + MAP_INSET;
+        acc = m->x.acc[x] * x_scale * MAP_SCALE*2 + MAP_INSET;
+        jrk = m->x.jrk[x] * x_scale * MAP_SCALE*4 + MAP_INSET;
         jnc = m->x.jnc[x] * x_scale * MAP_SCALE*8 + MAP_INSET;
         if(pos >= height) pos = height-1;
         if(vel >= height) vel = height-1;
         if(acc >= height) acc = height-1;
+        if(jrk >= height) jrk = height-1;
         if(jnc >= height) jnc = height-1;
-        M.at<Vec3b>(x,pos) = mp;
-        M.at<Vec3b>(x,vel) = np;
-        M.at<Vec3b>(x,acc) = op;
-        M.at<Vec3b>(x,jnc) = pp;
+//        for(int q=(MAP_INSET-10);q<=(MAP_INSET+10);q+=5) M.at<Vec3b>(x,q) = white;
+        M.at<Vec3b>(x,pos) = pos_color;
+//        M.at<Vec3b>(x,vel) = vel_color;
+        M.at<Vec3b>(x,acc) = acc_color;
+        
+        M.at<Vec3b>(x,jnc) = jnc_color;
+        
+        if( fabs(m->x.jrk[x]) >= 0.10 ) M.at<Vec3b>(x,jrk) = white;
+        else M.at<Vec3b>(x,jrk) = jrk_color;
+        
+        if( fabs(m->x.vel[x]) >= 2 ) M.at<Vec3b>(x,vel) = white;
+        else M.at<Vec3b>(x,vel) = vel_color;
+        
     }
+    for(int i=0; i<p->x.length; i++)
+    {
+        int l = p->x.locations[i];
+        for(int k = 0; k < 300; k++)
+        {
+            int dir = p->x.dir[i];
+            if( dir == 1) M.at<Vec3b>(l,k) = red;
+            else if( dir == 2 ) M.at<Vec3b>(l,k) = blue;
+            else M.at<Vec3b>(l,k) = white;
+        }
+    }
+    
+//    int x = 0.1*MAP_SCALE*4 + MAP_INSET;
+//    for(int y=0;y<h;y++) M.at<Vec3b>(y,x) = white;
     
     for(int i=0; i<p->x.length; i++)
     {
@@ -79,15 +109,30 @@ void drawTau(Mat M, density_map_pair_t * m, peak_list_pair_t * p, probability_li
         pos = m->y.map[y] * y_scale * 2;
         vel = m->y.vel[y] * y_scale * MAP_SCALE + MAP_INSET;
         acc = m->y.acc[y] * y_scale * MAP_SCALE*4 + MAP_INSET;
-        jnc = m->y.jnc[y] * y_scale * MAP_SCALE*8 + MAP_INSET;
+        jrk = m->y.jrk[y] * y_scale * MAP_SCALE*8 + MAP_INSET;
+        jnc = m->y.jnc[y] * y_scale * MAP_SCALE*16 + MAP_INSET;
         if(pos >= height) pos = width-1;
         if(vel >= height) vel = width-1;
         if(acc >= height) acc = width-1;
+        if(jrk >= height) jrk = width-1;
         if(jnc >= height) jnc = width-1;
-        M.at<Vec3b>(pos,y) = mp;
-        M.at<Vec3b>(vel,y) = np;
-        M.at<Vec3b>(acc,y) = op;
-        M.at<Vec3b>(jnc,y) = pp;
+        M.at<Vec3b>(pos,y) = pos_color;
+        M.at<Vec3b>(vel,y) = vel_color;
+        M.at<Vec3b>(acc,y) = acc_color;
+        M.at<Vec3b>(jrk,y) = jrk_color;
+        M.at<Vec3b>(jnc,y) = jnc_color;
+    }
+    
+    for(int i=0; i<p->y.length; i++)
+    {
+        int l = p->y.locations[i];
+        for(int k = 0; k < 300; k++)
+        {
+            int dir = p->y.dir[i];
+            if( dir == 1) M.at<Vec3b>(k,l) = red;
+            else if( dir == 2 ) M.at<Vec3b>(k,l) = blue;
+            else M.at<Vec3b>(k,l) = white;
+        }
     }
     
     for(int i=0; i<p->y.length; i++)
@@ -104,16 +149,20 @@ void drawTau(Mat M, density_map_pair_t * m, peak_list_pair_t * p, probability_li
         for(int z = 0; z < width*v*y_scale; z++)
             M.at<Vec3b>(z, l) = rp;
     }
+    
     for(int j = 0; j < width; j++)
     {
         M.at<Vec3b>(j,yp) = ap;
         M.at<Vec3b>(j,ys) = bp;
     }
     
-    Size size(FNL_RESIZE,FNL_RESIZE);
-    Mat O;
-    resize(M,O,size);
-    imshow("...", O);
+    Mat overlay;
+    float alpha = 0.3;
+    M.copyTo(overlay);
+    rectangle(overlay,Point(yp,xp), Point(ys,xs), Scalar(0,255,255), -1);
+    addWeighted(overlay, alpha, M, 1 - alpha, 0, M);
+    
+    imshow("...", M);
 }
 
 void drawDensityMap(density_map_pair_t * m)

@@ -31,11 +31,11 @@ void performTauA( pixel_base_t ** img, prediction_pair_t * result )
 {
     prediction_pair_t prediction;
     prediction = locations;
-    performRho(img, result, &densities );
+    performRho(img, &prediction, &densities );
     
 //    printf("Rho:\n\tX l:pri>%d & sec>%d, p:pri>%d & sec>%d\n\tY l:pri>%d & sec>%d, p:pri>%d & sec>%d\n", locations.x.primary, locations.x.secondary, prediction.x.primary, prediction.x.secondary, locations.y.primary, locations.y.secondary, prediction.y.primary, prediction.y.secondary );
     
-//    performSigma( &prediction, &locations, result);
+    performSigma( &prediction, &locations, result);
     updateLocations(result);
 }
 

@@ -63,7 +63,11 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "26"
+            argument = "13"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "noise"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

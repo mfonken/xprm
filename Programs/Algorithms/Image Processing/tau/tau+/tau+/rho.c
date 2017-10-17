@@ -9,11 +9,18 @@
 /* Own Include */
 #include "rho.h"
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 
+//#define START_END_PEAKS
+
 #define opsign(X,Y)     (X<0)^(Y<0)
-#define rising(X,Y)     (X<0)&(Y>=0)
-#define falling(X,Y)   (X>=0)&(Y<0)
+#define rising(X,Y)    (X>=0)&(Y<0)
+#define falling(X,Y)    (X<0)&(Y>=0)
+
+#define opsignthresh(X,Y,T)    ((X*Y)<T)
+#define risingthresh(X,Y,T)    ((X*Y)<T)&(Y<X)
+#define fallingthresh(X,Y,T)   ((X*Y)<T)&(Y>X)
 
 ring_buffer_t peak_buffer;
 uint16_t image_width, image_height;
@@ -23,7 +30,7 @@ probability_list_pair_t probability_list_pair;
 
 void initRho( uint16_t img_width, uint16_t img_height )
 {
-    printf("Init-ing rho: (%d, %d)\n", img_width, img_height);
+    printf("Init-ing rho: %dx%d\n", img_width, img_height);
     image_width  = img_width;
     image_height = img_height;
     
@@ -69,9 +76,23 @@ void generateDensityMap( pixel_base_t ** img, density_map_pair_t * density_maps 
     
     gaussianBlur(density_maps->x.map, density_maps->x.length);
     gaussianBlur(density_maps->y.map, density_maps->y.length);
+    
 //    smooth1D(density_maps->x.map, density_maps->x.length);
 //    smooth1D(density_maps->y.map, density_maps->y.length);
+    
     fillDensityMapPairData( density_maps );
+    
+//    gaussianBlur(density_maps->x.map, density_maps->x.length);
+    gaussianBlur(density_maps->x.vel, density_maps->x.length);
+    gaussianBlur(density_maps->x.acc, density_maps->x.length);
+    gaussianBlur(density_maps->x.jrk, density_maps->x.length);
+    gaussianBlur(density_maps->x.jnc, density_maps->x.length);
+    
+//    gaussianBlur(density_maps->y.map, density_maps->y.length);
+    gaussianBlur(density_maps->y.vel, density_maps->y.length);
+    gaussianBlur(density_maps->y.acc, density_maps->y.length);
+    gaussianBlur(density_maps->y.jrk, density_maps->y.length);
+    gaussianBlur(density_maps->y.jnc, density_maps->y.length);
 }
 
 void generatePeakListPair( density_map_pair_t * density_pair, peak_list_pair_t * peaks )
@@ -80,52 +101,79 @@ void generatePeakListPair( density_map_pair_t * density_pair, peak_list_pair_t *
     generatePeakList( &density_pair->y, &peaks->y );
 }
 
-/*******        PEAK LIST GENERATOR START       *******/
 void generatePeakList( density_map_t * density_map, peak_list_t * peaks )
 {
-    int thresh = 0.9;
+//    float pos_thresh = 50, vel_thresh = 1, acc_thresh = 0.01, jrk_thresh = 0, jnc_thresh = 0.1;
+    float pos_thresh = 10, vel_thresh = 2, acc_thresh = 0.1, jrk_thresh = 0.13, jnc_thresh = 0.01;
     
-    bool event = false;
     uint16_t l = density_map->length, peak_index = 0;
-    float curr_jnc = 0, last_acc = density_map->acc[0], curr_acc = 0;
+    float curr_jrk = 0, last_jnc = density_map->jnc[0], curr_jnc = 0, last_acc = density_map->acc[0], curr_acc = 0, curr_vel = 0, curr_pos = 0;
     
-    float array[3];
-    int   index = 0;
+    float array[100];
+    int   add_index = 0, rmv_index = 0;
     
     for( int i = 1; i < l; i++ )
     {
+        curr_pos = density_map->map[i];
+        curr_vel = density_map->vel[i];
         curr_acc = density_map->acc[i];
+        curr_jrk = density_map->jrk[i];
         curr_jnc = density_map->jnc[i];
-        event = fabs(curr_jnc) > thresh;
-        
-        if(event)
+
+        if( curr_pos >= pos_thresh
+            && curr_vel >= vel_thresh
+            && fallingthresh(curr_acc, last_acc, acc_thresh)
+            && curr_jrk <= -jrk_thresh
+            && risingthresh(curr_jnc, last_jnc, jnc_thresh)
+           )
         {
-            if( falling(curr_acc, last_acc) )
-            {
-                array[index++] = i;
-            }
-            else if( rising(curr_acc, last_acc) )
-            {
-                int avg = ( i - array[--index] ) / 2;
-                peaks->locations[peak_index] = avg;
-                peaks->peaks[peak_index] = density_map->map[avg];
-                peak_index++;
-            }
+            array[add_index++] = i;
+
+#ifdef START_END_PEAKS
+            peaks->locations[peak_index] = i;
+            peaks->peaks[peak_index] = density_map->map[i];
+            peaks->dir[peak_index] = 2;
+            peak_index++;
+#endif
+        }
+        else if( curr_pos >= pos_thresh
+            && curr_vel <= -vel_thresh
+            && risingthresh(curr_acc, last_acc, acc_thresh)
+            && curr_jrk >= jrk_thresh
+            && fallingthresh(curr_jnc, last_jnc, jnc_thresh)
+            )
+        {
+            int s = (rmv_index < add_index)?array[rmv_index++]:i;
+            int avg = ( i + s ) / 2;
+            peaks->locations[peak_index] = avg;
+            peaks->peaks[peak_index] = density_map->map[avg];
+            peaks->dir[peak_index] = 0;
+            peak_index++;
+            
+#ifdef START_END_PEAKS
+            peaks->locations[peak_index] = i;
+            peaks->peaks[peak_index] = density_map->map[i];
+            peaks->dir[peak_index] = 1;
+            peak_index++;
+#endif
         }
         
         last_acc = curr_acc;
+        last_jnc = curr_jnc;
     }
     
     peaks->length = peak_index;
-    printf("peaks %d\n", peaks->length);
+//    printf("peaks %d\n", peaks->length);
 }
 
 void generatePeakListOld( density_map_t * density_map, peak_list_t * peaks )
 {
+    int inset = 10;
+    
     uint16_t l = density_map->length;
-    uint16_t local_max = density_map->map[0], local_index = 0, next;
+    uint16_t local_max = density_map->map[inset], local_index = 0, next;
     uint8_t peak_index = 0;
-    for( int i = 1; i < l; i++)
+    for( int i = inset+1; i < l; i++)
     {
         next = density_map->map[i];
         if( next > local_max )
@@ -144,12 +192,17 @@ void generatePeakListOld( density_map_t * density_map, peak_list_t * peaks )
     peaks->length = peak_index;
     printf("peaks %d\n", peaks->length);
 }
-/*******        PEAK LIST GENERATOR END         *******/
 
 void generateProbabilityListPair( peak_list_pair_t * peak_list_pair, probability_list_pair_t * probability_pair, prediction_pair_t * last_locations, prediction_pair_t * last_densities )
 {
+    printf("|=====================PROBABILITY LIST PAIR=====================|\n");
+    
+    printf("X:\n");
     generateProbabilityList( &peak_list_pair->x, &probability_pair->x, &last_locations->x, &last_densities->x );
+    printf("Y:\n");
     generateProbabilityList( &peak_list_pair->y, &probability_pair->y, &last_locations->y, &last_densities->y );
+    
+    printf("|===============================================================|\n");
 }
 
 void generateProbabilityList( peak_list_t * peaks, probability_list_t * probability, prediction_t* last_locations, prediction_t * last_densities )
@@ -165,7 +218,7 @@ void generateProbabilityList( peak_list_t * peaks, probability_list_t * probabil
     }
     
     probability->length = length;
-//    printf("Probability length is %d\n", length);
+    printf("Probability length is %d\n", length);
     for( uint16_t i = 0; i < length; i++ )
     {
         primary_location_probability    = 1 - fabs( llp - (FLOAT)peaks->locations[i] ) / image_width;
@@ -176,10 +229,10 @@ void generateProbabilityList( peak_list_t * peaks, probability_list_t * probabil
         
         probability->primary[i]    = ( LOCATION_BIAS * primary_location_probability )   + ( DENSITY_BIAS * primary_density_probability );
         probability->secondary[i]  = ( LOCATION_BIAS * secondary_location_probability ) + ( DENSITY_BIAS * secondary_density_probability );
-//        printf("\t Last[%d]: primary-location>%.2f & density>%.2f secondary-location>%.2f & density>%.2f\n", i, llp, ldp, lls, lds );
-//        printf("  Primary[%d] location>%.2f & density>%.2f\n", i, primary_location_probability, primary_density_probability );
-//        printf("Secondary[%d] location>%.2f & density>%.2f\n", i, secondary_location_probability, secondary_density_probability );
-//        printf("Probability[%d] is pri>%.2f & sec>%.2f\n", i, probability->primary[i], probability->secondary[i]);
+        printf("\t Last[%d]: primary-location>%.2f & density>%.2f | secondary-location>%.2f & density>%.2f\n", i, llp, ldp, lls, lds );
+        printf("  Primary[%d] location>%.2f & density>%.2f\n", i, primary_location_probability, primary_density_probability );
+        printf("Secondary[%d] location>%.2f & density>%.2f\n", i, secondary_location_probability, secondary_density_probability );
+        printf("Probability[%d] is pri>%.2f & sec>%.2f\n", i, probability->primary[i], probability->secondary[i]);
     }
 }
 
@@ -232,18 +285,19 @@ void fillDensityMapPairData( density_map_pair_t * m )
 
 void fillDensityMapData( density_map_t * m )
 {
-    int l = m->length;
-    
-    for(int i = 1; i < l; i++)
+    int l = m->length, i;
+    for( i = 1; i < l; i++ )
     {
         m->vel[i]   = m->map[i] - m->map[i-1];
         m->acc[i]   = m->vel[i] - m->vel[i-1];
-        m->jnc[i]   = m->acc[i] - m->acc[i-1];
+        m->jrk[i]   = m->acc[i] - m->acc[i-1];
+        m->jnc[i]   = m->jrk[i] - m->jrk[i-1];
     }
-    m->map[l-1] = 0;
-    m->vel[l-1] = 0;
-    m->acc[l-1] = 0;
-    m->jnc[l-1] = 0;
+    m->map[i] = 0;
+    m->vel[i] = 0;
+    m->acc[i] = 0;
+    m->jrk[i] = 0;
+    m->jnc[i] = 0;
 }
 
 
@@ -302,25 +356,33 @@ void initDensityMapPair( density_map_pair_t * m, int w, int h )
     (*m).x.map = (float*)malloc(sizeof(float)*h);
     (*m).x.vel = (float*)malloc(sizeof(float)*h);
     (*m).x.acc = (float*)malloc(sizeof(float)*h);
+    (*m).x.jrk = (float*)malloc(sizeof(float)*h);
     (*m).x.jnc = (float*)malloc(sizeof(float)*h);
+    (*m).x.length = 0;
     (*m).y.map = (float*)malloc(sizeof(float)*w);
     (*m).y.vel = (float*)malloc(sizeof(float)*w);
     (*m).y.acc = (float*)malloc(sizeof(float)*w);
+    (*m).y.jrk = (float*)malloc(sizeof(float)*w);
     (*m).y.jnc = (float*)malloc(sizeof(float)*w);
-    (*m).x.length = h;
-    (*m).y.length = w;
+    (*m).y.length = 0;
 }
 void initPeaksListPair( peak_list_pair_t * p, int w, int h )
 {
-    (*p).x.locations = (uint16_t*)malloc(sizeof(uint16_t)*h/2);
-    (*p).x.peaks = (uint16_t*)malloc(sizeof(uint16_t)*h/2);
-    (*p).y.locations = (uint16_t*)malloc(sizeof(uint16_t)*w/2);
-    (*p).y.peaks = (uint16_t*)malloc(sizeof(uint16_t)*w/2);
+    int max_peaks_w = w, max_peaks_h = h;
+    (*p).x.locations = (uint16_t*)malloc(sizeof(uint16_t)*max_peaks_h);
+    (*p).x.peaks = (uint16_t*)malloc(sizeof(uint16_t)*max_peaks_h);
+    (*p).x.dir = (int*)malloc(sizeof(int)*max_peaks_h);
+    (*p).x.length = 0;
+    (*p).y.locations = (uint16_t*)malloc(sizeof(uint16_t)*max_peaks_w);
+    (*p).y.peaks = (uint16_t*)malloc(sizeof(uint16_t)*max_peaks_w);
+    (*p).y.dir = (int*)malloc(sizeof(int)*max_peaks_w);
+    (*p).y.length = 0;
 }
 void initProbabilityListPair( probability_list_pair_t * r, int w, int h )
 {
-    (*r).x.primary = (FLOAT*)malloc(sizeof(FLOAT)*h/2);
-    (*r).x.secondary = (FLOAT*)malloc(sizeof(FLOAT)*h/2);
-    (*r).y.primary = (FLOAT*)malloc(sizeof(FLOAT)*w/2);
-    (*r).y.secondary = (FLOAT*)malloc(sizeof(FLOAT)*w/2);
+    int max_peaks_w = w, max_peaks_h = h;
+    (*r).x.primary = (FLOAT*)malloc(sizeof(FLOAT)*max_peaks_h);
+    (*r).x.secondary = (FLOAT*)malloc(sizeof(FLOAT)*max_peaks_h);
+    (*r).y.primary = (FLOAT*)malloc(sizeof(FLOAT)*max_peaks_w);
+    (*r).y.secondary = (FLOAT*)malloc(sizeof(FLOAT)*max_peaks_w);
 }

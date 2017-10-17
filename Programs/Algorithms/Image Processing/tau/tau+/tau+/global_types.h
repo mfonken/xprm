@@ -14,6 +14,7 @@ extern "C" {
 #define global_types_h
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "kalman.h"
 
 #define ABSINV(X)   ((X<1)?1-X:X-1)
@@ -74,6 +75,7 @@ typedef struct
     float*          map;
     float*          vel;
     float*          acc;
+    float*          jrk;
     float*          jnc;
     uint16_t        length;
 }density_map_t;
@@ -89,6 +91,7 @@ typedef struct
     uint16_t  length;
     uint16_t* locations;
     uint16_t* peaks;
+    int*     dir;
 }peak_list_t;
 
 typedef struct

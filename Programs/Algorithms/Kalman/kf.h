@@ -1,10 +1,7 @@
-//
-//  kf.h
-//  
-//
-//  Created by Matthew Fonken on 10/6/16.
-//
-//
+/*! \file kf.h
+ \brief Quick Kalman
+ */
+
 
 #include <stdio.h>
 #include <stdint.h>
@@ -25,6 +22,12 @@ struct kalman
     uint32_t value;
 };
 
+/*! ***********************************************************************************************//**
+*  \brief Initalize Kalman Filter
+*  \param[in] k Pointer to kalman filter type
+*  \param[in] v Initial value
+**************************************************************************************************/
+
 void kalmanInit(struct kalman *k)
 {
     k->P_k[0][0]   = 0;
@@ -37,7 +40,37 @@ void kalmanInit(struct kalman *k)
     k->bias        = 0;
     k->value       = 0;
 }
-
+/***********************************************************************************************//**
+*  \brief Update Kalman Filter
+*  \param[in] k Pointer to kalman filter type
+*  \param[in] value_new    Measured value      - units
+*  \param[in] rate_new     Measured rate       - units/time
+*  \param[in] delta_time   Time since last     - time
+***************************************************************************************************
+* FORMULA:
+\f{eqnarray*}{
+\mathbf{Predict\space:} \\
+&rate_k &=& rate_{new} - bias_k \\
+&value_k &=& value_k + {rate_K}\Delta{t} \\
+&P_{k_{diag}} &=& P_{11_k}\Delta{t} \\
+&P_{00_k} &=& P_{00_k} + \Delta{t}(P_{11_k}\Delta{t} - P_{01_k} - P_{10_k} + value_u) \\
+&P_{01_k} &=& P_{01_k} - P_{k_{diag}} \\
+&P_{10_k} &=& P_{10_k} - P_{k_{diag}} \\
+&P_{11_k} &=& P_{11_k} + bias_u\Delta{t} \\
+\\
+\mathbf{Update\space:} \\
+&S &=& P_{00_k} + sensor_u \\
+&K_{0_k} &=& P_{00_k} / S \\
+&K_{1_k} &=& P_{10_k} / S \\
+&\Delta{value} &=& value_{new} - value_k \\
+&value_k &=& value_k + K_{0_k}\Delta{value} \\
+&bias_k &=& bias_k + K_{1_k}\Delta{value} \\
+&P_{00_k} &=& P_{00_k} - K_{0_k}P_{00_k} \\
+&P_{01_k} &=& P_{01_k} - K_{0_k}P_{01_k} \\
+&P_{10_k} &=& P_{10_k} - K_{1_k}P_{00_k} \\
+&P_{11_k} &=& P_{11_k} - K_{1_k}P_{01_k} \\
+\f}
+**************************************************************************************************/
 void kalmanUpdate(struct kalman *k,
                   uint32_t value_new,
                   uint32_t rate_new,

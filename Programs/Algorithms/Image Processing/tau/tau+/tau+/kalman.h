@@ -11,13 +11,13 @@ extern "C" {
 #include <sys/time.h>
 
 /** Uncertainty of value */
-#define VALUE_UNCERTAINTY   0.001
+#define VALUE_UNCERTAINTY   0.01
     
 /** Uncertainty of bias */
 #define BIAS_UNCERTAINTY    0.003
-    
+
 /** Uncertainty of sensor */
-#define SENSOR_UNCERTAINTY  0.03
+#define SENSOR_UNCERTAINTY  0.01
 
 /** Kalman structure */
 typedef struct _kalman_t
