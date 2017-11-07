@@ -77,7 +77,7 @@ char readSensors() {
           Mag[2] = float(inputStringArr[9]) - MAG_CAL[2];
 
           myPort.clear();
-          normalizeValues();
+          //normalizeValues();
           calculateAngles();
 
           return 'r';

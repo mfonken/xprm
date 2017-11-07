@@ -1,6 +1,6 @@
 import processing.serial.*;
 
-float scale = 500;
+float scale = 20;
 
 float ellipse_radius = 5.0;
 
@@ -9,24 +9,25 @@ Serial myPort;  // Create object from Serial class
 float [] Mag = new float[3];          //mag readings
 
 
-int lf = 10; // 10 is '\n' in ASCII
+int lf = '\n';
 byte[] inBuffer = new byte[100];
-String state = "rf";
 
 PFont font;
 final int VIEW_SIZE_X = 600, VIEW_SIZE_Y = 600;
 
+int ORDER_OF_MAGNITUDE = 1;
+
 PrintWriter output;
 
-int numSamples = 10000;
+int numSamples = 5000;
 
 void setup() 
 {
   size(1000, 1000);
   try {
     printArray(Serial.list());
-    if (Serial.list().length < 3) throw new Exception();
-    myPort = new Serial(this, Serial.list()[3], 115200);
+    //if (Serial.list().length < 3) throw new Exception();
+    myPort = new Serial(this, Serial.list()[0], 115200);
   }
   catch (Exception e) {
     println("Could not open serial port.");
@@ -36,7 +37,7 @@ void setup()
   // The font must be located in the sketch's "data" directory to load successfully
   font = loadFont("CourierNew36.vlw"); 
   background(0);
-  stroke(255);
+  stroke(255); 
   line(0, height/2, width, height/2);
   line(width/2, 0, width/2, height);
   noStroke();
@@ -57,12 +58,9 @@ char readSensors() {
         {
         case 'm':
           print("Received Raw Data");
-          Mag[0] = float(inputStringArr[1])/1000;
-          print(".");
-          Mag[1] = float(inputStringArr[2])/1000;
-          print(".");
-          Mag[2] = float(inputStringArr[3])/1000;
-          println(".");
+          Mag[0] = float(inputStringArr[1]);///ORDER_OF_MAGNITUDE;
+          Mag[1] = float(inputStringArr[2]);///ORDER_OF_MAGNITUDE;
+          Mag[2] = float(inputStringArr[3]);///ORDER_OF_MAGNITUDE;
 
           if ( Float.isNaN(Mag[0]) || Float.isNaN(Mag[1]) || Float.isNaN(Mag[2])) throw new Exception();
           myPort.clear();
@@ -73,6 +71,7 @@ char readSensors() {
             exit();
           }
           output.println(Mag[0] + " " + Mag[1] + " " + Mag[2]); 
+          println("M: " + Mag[0] + " " + Mag[1] + " " + Mag[2]); 
           return 'r';
 
         default:
@@ -85,15 +84,13 @@ char readSensors() {
   {
     println("Error!");
   }
-  myPort.clear();
+  //myPort.clear();
   return 'n';
 }
 
-void draw() {
-
+void draw() 
+{
   readSensors();
-
-  //output.println(Mag[0] + ", " + Mag[1] + ", " + Mag[2]); 
   drawPoint();
 }
 
