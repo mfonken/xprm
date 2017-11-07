@@ -13,7 +13,7 @@
 #include <stdint.h>
 #include <math.h>
 
-#define MAX_SAMPLES     1000
+#define MAX_SAMPLES     1500
 
 /* See - AN4246: Calibrating an eCompass in the Presence of Hard and Soft Iron Interference */
 
