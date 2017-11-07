@@ -12,115 +12,158 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
+#include <string>
 
 #include "global_types.h"
 #include "tau_test.hpp"
 #include "tau.h"
+#include "rho.h"
+#include <sys/time.h>
+
+#define IMAGE_ROOT "/Users/matthewfonken/Desktop/marbl/xprm/Programs/Algorithms/Image Processing/tau/tau+/tau+/images/"
+
+#define FRAME_DELAY_MS 30
 
 #define CAM_WIDTH   640
 #define CAM_HEIGHT  320
-#define THRESHOLD   200
-#define BRIGHTNESS  100
 
 using namespace cv;
 using namespace std;
 
-bool thresh(uint8_t t, Vec3d p)
+int main( int argc, char * args[] )
 {
-    return p[0] > t;
-}
-
-void MatToCimage( uint16_t width, uint16_t height, Mat mat, pixel_base_t ** img )
-{
-    for(uint16_t y = 0; y < height; y++)
+    struct timeval stop, start;
+    bool no_file = true;
+    Mat image,frame;
+    int gif_loop = -1;
+    int NUM_GIF_FRAMES = 1;
+    
+    string subdir("old");
+    if(argc == 2)
     {
-        for(uint16_t x = 0; x < width; x++)
+        std::string file(IMAGE_ROOT);
+        file.append(args[1]);
+        file.append(".bmp");
+        printf("opening file: %s\n", file.c_str());
+        image = imread(file, IMREAD_COLOR );
+        no_file = false;
+        if( image.empty() )                      // Check for invalid input
         {
-            Vec3b pixel = mat.at<Vec3b>(y, x);
-            img[y][x] = (thresh(THRESHOLD, pixel)) ? 1:0;
+            cout <<  "Could not open or find the image" << std::endl ;
+            return -1;
         }
     }
-}
-void cimageToMat( uint16_t width, uint16_t height, pixel_base_t ** img, Mat mat )
-{
-    for(uint16_t y = 0; y < height; y++)
+    else if(argc > 2)
     {
-        for(uint16_t x = 0; x < width; x++)
+        no_file = false;
+        NUM_GIF_FRAMES = atoi(args[1]);
+        subdir = args[2];
+        printf("Using gif with %d frames.\n",NUM_GIF_FRAMES);
+        gif_loop = NUM_GIF_FRAMES;
+        std::string file(IMAGE_ROOT);
+        file.append("frames/");
+        file.append(subdir);
+        file.append("/1.png");
+        image = imread(file, IMREAD_COLOR );
+        if( image.empty() )                      // Check for invalid input
         {
-            Vec3b pixel;
-            pixel[0] = img[y][x];
-            pixel[1] = img[y][x];
-            pixel[2] = img[y][x];
-            mat.at<Vec3b>(y, x) = pixel;
+            cout <<  "Could not open or find the image" << std::endl ;
+            return -1;
         }
     }
-}
-
-void cimageToBandW( uint16_t width, uint16_t height, pixel_base_t ** img, Mat mat )
-{
-    for(uint16_t y = 0; y < height; y++)
-    {
-        for(uint16_t x = 0; x < width; x++)
-        {
-            Vec3b pixel;
-            pixel[0] = img[y][x]*BRIGHTNESS;
-            pixel[1] = img[y][x]*BRIGHTNESS;
-            pixel[2] = img[y][x]*BRIGHTNESS;
-            mat.at<Vec3b>(y, x) = pixel;
-        }
-    }
-}
-
-int main()
-{
+    
+    Size size(FNL_RESIZE,FNL_RESIZE);
+    if(!no_file) resize(image,frame,size);
+    
     int width = CAM_WIDTH, height = CAM_HEIGHT;
     VideoCapture cam(0);
     cam.set(CV_CAP_PROP_FRAME_WIDTH, width);
     cam.set(CV_CAP_PROP_FRAME_HEIGHT, height);
     if (!cam.isOpened()) cout << "cannot open camera" << endl;
     
-    Mat testFrame;
-    cam.read(testFrame);
-    printf("Init-ing camera: (%d, %d)\n", testFrame.cols, testFrame.rows);
-    if(testFrame.cols < width)  width  = testFrame.cols;
-    if(testFrame.rows < height) height = testFrame.rows;
+    if(no_file)
+    {
+        cam.read(frame);
+        printf("Init-ing camera: (%d, %d)\n", frame.cols, frame.rows);
+    }
     
+    width  = frame.cols;
+    height = frame.rows;
     
-    pixel_base_t **frame;
-    initImg(&frame, width, height);
+    printf("Using frame size %dx%d.\n", width, height);
+    
+    pixel_base_t **pixels;
+    initImg(&pixels, width, height);
+    
+    density_map_pair_t      d;
+    peak_list_pair_t        p;
+    probability_list_pair_t r;
+    prediction_pair_t       e;
+
+    cv::Point textOrg(3, 18);
+    int fontFace = FONT_HERSHEY_SIMPLEX;
+    double fontScale = 0.5;
+    int thickness = 1;
     
     initTauA( width, height );
-//    prediction_pair_t prediction;
+
     
-    density_map_pair_t d;
-    initDensityMapPair(&d, width, height);
-    peak_list_pair_t p;
-    initPeaksListPair(&p, width, height);
-    probability_list_pair_t r;
-    initProbabilityListPair(&r, width, height);
-    prediction_pair_t e;
-
+    bool live = false;
     for(int l=0;l<1;) {
-        Mat frameMat, out(height, width, CV_8UC3, Scalar(0,0,0));;
         
-        cam.read(frameMat);
+        Mat out(height, width, CV_8UC3, Scalar(0,0,0));
+        if(no_file) cam.read(frame);
+        else if(gif_loop > 0)
+        {
+            gif_loop %= NUM_GIF_FRAMES;
+            gif_loop++;
+            std::string file(IMAGE_ROOT);
+            file.append("frames/");
+            file.append(subdir);
+            file.append("/");
+            file.append(to_string( gif_loop ));
+            file.append(".png");
+//            printf("Opening frame #%d.\n", gif_loop);
+            image = imread(file, IMREAD_COLOR );
+            if( image.empty() )                      // Check for invalid input
+            {
+                cout <<  "Could not open or find the image " << file << std::endl ;
+                return -1;
+            }
+            resize(image,frame,size);
+        }
         
-        MatToCimage(width, height, frameMat, frame);
-        cimageToBandW( width, height, frame, out );
-//        imshow("cam", out);
-        
-        getDensityMap(frame, &d);
-        smooth1D(d.x.map, d.x.length);
-        smooth1D(d.y.map, d.y.length);
-        getPeakList(&d, &p);
-        getProbabilityList(&p, &r);
-        getPredictions(&p, &r, &e);
+        MatToCimage(width, height, frame, pixels);
+        cimageToBandW( width, height, pixels, out );
 
+        /* Tau A Start */
+        gettimeofday(&start, NULL);
+        performTauA(pixels, &e);
+        gettimeofday(&stop, NULL);
+        /* Tau A End */
+        
+        
+        
+        double seconds  = stop.tv_sec  - start.tv_sec;
+        double useconds = stop.tv_usec - start.tv_usec;
+        double diff = ((seconds) + useconds/1000000.0) + 0.0005;
+        int fps  = 1/diff;
+    
+        string text = "FPS:" + to_string(fps);
+        cv::putText(out, text, textOrg, fontFace, fontScale, Scalar::all(255), thickness,8);
+        
+        getRhoData(&d, &p, &r);
         drawTau(out, &d, &p, &r, &e);
-        
-        if (waitKey(30) >= 0)
-            break;
-        
+        //if (waitKey(FRAME_DELAY_MS) >= 0) break;
+        char c = waitKey(live?FRAME_DELAY_MS:50000);
+        if (c == 03) printf("Next frame.\n");
+        else if (c == 02)
+        {
+            gif_loop -= 2;
+            if( gif_loop < 0 ) gif_loop += NUM_GIF_FRAMES;
+            printf("Last frame. %d\n ", gif_loop);
+        }
+        else if (c == ' ') live = !live;
     }
     return 0;
 }
