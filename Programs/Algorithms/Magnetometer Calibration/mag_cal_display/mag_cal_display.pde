@@ -1,22 +1,16 @@
 import processing.serial.*;
 
-float scale = 20;
-
+float scale = 10;
 float ellipse_radius = 5.0;
 
-Serial myPort;  // Create object from Serial class
+Serial myPort;
 
 float [] Mag = new float[3];          //mag readings
-
 
 int lf = '\n';
 byte[] inBuffer = new byte[100];
 
 PFont font;
-final int VIEW_SIZE_X = 600, VIEW_SIZE_Y = 600;
-
-int ORDER_OF_MAGNITUDE = 1;
-
 PrintWriter output;
 
 int numSamples = 5000;
@@ -26,7 +20,6 @@ void setup()
   size(1000, 1000);
   try {
     printArray(Serial.list());
-    //if (Serial.list().length < 3) throw new Exception();
     myPort = new Serial(this, Serial.list()[0], 115200);
   }
   catch (Exception e) {
@@ -44,7 +37,7 @@ void setup()
   ellipseMode(CENTER);
 
   output = createWriter("mag_output.txt");
-  output.println((int)(0.8*numSamples));
+  output.println((int)(0.9*numSamples));
 }
 
 char readSensors() {
@@ -57,23 +50,20 @@ char readSensors() {
         switch(inputStringArr[0].charAt(0))
         {
         case 'm':
-          print("Received Raw Data");
-          Mag[0] = float(inputStringArr[1]);///ORDER_OF_MAGNITUDE;
-          Mag[1] = float(inputStringArr[2]);///ORDER_OF_MAGNITUDE;
-          Mag[2] = float(inputStringArr[3]);///ORDER_OF_MAGNITUDE;
+          print("Received Raw Data-");
+          Mag[0] = float(inputStringArr[1]);
+          Mag[1] = float(inputStringArr[2]);
+          Mag[2] = float(inputStringArr[3]);
 
           if ( Float.isNaN(Mag[0]) || Float.isNaN(Mag[1]) || Float.isNaN(Mag[2])) throw new Exception();
           myPort.clear();
           println(numSamples);
           numSamples--;
-          if (numSamples == -1) 
-          {
-            exit();
-          }
+          if (numSamples == -1) exit();
           output.println(Mag[0] + " " + Mag[1] + " " + Mag[2]); 
           println("M: " + Mag[0] + " " + Mag[1] + " " + Mag[2]); 
+          drawPoint();
           return 'r';
-
         default:
           break;
         }
@@ -84,29 +74,32 @@ char readSensors() {
   {
     println("Error!");
   }
-  //myPort.clear();
   return 'n';
 }
 
 void draw() 
 {
   readSensors();
-  drawPoint();
 }
 
 void drawPoint()
 {
+  float m0 = Mag[0]*scale+width/2;
+  float m1 = Mag[1]*scale+width/2;
+  float m2 = Mag[2]*scale+width/2;
+  println("F: " + m0 + " " + m1 + " " + m2); 
+  
   /* Draw X-Y Point */
   fill(255, 0, 0);
-  ellipse(Mag[0]*scale+width/2, Mag[1]*scale+height/2, ellipse_radius, ellipse_radius);
+  ellipse(m0, m1, ellipse_radius, ellipse_radius);
 
   /* Draw X-Z Point */
   fill(0, 255, 0);
-  ellipse(Mag[0]*scale+width/2, Mag[2]*scale+height/2, ellipse_radius, ellipse_radius);
+  ellipse(m0, m2, ellipse_radius, ellipse_radius);
 
   /* Draw Y-Z Point */
   fill(0, 0, 255);
-  ellipse(Mag[1]*scale+width/2, Mag[2]*scale+height/2, ellipse_radius, ellipse_radius);
+  ellipse(m1, m2, ellipse_radius, ellipse_radius);
 }
 
 void keyPressed()
