@@ -11,7 +11,9 @@
 using namespace cv;
 using namespace std;
 
+#ifdef HAS_CAMERA
 VideoCapture cam(0);
+#endif
 
 image_test::image_test(int argc, const char * argv[])
 {
@@ -65,11 +67,13 @@ image_test::image_test(int argc, const char * argv[])
     }
     else
     {
+#ifdef HAS_CAMERA
         cam.set(CV_CAP_PROP_FRAME_WIDTH, width);
         cam.set(CV_CAP_PROP_FRAME_HEIGHT, height);
         if (!cam.isOpened()) cout << "cannot open camera" << endl;
         cam.read(frame);
         printf("Init-ing camera: (%d, %d)\n", frame.cols, frame.rows);
+#endif
     }
     
     width  = frame.cols;
@@ -124,7 +128,9 @@ Mat image_test::getNextFrame()
         }
         else
         {
+#ifdef HAS_CAMERA
             cam.read(image);
+#endif
         }
         resize(image,frame,size);
     }

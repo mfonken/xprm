@@ -13,21 +13,21 @@
 #include <stdint.h>
 #include <math.h>
 
-#define MAX_SAMPLES     1500
+#define MAX_SAMPLES     5000
 
 /* See - AN4246: Calibrating an eCompass in the Presence of Hard and Soft Iron Interference */
 
 typedef struct
 {
     uint16_t n;                  /**< Number of sample */
-    double s[MAX_SAMPLES][3];  /**< Samples */
+    long double s[MAX_SAMPLES][3];  /**< Samples */
 } mag_cal_t;
 
 
 /*For calculating Determinant of the Matrix */
-double determinant(double a[4][4], double k)
+long double determinant(long double a[4][4], long double k)
 {
-    double s = 1, det = 0, b[4][4];
+    long double s = 1, det = 0, b[4][4];
     int i, j, m, n, c;
     if( k == 1 )
     {
@@ -65,7 +65,7 @@ double determinant(double a[4][4], double k)
     return det;
 }
 
-void invert( double *matrix[4][4] )
+void invert( long double *matrix[4][4] )
 {
     
 }
@@ -75,26 +75,26 @@ void invert( double *matrix[4][4] )
 /* Eq. 27: Error residual vector r = Y - Xß */
 /* Eq. 34: Ordinary Least Squares Solution vector ß = (X^T*X)^-1 * X^T*Y = [2Vx; 2Vy; 2Vz; B^2-Vx^2-Vy^2-Vz^2] */
 /* Returns hard-iron offset[0-2] and geomagnetic field strength B[3] */
-void performCalibration( double V[4], mag_cal_t * samples )
+void performCalibration( long double V[4], mag_cal_t * samples )
 {
     uint16_t n = samples->n;
     if( n > MAX_SAMPLES )
         n = MAX_SAMPLES;
     
     /* Vector Y - Known dependent variables */
-    double Y[n];
+    long double Y[n];
     
     for(int i = 0; i < n; i++ )
     {
-        double Bpx = samples->s[i][0];
-        double Bpy = samples->s[i][1];
-        double Bpz = samples->s[i][2];
+        long double Bpx = samples->s[i][0];
+        long double Bpy = samples->s[i][1];
+        long double Bpz = samples->s[i][2];
         Y[i] = ( Bpx * Bpx ) + ( Bpy * Bpy ) + ( Bpz * Bpz );
 //        printf("(%f,%f,%f)>%d:%f\n", Bpx, Bpy, Bpz, i, Y[i]);
     }
     
     /* Transposed Measurement Matrix X */
-    double X_T[4][n];
+    long double X_T[4][n];
     for( int i = 0; i < n; i++ )
     {
         for( int j = 0; j < 3; j++ )
@@ -105,14 +105,14 @@ void performCalibration( double V[4], mag_cal_t * samples )
         X_T[3][i] = 1;
     }
     
-    double X_T_X[4][4];
+    long double X_T_X[4][4];
     for( int j = 0; j < 4; j++ )
     {
         for( int i = 0; i < 4; i++ )
         {
-            double *row;
+            long double *row;
             row = X_T[i];
-            double product = 0;
+            long double product = 0;
             for( int k = 0; k < n; k++ )
             {
                 product += row[k] * X_T[j][k];
@@ -121,11 +121,11 @@ void performCalibration( double V[4], mag_cal_t * samples )
         }
     }
     
-    double d =  determinant(X_T_X,4);
+    long double d =  determinant(X_T_X,4);
     
     /* Calculate Inverse */
-    double b[4][4], c[4][4];
-    double X_T_X_INV[4][4];
+    long double b[4][4], c[4][4];
+    long double X_T_X_INV[4][4];
     int u,v;
     for( int q = 0; q < 4 ; q++ )
     {
@@ -160,10 +160,10 @@ void performCalibration( double V[4], mag_cal_t * samples )
     
     
     
-    double X_T_Y[4];
+    long double X_T_Y[4];
     for( int j = 0; j < 4; j++ )
     {
-        double product = 0;
+        long double product = 0;
         for( int k = 0; k < n; k++ )
         {
             product += X_T[j][k] * Y[k];
@@ -171,10 +171,10 @@ void performCalibration( double V[4], mag_cal_t * samples )
         X_T_Y[j] = product;
     }
     
-    double beta[4];
+    long double beta[4];
     for( int j = 0; j < 4; j++ )
     {
-        double product = 0;
+        long double product = 0;
         for( int k = 0; k < 4; k++ )
         {
             product += X_T_X_INV[j][k] * X_T_Y[k];
@@ -183,7 +183,7 @@ void performCalibration( double V[4], mag_cal_t * samples )
     }
     
     /* Extract Hard Iron Offset */
-    double HIO[4];
+    long double HIO[4];
     for(int i = 0; i < 3; i++ )
     {
         HIO[i] = beta[i] / 2;

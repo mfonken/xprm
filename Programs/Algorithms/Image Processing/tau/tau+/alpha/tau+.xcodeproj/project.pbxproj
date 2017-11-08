@@ -48,7 +48,6 @@
 		4990E3AA1F5785D8008F514E /* kalman.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kalman.h; sourceTree = "<group>"; };
 		49A6DE521F5139E70025C4DF /* tau.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tau.c; sourceTree = "<group>"; };
 		49A6DE531F5139E70025C4DF /* tau.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau.h; sourceTree = "<group>"; };
-		49B466211FA586E0004762C7 /* test_setup.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = test_setup.h; path = ../../v1/test_setup.h; sourceTree = "<group>"; };
 		49B9F83D1FB1178300D9B976 /* gaussian.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gaussian.c; sourceTree = "<group>"; };
 		49B9F83E1FB1178300D9B976 /* gaussian.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gaussian.h; sourceTree = "<group>"; };
 		49CC8B3C1F9D8B01007931C5 /* statem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = statem.c; sourceTree = "<group>"; };
@@ -58,6 +57,7 @@
 		49D1870E1F53771000494379 /* tau_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tau_test.cpp; sourceTree = "<group>"; };
 		49D1870F1F53771000494379 /* tau_test.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = tau_test.hpp; sourceTree = "<group>"; };
 		49E249091F96BCAD0004C67A /* kmat_print.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kmat_print.h; sourceTree = "<group>"; };
+		49E45D3F1FB2C7E600E81316 /* test_setup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = test_setup.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,7 +91,7 @@
 			isa = PBXGroup;
 			children = (
 				497681A91F4DF29800324190 /* main.cpp */,
-				49B466211FA586E0004762C7 /* test_setup.h */,
+				49E45D3F1FB2C7E600E81316 /* test_setup.h */,
 				49CC8B3F1F9D8CD6007931C5 /* image_utility.cpp */,
 				49CC8B401F9D8CD6007931C5 /* image_utility.hpp */,
 				4935F8F81F88469F006A9245 /* utility_functions.cpp */,

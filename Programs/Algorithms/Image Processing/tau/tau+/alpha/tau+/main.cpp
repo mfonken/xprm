@@ -38,19 +38,24 @@ int main( int argc, const char * argv[] )
     tau_t tau;
     initTauA(&tau, width, height );
     
-    int size = sizeof(prediction_pair_t);
-    printf("Size of tau is %dbytes\n", size);
+//    int size = sizeof(prediction_pair_t);
+//    printf("Size of tau is %dbytes\n", size);
 
     pixel_base_t **pixels;
     initImg(&pixels, width, height);
     
-    int draw = 4;
-    
     int threshold = THRESHOLD;
     double t[3];
-    
+
+#ifdef ITERATIONS
+    int iterations = ITERATIONS;
+    double times[iterations];
+    printf("Running for %d iterations\n", iterations);
+    for(int l=0;l<iterations;l++) {
+#else
+    printf("Running with User Control\n");
     for(int l=0;l<1;) {
-        
+#endif
         /* Re-init frame and out images every loop */
         Mat frame, out(height, width, CV_8UC3, Scalar(0,0,0));
         frame = util.getNextFrame();
@@ -61,6 +66,10 @@ int main( int argc, const char * argv[] )
 
         /* Run Tau */
         performTauA(&tau, t, pixels);
+        
+#ifdef ITERATIONS
+        times[l] = t[0]+t[1]+t[2];
+#endif
         
         /* Update threshold */
         int n = stateNumber(tau.sys.state);
@@ -75,7 +84,7 @@ int main( int argc, const char * argv[] )
 #ifdef STATEM_DEBUG
         printBayesianMap(&tau.sys.probabilities, tau.sys.state);
 #endif
-        
+#ifdef SHOW_IMAGES
         /* Draw time division array */
         double a[draw];
         a[0] = 0.0;
@@ -91,9 +100,21 @@ int main( int argc, const char * argv[] )
         /* Draw Tau output image */
         drawTau(out, &tau.rho.density_map_pair, &tau.rho.peak_list_pair, &tau.predictions);
         drawDensityMaps(&tau.rho.density_map_pair);
+#endif
         
         /* Wait for timer or key press */
+#ifdef SHOW_IMAGES
         util.loop(waitKey(util.isLive()?FRAME_DELAY_MS:60000));
+#else
+//        printf("#%d\n", l);
+        util.loop(' ');
+#endif
     }
+#ifdef ITERATIONS
+    long double average = 0;
+        for(int l = 0; l < iterations; l++) average += times[l];
+        average /= iterations;
+        printf("L-%d A-%Lf\n", iterations, average);
+#endif
     return 0;
 }

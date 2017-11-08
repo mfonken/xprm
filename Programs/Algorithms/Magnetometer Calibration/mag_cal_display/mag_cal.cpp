@@ -33,14 +33,14 @@ int main( int argc, char * args[])
     {
         for(int j = 0; j < 3; j++)
         {
-            fscanf(fp, "%lf", &(samples.s[i][j]));
+            fscanf(fp, "%Lf", &(samples.s[i][j]));
 //            printf("%lf ", samples.s[i][j]);
         }
 //        printf("\n");
     }
 
-    double ret[4];
+    long double ret[4];
     performCalibration( ret, &samples );
-    printf("Hard-iron Offset> (%.3lf, %.3lf, %.3lf)|%.3lf\n",ret[0], ret[1], ret[2], ret[3]);
+    printf("Hard-iron Offset> (%.3Lf, %.3Lf, %.3Lf)|%.3Lf\n",ret[0], ret[1], ret[2], ret[3]);
     fclose(fp);
 }

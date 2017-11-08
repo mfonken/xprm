@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 
-#define MAX_BLOBS       10
-#define MAX_GAP         3
+#define MAX_BLOBS       30
+#define MAX_GAP         50
     
 typedef struct _blob_t
 {
