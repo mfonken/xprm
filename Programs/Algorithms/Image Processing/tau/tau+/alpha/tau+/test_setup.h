@@ -20,7 +20,7 @@
 //#define SHOW_IMAGES
 
 #ifndef SHOW_IMAGES
-#define ITERATIONS 100000
+#define ITERATIONS 10000
 #endif
 
 /* KALMAN / KMAT SETUP */

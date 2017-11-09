@@ -28,6 +28,9 @@
 using namespace cv;
 using namespace std;
 
+int num_orders = 4;
+int orders[] = { 10, 100, 1000, 10000, 100000 };
+
 int main( int argc, const char * argv[] )
 {
     image_test util(argc, argv);
@@ -48,7 +51,9 @@ int main( int argc, const char * argv[] )
     double t[3];
 
 #ifdef ITERATIONS
-    int iterations = ITERATIONS;
+    for(int o = 0; o < num_orders; o++)
+    {
+    int iterations = orders[o];
     double times[iterations];
     printf("Running for %d iterations\n", iterations);
     for(int l=0;l<iterations;l++) {
@@ -115,6 +120,7 @@ int main( int argc, const char * argv[] )
         for(int l = 0; l < iterations; l++) average += times[l];
         average /= iterations;
         printf("L-%d A-%Lf\n", iterations, average);
+    }
 #endif
     return 0;
 }
