@@ -1,6 +1,6 @@
 import processing.serial.*;
 
-float scale = 10;
+float scale = 500;
 float ellipse_radius = 5.0;
 
 Serial myPort;
@@ -54,7 +54,7 @@ char readSensors() {
           Mag[0] = float(inputStringArr[1]);
           Mag[1] = float(inputStringArr[2]);
           Mag[2] = float(inputStringArr[3]);
-
+          
           if ( Float.isNaN(Mag[0]) || Float.isNaN(Mag[1]) || Float.isNaN(Mag[2])) throw new Exception();
           myPort.clear();
           println(numSamples);
@@ -84,6 +84,9 @@ void draw()
 
 void drawPoint()
 {
+  //Mag[0] += 4.077;
+  //Mag[1] -= 41.577;
+  //Mag[2] += 1.039;
   float m0 = Mag[0]*scale+width/2;
   float m1 = Mag[1]*scale+width/2;
   float m2 = Mag[2]*scale+width/2;
