@@ -1,10 +1,19 @@
-#define TILT_NONE
+//#define TILT_NONE
 //#define TILT_P45
 //#define TILT_N45
 //#define TILT_P30
 //#define TILT_N30
+//#define TILT_P45_FIRST_QUAD_OFFSET
+//#define TILT_N45_FIRST_QUAD_OFFSET
+//#define TILT_N45_BOTTOM_OFFSET
 //#define TILT_NONE_FIRST_QUAD_OFFSET
+#define TILT_NONE_LEFT_OFFSET
 //#define TILT_NONE_BOTTOM_OFFSET
+
+#define Xc 640-188//265
+#define Yc 0//53
+
+#define A_ANGLE 105
 
 //#define LOCK_BEACON_0
 //#define LOCK_BEACON_1
@@ -36,32 +45,56 @@ const int default_beaconB[]     = {960,400};
 #ifdef TILT_P45
 const char title[] = "+45º tilt & no offset";
 const double default_rotation[] = {0, 45,0};
-const int default_beaconA[]     = {411,629};
-const int default_beaconB[]     = {869,171};
+const int default_beaconA[]     = {414,626};
+const int default_beaconB[]     = {866,174};
 #endif
 #ifdef TILT_N45
 const char title[] = "-45º tilt & no offset";
 const double default_rotation[] = {0,-45,0};
-const int default_beaconA[]     = {411,171};
-const int default_beaconB[]     = {869,629};
+const int default_beaconA[]     = {414,174};
+const int default_beaconB[]     = {866,626};
 #endif
 #ifdef TILT_P30
 const char title[] = "+30º tilt & no offset";
 const double default_rotation[] = {0, 30,0};
-const int default_beaconA[]     = {360,562};
-const int default_beaconB[]     = {921,238};
+const int default_beaconA[]     = {360,238};
+const int default_beaconB[]     = {921,562};
 #endif
 #ifdef TILT_N30
 const char title[] = "-30º tilt & no offset";
 const double default_rotation[] = {0,-30,0};
-const int default_beaconA[]     = {360,238};
-const int default_beaconB[]     = {921,562};
+const int default_beaconA[]     = {360,562};
+const int default_beaconB[]     = {921,238};
+#endif
+#ifdef TILT_P45_FIRST_QUAD_OFFSET
+const char title[] = "+45º tilt & 1st quadrant offset";
+const double default_rotation[] = {0, 45,0};
+const int default_beaconA[]     = {-265+Xc,400+Yc};
+const int default_beaconB[]     = {188+Xc,-53+Yc};
+#endif
+#ifdef TILT_N45_FIRST_QUAD_OFFSET
+const char title[] = "-45º tilt & 1st quadrant offset";
+const double default_rotation[] = {0,-45,0};
+const int default_beaconA[]     = {-265+Xc,-53+Yc};
+const int default_beaconB[]     = {188+Xc,400+Yc};
+#endif
+#ifdef TILT_N45_BOTTOM_OFFSET
+const char title[] = "-45º tilt & 1st quadrant offset";
+const double default_rotation[] = {0,-45,0};
+const int default_beaconA[]     = {413+Xc,-53+Yc};
+const int default_beaconB[]     = {866+Xc,400+Yc};
 #endif
 #ifdef TILT_NONE_FIRST_QUAD_OFFSET
 const char title[] = "no tilt & 1st quadrant offset";
 const double default_rotation[] = {0,0,0};
 const int default_beaconA[]     = {0,HEIGHT/4};
 const int default_beaconB[]     = {HALF_WIDTH,HEIGHT/4};
+#endif
+#ifdef TILT_NONE_LEFT_OFFSET
+const char title[] = "no tilt & bottom half offset";
+const double default_rotation[] = {0,0,0};
+const int default_beaconA[]     = {0,400};
+const int default_beaconB[]     = {640,400};
 #endif
 #ifdef TILT_NONE_BOTTOM_OFFSET
 const char title[] = "no tilt & bottom half offset";
@@ -88,11 +121,13 @@ int main(int argc, const char * argv[])
     bea[1].y = default_beaconB[1];
     
     double dx = (bea[1].x-bea[0].x), dy = (bea[1].y-bea[0].y);
-    printf("Angle is %.1fº and distance is %.1f\n", -atan2(dy,dx)*RAD_TO_DEG, sqrt(dx*dx+dy*dy)/2);
+    printf("Beacons are #1(%4d,%4d) & #2(%4d,%4d)\n", (int)bea[0].x,(int)bea[0].y,(int)bea[1].x,(int)bea[1].y);
+    printf("Angle is %.1fº and beacon distance is %.1f\n", -atan2(dy,dx)*RAD_TO_DEG, sqrt(dx*dx+dy*dy));
+    ///NOTE: TILT IS INVERTED BECAUSE IT IS THE CAMERA'S TILT, NOT THE VISUALIZED BEACON VECTOR
     
 #ifdef DEBUG_ROTATION
     char name = 'A';
-    for(int i = -135; name < 'H'; i += 15)
+    for(int i = A_ANGLE; name < 'H'; i -= 15)
     {
         printf("%c: %4dº>", name++, i);
         kin.rotation[2] = i * DEG_TO_RAD;
@@ -155,7 +190,9 @@ int main(int argc, const char * argv[])
 #endif
         
         cr(&kin, bea);
+#ifdef PRINT_POS
         printf("\tX: %.4f Y: %.4f Z: %.4f (%s)\n", kin.position[0] * scale, kin.position[1] * scale, kin.position[2] * scale, UNITS);
+#endif
     }
     
     return 0;

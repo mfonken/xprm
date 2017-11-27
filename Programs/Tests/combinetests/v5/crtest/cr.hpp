@@ -23,14 +23,16 @@
 
 #define     CAMERA_WIDTH            1280    // pixels
 #define     CAMERA_HEIGHT           800     // pixels
+#define     CAMERA_HALF_WIDTH       CAMERA_WIDTH/2
+#define     CAMERA_HALF_HEIGHT      CAMERA_HEIGHT/2
 
 
 #define     UNITS                  "cm"
 #define     PIXEL_TO_UNIT           3e-6
-#define     UNIT_TO_PIXEL         1/1280//( 1.0 / PIXEL_TO_UNIT )
+#define     UNIT_TO_PIXEL         ( 1.0 / PIXEL_TO_UNIT )
 
 #define     FOCAL_REFRACTION        1.42e-6//0.945e-6  // units / units
-#define     FOCAL_LENGTH          1//( 3.5e-3 * FOCAL_REFRACTION ) * UNIT_TO_PIXEL // dimension units
+#define     FOCAL_LENGTH          ( 3.5e-3 * FOCAL_REFRACTION ) * UNIT_TO_PIXEL // dimension units
 
 #define     D_FIXED                 3.4e-2
 

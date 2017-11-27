@@ -8,48 +8,6 @@
 /* Own header */
 #include "matrix.h"
 
-void subtractvec3_t( vec3_t * x,
-                     vec3_t * y )
-{
-    x->i = x->i - y->i;
-    x->j = x->j - y->j;
-    x->k = x->k - y->k;
-}
-
-double lengthOfvec3_t( vec3_t * vec )
-{
-    double i_2 = vec->i * vec->i;
-    double j_2 = vec->j * vec->j;
-    double k_2 = vec->k * vec->k;
-    return sqrt( i_2 + j_2 + k_2 );
-}
-
-double lengthOfvec2_t( vec2_t * vec )
-{
-    double i_2 = vec->i * vec->i;
-    double j_2 = vec->j * vec->j;
-    return sqrt( i_2 + j_2 );
-}
-
-void normalizevec3_t( vec3_t * vec )
-{
-    double length = lengthOfvec3_t( vec );
-    if(!length) return;
-    vec->i /= length;
-    vec->j /= length;
-    vec->k /= length;
-}
-
-double get2dDistance( cartesian2_t *a, cartesian2_t *b )
-{
-    double a_x = a->x;
-    double a_y = a->y;
-    double b_x = b->x;
-    double b_y = b->y;
-
-    return sqrt( ( ( b_x * b_x ) - ( a_x * a_x ) ) + ( ( b_y * b_y ) - ( a_y * a_y ) ) );
-}
-
 void Multiply_Vec_3x1( mat3x3_t * a, vec3_t * b, vec3_t * c )
 {
     c->i = a->ii * b->i + a->ij * b->j + a->ik * b->k;
@@ -91,7 +49,7 @@ void Quaternion_To_Euler( quaternion_t * quat, ang3_t * ang )
     ang->x = atan2(a, b);
     
     a = 2*(w*y-x*z);
-    ang->y = asin(a);
+    ang->y = RASIN(a);
     
     a = 2*(w*z+x*y);
     b = 1-2*(y*y+z*z);
@@ -166,6 +124,59 @@ void Quaternion_Combine(quaternion_t * a, quaternion_t * b, quaternion_t * c)
 }
 
 /* Generic vector3 manipulations */
+double dist2( cartesian2_t *a, cartesian2_t *b )
+{
+    double a_x = a->x;
+    double a_y = a->y;
+    double b_x = b->x;
+    double b_y = b->y;
+    
+    return sqrt( ( ( b_x * b_x ) - ( a_x * a_x ) ) + ( ( b_y * b_y ) - ( a_y * a_y ) ) );
+}
+
+void sub3( vec3_t * x,
+          vec3_t * y )
+{
+    x->i = x->i - y->i;
+    x->j = x->j - y->j;
+    x->k = x->k - y->k;
+}
+
+double len3( vec3_t * vec )
+{
+    double i_2 = vec->i * vec->i;
+    double j_2 = vec->j * vec->j;
+    double k_2 = vec->k * vec->k;
+    return sqrt( i_2 + j_2 + k_2 );
+}
+
+double len2( vec2_t * vec )
+{
+    double i_2 = vec->i * vec->i;
+    double j_2 = vec->j * vec->j;
+    return sqrt( i_2 + j_2 );
+}
+
+void norm3( vec3_t * vec )
+{
+    double length = len3( vec );
+    if(!length) return;
+    vec->i /= length;
+    vec->j /= length;
+    vec->k /= length;
+}
+
+/* Angle between two vectors */
+double ang3( vec3_t * u, vec3_t * v)
+{
+    return acos( ZDIV( dot3( u, v ), ( len3(u) * len3(v) ) ) );
+}
+
+/* Dot product of two vectors */
+double dot3( vec3_t * u, vec3_t * v )
+{
+    return u->i*v->i + u->j*v->j + u->k*v->k;
+}
 /* Cross product of two vectors */
 void cross3( vec3_t * u, vec3_t * v, vec3_t * r )
 {
