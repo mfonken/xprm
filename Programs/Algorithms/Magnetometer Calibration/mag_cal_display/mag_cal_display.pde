@@ -1,6 +1,6 @@
 import processing.serial.*;
 
-float scale = 500;
+float scale = 5;//500;
 float ellipse_radius = 5.0;
 
 Serial myPort;
@@ -15,12 +15,14 @@ PrintWriter output;
 
 int numSamples = 5000;
 
+double MagOffset[] = {-2.396, 38.040, 1.093};
+
 void setup() 
 {
   size(1000, 1000);
   try {
     printArray(Serial.list());
-    myPort = new Serial(this, Serial.list()[0], 115200);
+    myPort = new Serial(this, Serial.list()[1], 115200);
   }
   catch (Exception e) {
     println("Could not open serial port.");
@@ -84,9 +86,9 @@ void draw()
 
 void drawPoint()
 {
-  //Mag[0] += 4.077;
-  //Mag[1] -= 41.577;
-  //Mag[2] += 1.039;
+  Mag[0] -= MagOffset[0];
+  Mag[1] -= MagOffset[1];
+  Mag[2] -= MagOffset[2];
   float m0 = Mag[0]*scale+width/2;
   float m1 = Mag[1]*scale+width/2;
   float m2 = Mag[2]*scale+width/2;

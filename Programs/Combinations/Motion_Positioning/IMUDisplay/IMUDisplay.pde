@@ -62,12 +62,10 @@ char readSensors() {
         {
         case 'r':
           println("Received Raw Data.");
-          // convert raw readings to G
           Accel[0] = float(inputStringArr[1]);
           Accel[1] = float(inputStringArr[2]);
           Accel[2] = float(inputStringArr[3]);
 
-          // convert raw readings to degrees/sec
           Gyro[0] = float(inputStringArr[4]);
           Gyro[1] = float(inputStringArr[5]);
           Gyro[2] = float(inputStringArr[6]);
