@@ -12,7 +12,7 @@
 extern "C" {
 #endif
     
-//#define PRINT_POS
+#define PRINT_POS
     
 #define RAD_TO_DEG (180 / M_PI)
 #define DEG_TO_RAD (M_PI / 180)

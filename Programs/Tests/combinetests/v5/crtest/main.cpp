@@ -1,4 +1,4 @@
-//#define TILT_NONE
+#define TILT_NONE
 //#define TILT_P45
 //#define TILT_N45
 //#define TILT_P30
@@ -7,13 +7,13 @@
 //#define TILT_N45_FIRST_QUAD_OFFSET
 //#define TILT_N45_BOTTOM_OFFSET
 //#define TILT_NONE_FIRST_QUAD_OFFSET
-#define TILT_NONE_LEFT_OFFSET
+//#define TILT_NONE_LEFT_OFFSET
 //#define TILT_NONE_BOTTOM_OFFSET
 
 #define Xc 640-188//265
 #define Yc 0//53
 
-#define A_ANGLE 105
+#define A_ANGLE 135
 
 //#define LOCK_BEACON_0
 //#define LOCK_BEACON_1
