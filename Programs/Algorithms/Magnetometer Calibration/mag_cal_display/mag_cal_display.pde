@@ -5,6 +5,8 @@ float ellipse_radius = 5.0;
 
 Serial myPort;
 
+String PORT = "COM19";
+
 float [] Mag = new float[3];          //mag readings
 
 int lf = '\n';
@@ -21,14 +23,17 @@ void setup()
 {
   size(1000, 1000);
   try {
-    printArray(Serial.list());
-    myPort = new Serial(this, Serial.list()[1], 115200);
+    String ports[] = Serial.list();
+    printArray(ports);
+    for(int i = 0; i < ports.length; i++)
+      if(ports[i].equals(PORT)) myPort = new Serial(this, Serial.list()[i], 115200);
   }
   catch (Exception e) {
     println("Could not open serial port.");
     exit();
     while (true);
   }
+  println("Successfully opened serial port " + PORT);
   // The font must be located in the sketch's "data" directory to load successfully
   font = loadFont("CourierNew36.vlw"); 
   background(0);

@@ -11,6 +11,8 @@ float DECLINATION = -8.5;
 
 Serial myPort;  // Create object from Serial class
 
+String PORT = "COM19";
+
 float [] Accel = new float[3];         //projection of normalized gravitation force vector on x/y/z axis, as measured by accelerometer
 float [] Gyro = new float[3];          //Gyro readings
 float [] Mag = new float[3];          //Gyro readings
@@ -37,8 +39,10 @@ void setup()
 {
   size(600, 600, P3D);
   try {
-    printArray(Serial.list());
-    myPort = new Serial(this, Serial.list()[0], 115200);
+    String ports[] = Serial.list();
+    printArray(ports);
+    for(int i = 0; i < ports.length; i++)
+      if(ports[i].equals(PORT)) myPort = new Serial(this, Serial.list()[i], 115200);
   }
   catch (Exception e) {
     println("Could not open serial port.");
