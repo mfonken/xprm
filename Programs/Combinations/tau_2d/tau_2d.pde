@@ -18,7 +18,7 @@ float [] RwGyro = new float[3];        //Rw obtained from last estimated value a
 float [] Awz = new float[2];           //angles between projection of R on XZ/YZ plane and Z axis (deg)
 float [] RwEst = new float[3];
 float [] PwEst = new float[3];
-
+float [] NwEst = new float[3];
 
 //float [] MAG_CAL = {-0.082, 0.384, 0.087}; // LSM9DS1
 float [] MAG_CAL = {-2.396, 38.040, 1.093}; // MPU9250
@@ -116,6 +116,11 @@ char readSensors() {
           drawPosition();
           myPort.clear();
           return 'f';
+        case 'n':
+          println("Received Non-grav Acceleration Data.");
+          NwEst[1] = float(inputStringArr[1]);
+          NwEst[0] = float(inputStringArr[2]);
+          NwEst[2] = float(inputStringArr[3]);
         case 'w':
           println("Wrote:" + inputStringArr[1] + " " + inputStringArr[2]);
           break;

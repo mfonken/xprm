@@ -41,8 +41,8 @@ void setup()
   try {
     String ports[] = Serial.list();
     printArray(ports);
-    for(int i = 0; i < ports.length; i++)
-      if(ports[i].equals(PORT)) myPort = new Serial(this, Serial.list()[i], 115200);
+    for (int i = 0; i < ports.length; i++)
+      if (ports[i].equals(PORT)) myPort = new Serial(this, Serial.list()[i], 115200);
   }
   catch (Exception e) {
     println("Could not open serial port.");
@@ -84,6 +84,13 @@ char readSensors() {
 
           return 'r';
         case 'f':
+          println("Received Filtered Data.");
+          RwEst[0] = float(inputStringArr[1]);
+          RwEst[1] = float(inputStringArr[2]);
+          RwEst[2] = float(inputStringArr[3]);
+          myPort.clear();
+          return 'f';
+        case 'n':
           println("Received Filtered Data.");
           RwEst[0] = float(inputStringArr[1]);
           RwEst[1] = float(inputStringArr[2]);
@@ -244,7 +251,7 @@ void buildBoxShape() {
 }
 
 void buildPenShape() {
-  
+
   int pen_w = 5;
   int pen_h = 5;
   int pen_l = 50;
@@ -308,25 +315,24 @@ void drawCube() {
 
   buildPenShape();
   popMatrix();
-  
+
   pushMatrix();
   translate(IND_AXES_X, IND_AXES_Y, 0);
   rotateX(RwEst[0]);
   buildBoxShape();
   popMatrix();
-  
+
   pushMatrix();
   translate(IND_AXES_X+100, IND_AXES_Y, 0);
   rotateZ(RwEst[1]);
   buildBoxShape();
   popMatrix();
-  
+
   pushMatrix();
   translate(IND_AXES_X+200, IND_AXES_Y, 0);
   rotateY(RwEst[2]);
   buildBoxShape();
   popMatrix();
-  
 }
 
 /******************************************************************************

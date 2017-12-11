@@ -11,32 +11,56 @@
 #include "kinetic_types.h"
 #include "matrix.h"
 
-double pr[] = {0,90};
-double accel[] = {0,0,-1};
+#define STR_ANG 0
+#define STP_ANG 180
+#define STEP_AB 45
+
+#define ANG_DIF (STP_ANG-STR_ANG)
+#define STEP    ANG_DIF>0?STEP_AB:-STEP_AB
+
+#define ROT_R  0
+#define ROT_P  1
+#define ROT_Y  1
+
+#define A
+
+double ori[] = {0,0,0};
+double acc[] = {0.7071,0,-0.7071};
 
 int main(int argc, const char * argv[])
 {
-    printf("Testing with a pitch of %.2fº and a roll of %.2fº and starting accel of <%.2f, %.2f, %.2f>\n\n", pr[0], pr[1], accel[0], accel[1], accel[2]);
-    quaternion_t q;
+    int ang_diff = ANG_DIF, step = STEP;
+    int step_n = ang_diff/step;
+    printf("Start%d Stop%d AngDif%d StepAb%d Step%d StepN%d\n", STR_ANG, STP_ANG, ang_diff, STEP_AB, step, step_n);
+    printf("Testing with acceleration of: (%.2f, %.2f, %.2f) (g)\n", acc[0], acc[1], acc[2]);
     
-    /* Create a vector of accelerometer values */
-    ang3_t a;
-    a.x = pr[0] * DEG_TO_RAD;// imu->data.pitch;
-    a.y = pr[1] * DEG_TO_RAD;// imu->data.roll;
-    a.z = 0;
-    Euler_To_Quaternion(&a, &q);
-    
-    vec3_t g,r,ngacc;
-    g.i =  0;
-    g.j =  0;
-    g.k = -1;
-    Rotate_Vector_By_Quaternion(&g, &q, &r);
-    
-    ngacc.i = accel[0] - r.i;
-    ngacc.j = accel[1] - r.j;
-    ngacc.k = accel[2] - r.k;
-    
-    printf("Non-grav acceleration is <%.2f, %.2f, %.2f>\n\n", ngacc.i, ngacc.j, ngacc.k);
+    for(int i = 0, s = STR_ANG; i <= step_n; i++, s+=STEP)
+    {
+        printf("#%3d(%3dº): ", i, s);
+        
+        /* Create a orientation vector and quaternion */
+        ang3_t ov;
+        ov.x = ( ori[0] + ROT_R*s ) * DEG_TO_RAD;
+        ov.y = ( ori[1] + ROT_P*s ) * DEG_TO_RAD;
+        ov.z = ( ori[2] + ROT_Y*s ) * DEG_TO_RAD;
+            
+        printf("<%3d, %3d, %3d>(º): ", (int)(ov.x * RAD_TO_DEG), (int)(ov.y * RAD_TO_DEG), (int)(ov.z * RAD_TO_DEG));
+        
+        quaternion_t oq;
+        Euler_To_Quaternion(&ov, &oq);
+        
+        /* Rotate acceleration vector by quaternion */
+        vec3_t a,r;
+        a.i = acc[0];
+        a.j = acc[1];
+        a.k = acc[2];
+        Rotate_Vector_By_Quaternion(&a, &oq, &r);
+        
+        /* Negate gravity: -(-1g) = +1g */
+        r.k += 1.0;
+        
+        printf("Non-grav acceleration is <%.2f, %.2f, %.2f>\n", r.i, r.j, r.k);
+    }
     
     return 0;
 }
