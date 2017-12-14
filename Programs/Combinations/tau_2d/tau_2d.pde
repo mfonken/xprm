@@ -8,7 +8,7 @@ int axis_scale = 100;
 float DECLINATION = -8.5;
 
 Serial myPort;  // Create object from Serial class
-String PORT = "COM19";
+String PORT = "/dev/tty.usbmodem14221";//"COM19";
 int xPos = 0;
 
 float [] Accel = new float[3];         //projection of normalized gravitation force vector on x/y/z axis, as measured by accelerometer
