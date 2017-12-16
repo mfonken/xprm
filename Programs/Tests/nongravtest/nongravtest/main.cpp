@@ -7,59 +7,104 @@
 //
 
 #include <iostream>
+#include <fstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
 
-#include "kinetic_types.h"
-#include "matrix.h"
+#include "kinetic/imu_stubs.h"
+#include "kinetic/kinetic_types.h"
+#include "kinetic/kinetic.h"
+#include "kinetic/matrix.h"
 
-#define STR_ANG 0
-#define STP_ANG 180
-#define STEP_AB 45
-
-#define ANG_DIF (STP_ANG-STR_ANG)
-#define STEP    ANG_DIF>0?STEP_AB:-STEP_AB
-
-#define ROT_R  0
-#define ROT_P  1
-#define ROT_Y  1
-
-#define A
+using namespace std;
 
 double ori[] = {0,0,0};
 double acc[] = {0.7071,0,-0.7071};
 
+LSM9DS1_t lsm;
+kinetic_t kin;
+
+#define OUT_FPS  60
+#define OUT_UDL  1000000 / OUT_FPS
+#define MAX_BUFFER 74
+
+void * DATA_WR_THREAD( void *data )
+{
+    const char file_name[] = "/Users/matthewfonken/Desktop/out.txt";
+    
+    ofstream outfile;
+    outfile.open(file_name, ofstream::out | ofstream::trunc);
+    if (!outfile.is_open())
+    {
+        printf("Failed to open %s\n", file_name);
+        while(1);
+    }
+    printf("Opened %s\n", file_name);
+    int counter = 1;
+    while(1)
+    {
+        outfile.open(file_name, ofstream::out | ofstream::trunc);
+        char kin_packet[MAX_BUFFER];
+        int l = sprintf(kin_packet, "g,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f\r\n",  kin.rotation[0], kin.rotation[1], kin.rotation[2],  kin.nongrav[0], kin.nongrav[1], kin.nongrav[2]);
+        
+        outfile.write(kin_packet,l);
+        outfile.close();
+        
+        if(++counter > OUT_FPS) counter = 1;
+        usleep(OUT_UDL);
+    }
+}
+
 int main(int argc, const char * argv[])
 {
-    int ang_diff = ANG_DIF, step = STEP;
-    int step_n = ang_diff/step;
-    printf("Start%d Stop%d AngDif%d StepAb%d Step%d StepN%d\n", STR_ANG, STP_ANG, ang_diff, STEP_AB, step, step_n);
-    printf("Testing with acceleration of: (%.2f, %.2f, %.2f) (g)\n", acc[0], acc[1], acc[2]);
+//    pthread_t threads[1];
+//    
+//    printf("Starting Data Output thread.\n");
+//    int t1, t2;
+//    t1 = pthread_create(&threads[0], NULL, &BT_THREAD, NULL);
+//    if (t1) {
+//        cout << "Error:unable to create Data Output thread," << t1 << endl;
+//        exit(-1);
+//    }
     
-    for(int i = 0, s = STR_ANG; i <= step_n; i++, s+=STEP)
+    
+    printf("Initializing IMU.\n");
+    IMU_Init( &lsm );
+    
+    printf("Initializing Kinetic Utility.\n");
+    Kinetic_Init( &lsm, &kin );
+    
+    while(1)
     {
-        printf("#%3d(%3dº): ", i, s);
+        Kinetic_Update_Rotation( &lsm, &kin );
         
         /* Create a orientation vector and quaternion */
         ang3_t ov;
-        ov.x = ( ori[0] + ROT_R*s ) * DEG_TO_RAD;
-        ov.y = ( ori[1] + ROT_P*s ) * DEG_TO_RAD;
-        ov.z = ( ori[2] + ROT_Y*s ) * DEG_TO_RAD;
+        ov.x = kin.rotation[0];
+        ov.y = kin.rotation[1];
+        ov.z = kin.rotation[2];
             
-        printf("<%3d, %3d, %3d>(º): ", (int)(ov.x * RAD_TO_DEG), (int)(ov.y * RAD_TO_DEG), (int)(ov.z * RAD_TO_DEG));
+        printf("<%3d, %3d, %3d>(º) | ", (int)(ov.x * RAD_TO_DEG), (int)(ov.y * RAD_TO_DEG), (int)(ov.z * RAD_TO_DEG));
         
         quaternion_t oq;
         Euler_To_Quaternion(&ov, &oq);
         
         /* Rotate acceleration vector by quaternion */
         vec3_t a,r;
-        a.i = acc[0];
-        a.j = acc[1];
-        a.k = acc[2];
+        a.i = lsm.data.accel_raw[0];
+        a.j = lsm.data.accel_raw[1];
+        a.k = lsm.data.accel_raw[2];
         Rotate_Vector_By_Quaternion(&a, &oq, &r);
         
         /* Negate gravity: -(-1g) = +1g */
-        r.k += 1.0;
+        r.k -= 1.0;
         
-        printf("Non-grav acceleration is <%.2f, %.2f, %.2f>\n", r.i, r.j, r.k);
+        printf("(%.2f, %.2f, %.2f)\n", r.i, r.j, r.k);
+        
+        kin.nongrav[0] = r.i;
+        kin.nongrav[1] = r.j;
+        kin.nongrav[2] = r.k;
     }
     
     return 0;

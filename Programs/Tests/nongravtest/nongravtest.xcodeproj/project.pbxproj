@@ -7,8 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		493F2D651FE4E9AE000CFDB1 /* sercom.c in Sources */ = {isa = PBXBuildFile; fileRef = 493F2D631FE4E9AE000CFDB1 /* sercom.c */; };
+		493F2D791FE4EAF8000CFDB1 /* imu_stubs.c in Sources */ = {isa = PBXBuildFile; fileRef = 493F2D721FE4EAF8000CFDB1 /* imu_stubs.c */; };
+		493F2D7A1FE4EAF8000CFDB1 /* kinetic.c in Sources */ = {isa = PBXBuildFile; fileRef = 493F2D741FE4EAF8000CFDB1 /* kinetic.c */; };
+		493F2D7B1FE4EAF8000CFDB1 /* matrix.c in Sources */ = {isa = PBXBuildFile; fileRef = 493F2D771FE4EAF8000CFDB1 /* matrix.c */; };
+		493F2D7E1FE4ED84000CFDB1 /* kalman.c in Sources */ = {isa = PBXBuildFile; fileRef = 493F2D7C1FE4ED84000CFDB1 /* kalman.c */; };
 		498EA7221FCD14CE0045BAFC /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 498EA7211FCD14CE0045BAFC /* main.cpp */; };
-		498EA72B1FCD14E50045BAFC /* matrix.c in Sources */ = {isa = PBXBuildFile; fileRef = 498EA7291FCD14E50045BAFC /* matrix.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,11 +28,20 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		493F2D611FE4E9AE000CFDB1 /* nonpi_stubs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nonpi_stubs.h; sourceTree = "<group>"; };
+		493F2D631FE4E9AE000CFDB1 /* sercom.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sercom.c; sourceTree = "<group>"; };
+		493F2D641FE4E9AE000CFDB1 /* sercom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sercom.h; sourceTree = "<group>"; };
+		493F2D721FE4EAF8000CFDB1 /* imu_stubs.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = imu_stubs.c; sourceTree = "<group>"; };
+		493F2D731FE4EAF8000CFDB1 /* imu_stubs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imu_stubs.h; sourceTree = "<group>"; };
+		493F2D741FE4EAF8000CFDB1 /* kinetic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kinetic.c; sourceTree = "<group>"; };
+		493F2D751FE4EAF8000CFDB1 /* kinetic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kinetic.h; sourceTree = "<group>"; };
+		493F2D761FE4EAF8000CFDB1 /* kinetic_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kinetic_types.h; sourceTree = "<group>"; };
+		493F2D771FE4EAF8000CFDB1 /* matrix.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = matrix.c; sourceTree = "<group>"; };
+		493F2D781FE4EAF8000CFDB1 /* matrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = matrix.h; sourceTree = "<group>"; };
+		493F2D7C1FE4ED84000CFDB1 /* kalman.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kalman.c; sourceTree = "<group>"; };
+		493F2D7D1FE4ED84000CFDB1 /* kalman.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kalman.h; sourceTree = "<group>"; };
 		498EA71E1FCD14CE0045BAFC /* nongravtest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = nongravtest; sourceTree = BUILT_PRODUCTS_DIR; };
 		498EA7211FCD14CE0045BAFC /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		498EA7281FCD14E50045BAFC /* kinetic_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kinetic_types.h; sourceTree = "<group>"; };
-		498EA7291FCD14E50045BAFC /* matrix.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = matrix.c; sourceTree = "<group>"; };
-		498EA72A1FCD14E50045BAFC /* matrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = matrix.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -42,6 +55,39 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		493F2D601FE4E9AE000CFDB1 /* stubs */ = {
+			isa = PBXGroup;
+			children = (
+				493F2D611FE4E9AE000CFDB1 /* nonpi_stubs.h */,
+			);
+			path = stubs;
+			sourceTree = "<group>";
+		};
+		493F2D621FE4E9AE000CFDB1 /* utilities */ = {
+			isa = PBXGroup;
+			children = (
+				493F2D631FE4E9AE000CFDB1 /* sercom.c */,
+				493F2D641FE4E9AE000CFDB1 /* sercom.h */,
+			);
+			path = utilities;
+			sourceTree = "<group>";
+		};
+		493F2D711FE4EAF8000CFDB1 /* kinetic */ = {
+			isa = PBXGroup;
+			children = (
+				493F2D721FE4EAF8000CFDB1 /* imu_stubs.c */,
+				493F2D731FE4EAF8000CFDB1 /* imu_stubs.h */,
+				493F2D741FE4EAF8000CFDB1 /* kinetic.c */,
+				493F2D751FE4EAF8000CFDB1 /* kinetic.h */,
+				493F2D761FE4EAF8000CFDB1 /* kinetic_types.h */,
+				493F2D771FE4EAF8000CFDB1 /* matrix.c */,
+				493F2D7C1FE4ED84000CFDB1 /* kalman.c */,
+				493F2D7D1FE4ED84000CFDB1 /* kalman.h */,
+				493F2D781FE4EAF8000CFDB1 /* matrix.h */,
+			);
+			path = kinetic;
+			sourceTree = "<group>";
+		};
 		498EA7151FCD14CE0045BAFC = {
 			isa = PBXGroup;
 			children = (
@@ -62,9 +108,9 @@
 			isa = PBXGroup;
 			children = (
 				498EA7211FCD14CE0045BAFC /* main.cpp */,
-				498EA7281FCD14E50045BAFC /* kinetic_types.h */,
-				498EA7291FCD14E50045BAFC /* matrix.c */,
-				498EA72A1FCD14E50045BAFC /* matrix.h */,
+				493F2D711FE4EAF8000CFDB1 /* kinetic */,
+				493F2D601FE4E9AE000CFDB1 /* stubs */,
+				493F2D621FE4E9AE000CFDB1 /* utilities */,
 			);
 			path = nongravtest;
 			sourceTree = "<group>";
@@ -127,8 +173,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				498EA72B1FCD14E50045BAFC /* matrix.c in Sources */,
+				493F2D7B1FE4EAF8000CFDB1 /* matrix.c in Sources */,
+				493F2D7E1FE4ED84000CFDB1 /* kalman.c in Sources */,
+				493F2D651FE4E9AE000CFDB1 /* sercom.c in Sources */,
+				493F2D7A1FE4EAF8000CFDB1 /* kinetic.c in Sources */,
 				498EA7221FCD14CE0045BAFC /* main.cpp in Sources */,
+				493F2D791FE4EAF8000CFDB1 /* imu_stubs.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -228,6 +278,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEVELOPMENT_TEAM = RAUFW7M7KN;
+				OTHER_LDFLAGS = "-lpthread";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -236,6 +287,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEVELOPMENT_TEAM = RAUFW7M7KN;
+				OTHER_LDFLAGS = "-lpthread";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -259,6 +311,7 @@
 				498EA7271FCD14CE0045BAFC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

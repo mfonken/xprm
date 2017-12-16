@@ -12,7 +12,22 @@
 extern "C" {
 #endif
     
-#define PRINT_POS
+#include "kalman.h"
+//#include "../sensors/LSM9DS1_regs.h"
+    
+/***********************************************************************************************//**
+ * @addtogroup Application
+ * @{
+ **************************************************************************************************/
+
+/***********************************************************************************************//**
+ * @addtogroup kinetic
+ * @{
+ **************************************************************************************************/
+ 
+/***************************************************************************************************
+ Public MACROS
+ ***************************************************************************************************/
     
 #define RAD_TO_DEG (180 / M_PI)
 #define DEG_TO_RAD (M_PI / 180)
@@ -22,14 +37,48 @@ extern "C" {
 #define SIGN(X)   X>=0?1:-1
 #define RASIN(X)  X>-1&&X<1?asin(X):SIGN(X)*M_PI/2
     
+/* Kalman Defaults */
+#define MOTION_MAX_KALMAN_LIFE     10.0
+#define MOTION_VALUE_UNCERTAINTY   0.01
+#define MOTION_BIAS_UNCERTAINTY    0.003
+#define MOTION_SENSOR_UNCERTAINTY  0.02
+    
+/***************************************************************************************************
+ Public Types
+ ***************************************************************************************************/
+    
 typedef double mfloat;
+    
+static mfloat seconds_since( double time )
+{
+    struct timeval now;
+    gettimeofday( &now, NULL );
+    return (now.tv_sec + now.tv_usec/1000000.0) - time;
+}
+    
+/** Kalman structure */
+//typedef struct _kalman_t
+//{
+//    mfloat      K[2];               /**< Gain matrix */
+//    mfloat      P_k[2][2];          /**< Error covariance matrix */
+//    mfloat      rate;               /**< Rate */
+//    mfloat      bias;               /**< Bias */
+//    mfloat      value;              /**< Value */
+//    uint32_t    timestamp;          /**< Timestamp */
+//} kalman_t;
     
 /** Kinetic Type */
 typedef struct _kinetic_t
 {
+    mfloat     nongrav[3];
+    
     mfloat     position[3];             /**< Raw position */
     mfloat     rotation[3];             /**< Raw rotation */
     mfloat     truePosition[3];         /**< Raw true location */
+    
+    kalman_t   positionFilter[3];       /**< Filtered position */
+    kalman_t   rotationFilter[3];       /**< Filtered rotation */
+    kalman_t   truePositionFilter[3];   /**< Filtered true location */
 } kinetic_t;
 
 /** 2D Cartesian Cooridinate */
@@ -84,6 +133,31 @@ typedef struct
     mfloat z;
     mfloat w;
 } quaternion_t;
+    
+//typedef struct
+//{
+//    double 	accel[3];
+//    double 	gyro[3];
+//    double 	mag[3];
+//    
+//    double  accel_res;
+//    double 	gyro_res;
+//    double 	mag_res;
+//    
+//    double 	accel_bias[3];
+//    double 	gyro_bias[3];
+//    double 	mag_bias[3];
+//    
+//    double	roll;
+//    double	pitch;
+//    double	yaw;
+//} imu_t;
+//
+//typedef struct
+//{
+//    imu_t               data;
+//    LSM9DS1_cfg_t       settings;
+//} LSM9DS1_t;
 
 /** @} (end addtogroup kinetic) */
 /** @} (end addtogroup Application) */

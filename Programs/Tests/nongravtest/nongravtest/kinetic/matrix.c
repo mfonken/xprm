@@ -1,9 +1,9 @@
 /***********************************************************************************************//**
- * \file   matrix.c
- * \brief  Matrix Math
- ***************************************************************************************************
- *      Author: Matthew Fonken
- **************************************************************************************************/
+* \file   matrix.c
+* \brief  Matrix Math
+***************************************************************************************************
+*      Author: Matthew Fonken
+**************************************************************************************************/
 
 /* Own header */
 #include "matrix.h"
@@ -94,11 +94,6 @@ void Rotate_Vector_By_Quaternion(vec3_t * v, quaternion_t * q, vec3_t * r)
     cross3( &u, &t, &b );
     mul3( s, &t, &c );
     add33( v, &b, &c, r );
-    
-//    cross3( &u, v, &uxv );
-//    mul3( 2, &uxv, &a );
-//    mul3( s, &u, &b );
-//    add33( v, &a, &b, r );
 }
 
 /* Double quaternion Hamilton multiplication (Generic) */
@@ -117,10 +112,10 @@ void Quaternion_Combine(quaternion_t * a, quaternion_t * b, quaternion_t * c)
     c->x = A - (  E + F + G + H ) / 2;
     c->y = C + (  E - F + G - H ) / 2;
     c->z = D + (  E - F - G + H ) / 2;
-//    c->w = ( a->w * b->w ) - ( a->x * b->x ) - ( a->y * b->y ) - ( a->z * b->z );
-//    c->x = ( a->w * b->x ) + ( a->x * b->w ) + ( a->y * b->z ) - ( a->z * b->y );
-//    c->y = ( a->w * b->y ) - ( a->x * b->z ) + ( a->y * b->w ) + ( a->z * b->x );
-//    c->z = ( a->w * b->z ) + ( a->x * b->y ) - ( a->y * b->x ) + ( a->z * b->w );
+    //    c->w = ( a->w * b->w ) - ( a->x * b->x ) - ( a->y * b->y ) - ( a->z * b->z );
+    //    c->x = ( a->w * b->x ) + ( a->x * b->w ) + ( a->y * b->z ) - ( a->z * b->y );
+    //    c->y = ( a->w * b->y ) - ( a->x * b->z ) + ( a->y * b->w ) + ( a->z * b->x );
+    //    c->z = ( a->w * b->z ) + ( a->x * b->y ) - ( a->y * b->x ) + ( a->z * b->w );
 }
 
 /* Generic vector3 manipulations */
@@ -199,6 +194,20 @@ void add33( vec3_t * u, vec3_t * v, vec3_t * w, vec3_t * r)
     r->i = u->i + v->i + w->i;
     r->j = u->j + v->j + w->j;
     r->k = u->k + v->k + w->k;
+}
+
+void ang3Rad_To_Deg( ang3_t * a )
+{
+    a->x *= RAD_TO_DEG;
+    a->y *= RAD_TO_DEG;
+    a->z *= RAD_TO_DEG;
+}
+
+void ang3Deg_To_Rad( ang3_t * a )
+{
+    a->x *= DEG_TO_RAD;
+    a->y *= DEG_TO_RAD;
+    a->z *= DEG_TO_RAD;
 }
 
 /** @} (end addtogroup kinetic) */
