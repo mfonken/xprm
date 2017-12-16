@@ -8,7 +8,7 @@ int axis_scale = 100;
 float DECLINATION = -8.5;
 
 Serial myPort;  // Create object from Serial class
-String PORT = "/dev/tty.usbmodem14221";//"COM19";
+String PORT = "COM19";
 int xPos = 0;
 
 float [] Accel = new float[3];         //projection of normalized gravitation force vector on x/y/z axis, as measured by accelerometer
@@ -38,7 +38,9 @@ int IND_AXES_H = 20;
 enum OUTPUTS {
   ACCEL,
   GYRO,
-  MAG
+  MAG,
+  ANG,
+  POS
 }
 
 kalman_t pitch, roll, yaw;
@@ -65,7 +67,7 @@ void setup()
   println("Sending start...");
   myPort.write('S');
   println("Waiting for handshake...");
-  while(myPort.available() <= 0) myPort.write('S');;
+  while(myPort.available() <= 0) myPort.write('S');
   println("Handshake successful...");
   
   pitch = new kalman_t();
@@ -113,7 +115,8 @@ char readSensors() {
           PwEst[1] = float(inputStringArr[5]);
           PwEst[2] = float(inputStringArr[6]);
           
-          drawPosition();
+          //drawPosition();
+          drawGraphs(OUTPUTS.POS);
           myPort.clear();
           return 'f';
         case 'n':
@@ -121,6 +124,8 @@ char readSensors() {
           NwEst[1] = float(inputStringArr[1]);
           NwEst[0] = float(inputStringArr[2]);
           NwEst[2] = float(inputStringArr[3]);
+          drawPosition();
+          break;
         case 'w':
           println("Wrote:" + inputStringArr[1] + " " + inputStringArr[2]);
           break;
