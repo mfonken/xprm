@@ -22,6 +22,18 @@ void drawGraphs(OUTPUTS o)
     y = Mag[1] * scale;
     z = Mag[2] * scale;
     break;
+  case ANG:
+    scale = 15;
+    x = RwEst[0] * scale;
+    y = RwEst[1] * scale;
+    z = RwEst[2] * scale;
+    break;
+  case POS:
+    scale = 1000;
+    x = PwEst[0] * scale;
+    y = PwEst[1] * scale;
+    z = PwEst[2] * scale;
+    break;
   default:
     break;
   }
@@ -100,4 +112,5 @@ void drawTilts()
 
 void drawPosition()
 {
+  println("Non-gravitational acceleration is: X" + NwEst[0] + " Y" + NwEst[1] + " Z" + NwEst[2]);
 }
