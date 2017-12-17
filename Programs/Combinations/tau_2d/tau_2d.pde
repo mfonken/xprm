@@ -115,8 +115,7 @@ char readSensors() {
           PwEst[1] = float(inputStringArr[5]);
           PwEst[2] = float(inputStringArr[6]);
           
-          //drawPosition();
-          drawGraphs(OUTPUTS.POS);
+          drawPosition();
           myPort.clear();
           return 'f';
         case 'n':

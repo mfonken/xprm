@@ -25,7 +25,7 @@ double acc[] = {0.7071,0,-0.7071};
 LSM9DS1_t lsm;
 kinetic_t kin;
 
-#define OUT_FPS  60
+#define OUT_FPS  120
 #define OUT_UDL  1000000 / OUT_FPS
 #define MAX_BUFFER 74
 
@@ -46,7 +46,7 @@ void * DATA_WR_THREAD( void *data )
     {
         outfile.open(file_name, ofstream::out | ofstream::trunc);
         char kin_packet[MAX_BUFFER];
-        int l = sprintf(kin_packet, "g,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f\r\n",  kin.rotation[0], kin.rotation[1], kin.rotation[2],  kin.nongrav[0], kin.nongrav[1], kin.nongrav[2]);
+        int l = sprintf(kin_packet, "n,%.4f,%.4f,%.4f\r\n", kin.nongrav[0], kin.nongrav[1], kin.nongrav[2]);
         
         outfile.write(kin_packet,l);
         outfile.close();
@@ -58,15 +58,14 @@ void * DATA_WR_THREAD( void *data )
 
 int main(int argc, const char * argv[])
 {
-//    pthread_t threads[1];
-//    
-//    printf("Starting Data Output thread.\n");
-//    int t1, t2;
-//    t1 = pthread_create(&threads[0], NULL, &BT_THREAD, NULL);
-//    if (t1) {
-//        cout << "Error:unable to create Data Output thread," << t1 << endl;
-//        exit(-1);
-//    }
+    pthread_t threads[1];
+    
+    printf("Starting Data Output thread.\n");
+    int t1 = pthread_create(&threads[0], NULL, &DATA_WR_THREAD, NULL);
+    if (t1) {
+        cout << "Error:unable to create Data Output thread," << t1 << endl;
+        exit(-1);
+    }
     
     
     printf("Initializing IMU.\n");
@@ -85,7 +84,7 @@ int main(int argc, const char * argv[])
         ov.y = kin.rotation[1];
         ov.z = kin.rotation[2];
             
-        printf("<%3d, %3d, %3d>(º) | ", (int)(ov.x * RAD_TO_DEG), (int)(ov.y * RAD_TO_DEG), (int)(ov.z * RAD_TO_DEG));
+//        printf("<%3d, %3d, %3d>(º) | ", (int)(ov.x * RAD_TO_DEG), (int)(ov.y * RAD_TO_DEG), (int)(ov.z * RAD_TO_DEG));
         
         quaternion_t oq;
         Euler_To_Quaternion(&ov, &oq);
@@ -100,7 +99,7 @@ int main(int argc, const char * argv[])
         /* Negate gravity: -(-1g) = +1g */
         r.k -= 1.0;
         
-        printf("(%.2f, %.2f, %.2f)\n", r.i, r.j, r.k);
+//        printf("(%.2f, %.2f, %.2f)\n", r.i, r.j, r.k);
         
         kin.nongrav[0] = r.i;
         kin.nongrav[1] = r.j;
