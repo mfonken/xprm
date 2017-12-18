@@ -81,9 +81,9 @@
 				493F2D751FE4EAF8000CFDB1 /* kinetic.h */,
 				493F2D761FE4EAF8000CFDB1 /* kinetic_types.h */,
 				493F2D771FE4EAF8000CFDB1 /* matrix.c */,
+				493F2D781FE4EAF8000CFDB1 /* matrix.h */,
 				493F2D7C1FE4ED84000CFDB1 /* kalman.c */,
 				493F2D7D1FE4ED84000CFDB1 /* kalman.h */,
-				493F2D781FE4EAF8000CFDB1 /* matrix.h */,
 			);
 			path = kinetic;
 			sourceTree = "<group>";
