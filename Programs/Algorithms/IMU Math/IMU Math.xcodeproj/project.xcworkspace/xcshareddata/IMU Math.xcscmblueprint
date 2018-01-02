@@ -1,0 +1,37 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "84769111666037B116A3C3E7D0ABB3CBB7F4E257",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "F2D1766E59EA354BB4EB0999F81B3AAAEC45ACF0" : 9223372036854775807,
+    "EE9C904C95AE70892048F12DF43894F9010B926E" : 9223372036854775807,
+    "84769111666037B116A3C3E7D0ABB3CBB7F4E257" : 9223372036854775807
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "45BE5F34-3BA5-4EDC-8A39-41AB077D5BFA",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "F2D1766E59EA354BB4EB0999F81B3AAAEC45ACF0" : "combine\/",
+    "EE9C904C95AE70892048F12DF43894F9010B926E" : "",
+    "84769111666037B116A3C3E7D0ABB3CBB7F4E257" : "xprm\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "IMU Math",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "Programs\/Algorithms\/IMU Math\/IMU Math.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/mfonken\/xprm.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "84769111666037B116A3C3E7D0ABB3CBB7F4E257"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/mfonken\/marbl.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "EE9C904C95AE70892048F12DF43894F9010B926E"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/mfonken\/combine.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "F2D1766E59EA354BB4EB0999F81B3AAAEC45ACF0"
+    }
+  ]
+}

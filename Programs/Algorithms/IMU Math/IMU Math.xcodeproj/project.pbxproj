@@ -1,0 +1,356 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		490336FA1FF468E900344500 /* vector.c in Sources */ = {isa = PBXBuildFile; fileRef = 490336F21FF468E900344500 /* vector.c */; };
+		490336FB1FF468E900344500 /* matrix.c in Sources */ = {isa = PBXBuildFile; fileRef = 490336F81FF468E900344500 /* matrix.c */; };
+		490336FC1FF468E900344500 /* quaternion.c in Sources */ = {isa = PBXBuildFile; fileRef = 490336F91FF468E900344500 /* quaternion.c */; };
+		490337001FF4691000344500 /* kinetic.c in Sources */ = {isa = PBXBuildFile; fileRef = 490336FE1FF4691000344500 /* kinetic.c */; };
+		490337151FF46B7B00344500 /* sercom.c in Sources */ = {isa = PBXBuildFile; fileRef = 4903370F1FF46B7B00344500 /* sercom.c */; };
+		490337161FF46B7B00344500 /* imu_wrapper.c in Sources */ = {isa = PBXBuildFile; fileRef = 490337131FF46B7B00344500 /* imu_wrapper.c */; };
+		490337171FF46B7B00344500 /* imu_stubs.c in Sources */ = {isa = PBXBuildFile; fileRef = 490337141FF46B7B00344500 /* imu_stubs.c */; };
+		49EA43EC1FE85C6600022017 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49EA43E01FE85C6600022017 /* main.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		49EA43C91FE85C4300022017 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		490336F21FF468E900344500 /* vector.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = vector.c; sourceTree = "<group>"; };
+		490336F31FF468E900344500 /* quaternion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = quaternion.h; sourceTree = "<group>"; };
+		490336F41FF468E900344500 /* matrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = matrix.h; sourceTree = "<group>"; };
+		490336F51FF468E900344500 /* imu_math.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imu_math.h; sourceTree = "<group>"; };
+		490336F61FF468E900344500 /* math_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = math_types.h; sourceTree = "<group>"; };
+		490336F71FF468E900344500 /* vector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vector.h; sourceTree = "<group>"; };
+		490336F81FF468E900344500 /* matrix.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = matrix.c; sourceTree = "<group>"; };
+		490336F91FF468E900344500 /* quaternion.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = quaternion.c; sourceTree = "<group>"; };
+		490336FE1FF4691000344500 /* kinetic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kinetic.c; sourceTree = "<group>"; };
+		490336FF1FF4691000344500 /* kinetic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kinetic.h; sourceTree = "<group>"; };
+		4903370B1FF46B3900344500 /* kalman.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kalman.h; sourceTree = "<group>"; };
+		4903370C1FF46B3900344500 /* kalman.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = kalman.c; sourceTree = "<group>"; };
+		4903370F1FF46B7B00344500 /* sercom.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sercom.c; sourceTree = "<group>"; };
+		490337101FF46B7B00344500 /* imu_wrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imu_wrapper.h; sourceTree = "<group>"; };
+		490337111FF46B7B00344500 /* imu_stubs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imu_stubs.h; sourceTree = "<group>"; };
+		490337121FF46B7B00344500 /* sercom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sercom.h; sourceTree = "<group>"; };
+		490337131FF46B7B00344500 /* imu_wrapper.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = imu_wrapper.c; sourceTree = "<group>"; };
+		490337141FF46B7B00344500 /* imu_stubs.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = imu_stubs.c; sourceTree = "<group>"; };
+		490337181FF46F3F00344500 /* kinetic_master.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kinetic_master.h; sourceTree = "<group>"; };
+		49EA43CB1FE85C4300022017 /* IMU Math */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "IMU Math"; sourceTree = BUILT_PRODUCTS_DIR; };
+		49EA43E01FE85C6600022017 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		49EA43C81FE85C4300022017 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		490336F11FF468E900344500 /* math */ = {
+			isa = PBXGroup;
+			children = (
+				490336F51FF468E900344500 /* imu_math.h */,
+				490336F61FF468E900344500 /* math_types.h */,
+				490336F71FF468E900344500 /* vector.h */,
+				490336F21FF468E900344500 /* vector.c */,
+				490336F41FF468E900344500 /* matrix.h */,
+				490336F81FF468E900344500 /* matrix.c */,
+				490336F31FF468E900344500 /* quaternion.h */,
+				490336F91FF468E900344500 /* quaternion.c */,
+			);
+			path = math;
+			sourceTree = "<group>";
+		};
+		490336FD1FF4691000344500 /* kinetic */ = {
+			isa = PBXGroup;
+			children = (
+				490337181FF46F3F00344500 /* kinetic_master.h */,
+				490336FF1FF4691000344500 /* kinetic.h */,
+				490336FE1FF4691000344500 /* kinetic.c */,
+				4903370D1FF46B3900344500 /* filters */,
+				490336F11FF468E900344500 /* math */,
+				4903370E1FF46B7B00344500 /* utilities */,
+			);
+			path = kinetic;
+			sourceTree = "<group>";
+		};
+		4903370D1FF46B3900344500 /* filters */ = {
+			isa = PBXGroup;
+			children = (
+				4903370B1FF46B3900344500 /* kalman.h */,
+				4903370C1FF46B3900344500 /* kalman.c */,
+			);
+			name = filters;
+			path = "/Users/matthewfonken/Desktop/marbl/xprm/Programs/Algorithms/IMU Math/IMU Math/kinetic/filters";
+			sourceTree = "<absolute>";
+		};
+		4903370E1FF46B7B00344500 /* utilities */ = {
+			isa = PBXGroup;
+			children = (
+				490337101FF46B7B00344500 /* imu_wrapper.h */,
+				490337131FF46B7B00344500 /* imu_wrapper.c */,
+				490337111FF46B7B00344500 /* imu_stubs.h */,
+				490337141FF46B7B00344500 /* imu_stubs.c */,
+				490337121FF46B7B00344500 /* sercom.h */,
+				4903370F1FF46B7B00344500 /* sercom.c */,
+			);
+			path = utilities;
+			sourceTree = "<group>";
+		};
+		49EA43C21FE85C4300022017 = {
+			isa = PBXGroup;
+			children = (
+				49EA43D51FE85C6600022017 /* IMU Math */,
+				49EA43CC1FE85C4300022017 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		49EA43CC1FE85C4300022017 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				49EA43CB1FE85C4300022017 /* IMU Math */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		49EA43D51FE85C6600022017 /* IMU Math */ = {
+			isa = PBXGroup;
+			children = (
+				49EA43E01FE85C6600022017 /* main.cpp */,
+				490336FD1FF4691000344500 /* kinetic */,
+			);
+			path = "IMU Math";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		49EA43CA1FE85C4300022017 /* IMU Math */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 49EA43D21FE85C4300022017 /* Build configuration list for PBXNativeTarget "IMU Math" */;
+			buildPhases = (
+				49EA43C71FE85C4300022017 /* Sources */,
+				49EA43C81FE85C4300022017 /* Frameworks */,
+				49EA43C91FE85C4300022017 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "IMU Math";
+			productName = "IMU Math";
+			productReference = 49EA43CB1FE85C4300022017 /* IMU Math */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		49EA43C31FE85C4300022017 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0920;
+				ORGANIZATIONNAME = Marbl;
+				TargetAttributes = {
+					49EA43CA1FE85C4300022017 = {
+						CreatedOnToolsVersion = 8.3.3;
+						DevelopmentTeam = RAUFW7M7KN;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 49EA43C61FE85C4300022017 /* Build configuration list for PBXProject "IMU Math" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 49EA43C21FE85C4300022017;
+			productRefGroup = 49EA43CC1FE85C4300022017 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				49EA43CA1FE85C4300022017 /* IMU Math */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		49EA43C71FE85C4300022017 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				490337001FF4691000344500 /* kinetic.c in Sources */,
+				49EA43EC1FE85C6600022017 /* main.cpp in Sources */,
+				490336FB1FF468E900344500 /* matrix.c in Sources */,
+				490336FA1FF468E900344500 /* vector.c in Sources */,
+				490337151FF46B7B00344500 /* sercom.c in Sources */,
+				490337161FF46B7B00344500 /* imu_wrapper.c in Sources */,
+				490336FC1FF468E900344500 /* quaternion.c in Sources */,
+				490337171FF46B7B00344500 /* imu_stubs.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		49EA43D01FE85C4300022017 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		49EA43D11FE85C4300022017 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		49EA43D31FE85C4300022017 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEVELOPMENT_TEAM = RAUFW7M7KN;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		49EA43D41FE85C4300022017 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEVELOPMENT_TEAM = RAUFW7M7KN;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		49EA43C61FE85C4300022017 /* Build configuration list for PBXProject "IMU Math" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				49EA43D01FE85C4300022017 /* Debug */,
+				49EA43D11FE85C4300022017 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		49EA43D21FE85C4300022017 /* Build configuration list for PBXNativeTarget "IMU Math" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				49EA43D31FE85C4300022017 /* Debug */,
+				49EA43D41FE85C4300022017 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 49EA43C31FE85C4300022017 /* Project object */;
+}
