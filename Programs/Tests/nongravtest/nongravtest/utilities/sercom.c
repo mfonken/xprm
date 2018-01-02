@@ -19,7 +19,7 @@ void Init_SERCOM( int * filestream, const char * port, const char * port_alt)
         if (fd == -1)
             printf("Error - Unable to open UART.  Ensure it is not in use by another application\n");
         else
-            printf("Initializing SERCOM at %s: success on alternate.\n", port);
+            printf("Initializing SERCOM at %s: success on alternate.\n", port_alt);
     }
     else printf("Initializing SERCOM at %s(%d): success on main.\n", port, fd);
     struct termios options;
