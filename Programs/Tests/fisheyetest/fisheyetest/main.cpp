@@ -14,6 +14,8 @@
 #include "unfisheye.h"
 #include "open.hpp"
 
+//#define POINT_DETECT
+
 #define CAM_WIDTH               1920
 #define CAM_HEIGHT              1080
 #define FNL_RESIZE_S            2
@@ -66,7 +68,11 @@ int main(int argc, char * argv[]) {
             {
 #endif
             
-            Mat frame, in, out(HEIGHT, WIDTH, CV_8UC3, Scalar(0,0,0)), detect;
+            Mat frame, in,
+                out(HEIGHT, WIDTH, CV_8UC3, Scalar(0,0,0)),
+                out2(HEIGHT, WIDTH, CV_8UC3, Scalar(0,0,0)),
+                out3(HEIGHT, WIDTH, CV_8UC3, Scalar(0,0,0)),
+                detect;
             cam >> frame;
 //            Rect rectCrop((WIDTH-HEIGHT)/2, 0, HEIGHT, HEIGHT);
 //            Mat in(frame, rectCrop);
@@ -77,10 +83,11 @@ int main(int argc, char * argv[]) {
 #endif
             /*** Fisheye Correction Algorithm ***/
 //            quickUnfisheye(in, out);
-            unfisheye(in, out);
+            invfisheye(in, out3);
+//            invfisheye(out, out3);
                 
             /************************************/
-                
+#ifdef POINT_DETECT
                 kps = tra.detect(out, detect);
                 
                 vector<KeyPoint> gkps;
@@ -95,6 +102,7 @@ int main(int argc, char * argv[]) {
                         gkps.push_back(kps.at(i));
                     }
                 }
+#endif
 
 #ifdef PERFORMANCE_TEST
             gettimeofday( &stop, NULL);
@@ -112,6 +120,8 @@ int main(int argc, char * argv[]) {
 #ifndef PERFORMANCE_TEST
             imshow("In", in);
             imshow("Out", out);
+//            imshow("Out2", out2);
+            imshow("Out3", out3);
             waitKey(OUT_MDL);
 #endif
         }

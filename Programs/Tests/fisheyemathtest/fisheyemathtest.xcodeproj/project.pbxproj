@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		49A542E41FFC50E1000AF9BD /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 49A542E31FFC50E1000AF9BD /* main.c */; };
+		49A542EC1FFC5104000AF9BD /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 49A542EA1FFC5103000AF9BD /* main.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,7 +24,8 @@
 
 /* Begin PBXFileReference section */
 		49A542E01FFC50E1000AF9BD /* fisheyemathtest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = fisheyemathtest; sourceTree = BUILT_PRODUCTS_DIR; };
-		49A542E31FFC50E1000AF9BD /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		49A542EA1FFC5103000AF9BD /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		49A542EB1FFC5103000AF9BD /* fisheye_math.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fisheye_math.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,7 +58,8 @@
 		49A542E21FFC50E1000AF9BD /* fisheyemathtest */ = {
 			isa = PBXGroup;
 			children = (
-				49A542E31FFC50E1000AF9BD /* main.c */,
+				49A542EB1FFC5103000AF9BD /* fisheye_math.h */,
+				49A542EA1FFC5103000AF9BD /* main.c */,
 			);
 			path = fisheyemathtest;
 			sourceTree = "<group>";
@@ -119,7 +121,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				49A542E41FFC50E1000AF9BD /* main.c in Sources */,
+				49A542EC1FFC5104000AF9BD /* main.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
