@@ -13,15 +13,16 @@
 #include <math.h>
 #include <highgui.h>
 
-#define PERFORMANCE_TEST
+//#define PERFORMANCE_TEST
 //#define QUICK
-#define ALT_QUICK
+//#define ALT_QUICK
 
 //#define SQRT_32     5.65685424949
 //#define RAD_NORM_F  0.85
 //#define RAD_NORM_F_2 ( RAD_NORM_F * RAD_NORM_F )
 //#define DIV_F       1
 
+typedef struct { double x, y;} point2_t;
 
 #define INR(X,A,B) X>=A&&X<B
 
