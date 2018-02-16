@@ -20,8 +20,8 @@ uint8_t getBlobId(uint16_t x, uint16_t y, uint16_t n_c, uint8_t *num_blobs)
             double x_l = centroids.blobs[i].X;                   // Current average
             double n_l = centroids.blobs[i].w_last/2;            // Last row width
         
-            if( ( ( x + n_c + MAX_GAP) >= ( x_l - n_l) )  && // Check overlap of lower bound of blob and upper (with gap tolerance) of new
-                ( ( x - n_c - MAX_GAP ) <= ( x_l + n_l ) ) ) // and of upper bound of blob and lower (with gap tolerance) of new
+            if( ( ( x + n_c + MAX_GAP ) >= ( x_l - n_l) )  && // Check overlap of lower bound of blob and upper (with gap tolerance) of new
+                ( ( x - n_c - MAX_GAP ) <= ( x_l + n_l ) ) )  // and of upper bound of blob and lower (with gap tolerance) of new
             {
                 if( id == 0xff )                    // If new blob is not claimed
                 {
@@ -73,7 +73,7 @@ void getCentroids( uint8_t *image_line, uint16_t line_number, uint8_t skip )
                     }
                     temp_id = centroids.numBlobs++;               // Otherwise make a new id for the blob and increment the id counter
                 }
-                cma( a_x_last, &centroids.blobs[temp_id].X, centroids.blobs[temp_id].w_last ); // Cumulate the new pixels into the blob's X average
+                cma( a_x_last,    &centroids.blobs[temp_id].X, centroids.blobs[temp_id].w_last ); // Cumulate the new pixels into the blob's X average
                 cma( line_number, &centroids.blobs[temp_id].Y, centroids.blobs[temp_id].height ); // Cumulate the new row into the blob's Y average
                 centroids.blobs[temp_id].w_last = num_adj;    // Update blob with: New last row width
                 centroids.blobs[temp_id].x_last = a_x_last;   // last row average

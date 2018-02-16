@@ -44,7 +44,7 @@ typedef enum
     WEIGHTED = 1
 } sorting_settingss;
     
-#define MAX_PERSISTENCE ( 1 << 7 ) - 1 // MAX OF SIGNED BYTE
+
     
 /* Kalman Internal Lookup Pointer Type */
 typedef uint8_t kmat_p;

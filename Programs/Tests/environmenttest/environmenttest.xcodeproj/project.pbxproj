@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		49EA27A2203115C700F2BCB4 /* serial_wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49EA27A0203115C700F2BCB4 /* serial_wrapper.cpp */; };
 		49F3DAF9201689B10032AD5A /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49F3DAF8201689B10032AD5A /* main.cpp */; };
 		49F3DB0D201689CD0032AD5A /* environment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49F3DB00201689CD0032AD5A /* environment.cpp */; };
 		49F3DB0F201689CD0032AD5A /* sercom.c in Sources */ = {isa = PBXBuildFile; fileRef = 49F3DB07201689CD0032AD5A /* sercom.c */; };
-		49F3DB10201689CD0032AD5A /* sercom_wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49F3DB09201689CD0032AD5A /* sercom_wrapper.cpp */; };
 		49F3DB11201689CD0032AD5A /* file_writer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49F3DB0C201689CD0032AD5A /* file_writer.cpp */; };
 /* End PBXBuildFile section */
 
@@ -27,6 +27,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		49EA27A0203115C700F2BCB4 /* serial_wrapper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = serial_wrapper.cpp; path = /Users/matthewfonken/Desktop/marbl/Techincal/xprm/Programs/Tests/environmenttest/environmenttest/environment/utilities/serial_wrapper.cpp; sourceTree = "<absolute>"; };
+		49EA27A3203115F000F2BCB4 /* serial_wrapper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = serial_wrapper.hpp; path = /Users/matthewfonken/Desktop/marbl/Techincal/xprm/Programs/Tests/environmenttest/environmenttest/environment/utilities/serial_wrapper.hpp; sourceTree = "<absolute>"; };
 		49F3DAF5201689B10032AD5A /* environmenttest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = environmenttest; sourceTree = BUILT_PRODUCTS_DIR; };
 		49F3DAF8201689B10032AD5A /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		49F3DB00201689CD0032AD5A /* environment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = environment.cpp; sourceTree = "<group>"; };
@@ -34,8 +36,6 @@
 		49F3DB04201689CD0032AD5A /* environment.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = environment.hpp; sourceTree = "<group>"; };
 		49F3DB06201689CD0032AD5A /* file_writer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = file_writer.hpp; sourceTree = "<group>"; };
 		49F3DB07201689CD0032AD5A /* sercom.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sercom.c; sourceTree = "<group>"; };
-		49F3DB08201689CD0032AD5A /* sercom_wrapper.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = sercom_wrapper.hpp; sourceTree = "<group>"; };
-		49F3DB09201689CD0032AD5A /* sercom_wrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sercom_wrapper.cpp; sourceTree = "<group>"; };
 		49F3DB0A201689CD0032AD5A /* sercom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sercom.h; sourceTree = "<group>"; };
 		49F3DB0B201689CD0032AD5A /* utility_master.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utility_master.h; sourceTree = "<group>"; };
 		49F3DB0C201689CD0032AD5A /* file_writer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = file_writer.cpp; sourceTree = "<group>"; };
@@ -94,8 +94,8 @@
 				49F3DB0B201689CD0032AD5A /* utility_master.h */,
 				49F3DB06201689CD0032AD5A /* file_writer.hpp */,
 				49F3DB0C201689CD0032AD5A /* file_writer.cpp */,
-				49F3DB08201689CD0032AD5A /* sercom_wrapper.hpp */,
-				49F3DB09201689CD0032AD5A /* sercom_wrapper.cpp */,
+				49EA27A3203115F000F2BCB4 /* serial_wrapper.hpp */,
+				49EA27A0203115C700F2BCB4 /* serial_wrapper.cpp */,
 				49F3DB0A201689CD0032AD5A /* sercom.h */,
 				49F3DB07201689CD0032AD5A /* sercom.c */,
 			);
@@ -162,8 +162,8 @@
 				49F3DAF9201689B10032AD5A /* main.cpp in Sources */,
 				49F3DB0D201689CD0032AD5A /* environment.cpp in Sources */,
 				49F3DB11201689CD0032AD5A /* file_writer.cpp in Sources */,
+				49EA27A2203115C700F2BCB4 /* serial_wrapper.cpp in Sources */,
 				49F3DB0F201689CD0032AD5A /* sercom.c in Sources */,
-				49F3DB10201689CD0032AD5A /* sercom_wrapper.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
