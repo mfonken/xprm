@@ -151,10 +151,11 @@ public:
 class PeakList
 {
 public:
-    int  length;
-    int* map;
-    int* den;
-    int*   dir;
+    int     length;
+    int*    map;
+    int*    den;
+    int*    dir;
+    int*    max;
 };
 
 class PeakListPair

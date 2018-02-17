@@ -39,18 +39,26 @@ void Rho::perform( Mat M, PredictionPair * p )
     updateDensityKalmanPair();
     filterDensityPair();
     analyzeDensityPair();
-    selectPeakListPair(p);
+//    selectPeakListPair(p);
 }
 
 void Rho::perform( cimage_t * img, PredictionPair * p )
 {
     image = *img;
-    generateDensityMapFromCImage();
+    generateCenterOfMass(p);
+    generateDensityMapFromCImageWithQuadrantMasses();
     getDensityMaxPair();
     updateDensityKalmanPair();
     filterDensityPair();
     analyzeDensityPair();
     selectPeakListPair(p);
+    updatePredictions(p);
+}
+
+void Rho::generateCenterOfMass( PredictionPair * p )
+{
+    comX = ((int)(p->x.primary + p->x.secondary)) >> 1;
+    comY = ((int)(p->y.primary + p->y.secondary)) >> 1;
 }
 
 void Rho::generateDensityMap()
@@ -85,7 +93,7 @@ void Rho::generateDensityMap()
 
 void Rho::generateDensityMapFromCImage()
 {
-    int h = height, w = width, d = 0;
+    int h = height, w = width, d = 0, dR = 0;
     int * mapx = density_map_pair.x.map, * mapy = density_map_pair.y.map;
     density_map_pair.y.length = w;
     density_map_pair.x.length = h;
@@ -93,16 +101,15 @@ void Rho::generateDensityMapFromCImage()
     memset(mapy, 0, sizeof(int) * w);
     memset(mapx, 0, sizeof(int) * h);
     
-    Vec3b pixel = {0,0,0};
-    double mX = 0, mY = 0;
+//    double mX = 0;//, mY = 0;
     for( int y = 0; y < h; y++ )
     {
-        int dR = 0;
+        dR = 0;
         for( int x = 0; x < w; x++ )
         {
             d = x + y*h;
             int p = (unsigned char)image.pixels[d];
-            if(p)
+            if(p > 10)
             {
                 dR      ++;
                 mapy[x] ++;
@@ -110,14 +117,62 @@ void Rho::generateDensityMapFromCImage()
         }
         mapx[y] = dR;
         
-        if(dR > mX) mX = dR;
+//        if(dR > mX) mX = dR;
     }
-    density_map_pair.x.max = mX; 
+//    density_map_pair.x.max = mX;
+}
+
+
+void Rho::generateDensityMapFromCImageWithQuadrantMasses()
+{
+    int h = height, w = width, d = 0, dR = 0, y, x;
+    int * mapx = density_map_pair.x.map, * mapy = density_map_pair.y.map;
+    density_map_pair.y.length = w;
+    density_map_pair.x.length = h;
+    
+    int x_tog = 0, y_tog = 0;
+    
+    memset(Q, 0, sizeof(int) * 4);
+    memset(mapy, 0, sizeof(int) * w);
+    memset(mapx, 0, sizeof(int) * h);
+    
+    for( y = 0; y < comY; y++ )
+    {
+        for( x = 0, dR = 0; x < w; x++, x_tog=x<comX )
+        {
+            d = x + y*h;
+            int p = (unsigned char)image.pixels[d];
+            if(p > 10)
+            {
+                dR      ++;
+                mapy[x] ++;
+                Q[x_tog]++;
+            }
+        }
+        mapx[y] = dR;
+    }
+    for( y = comY; y < h; y++ )
+    {
+        for( x = 0, dR = 0; x < w; x++)//, x_tog=x<comX )
+        {
+            d = x + y*h;
+            int p = (unsigned char)image.pixels[d];
+            if(p > 10)
+            {
+                dR      ++;
+                mapy[x] ++;
+//                Q[y_tog << 1 | x_tog]++;
+            }
+        }
+        mapx[y] = dR;
+    }
+    
+//    printf("Q[0]=%d Q[1]=%d\nQ[2]=%d Q[3]=%d\n", Q[0], Q[1], Q[2], Q[3]);
 }
 
 void Rho::getDensityMaxPair()
 {
-//    getDensityMax(&density_map_pair.x);
+    getDensityMax(&density_map_pair.x);
     getDensityMax(&density_map_pair.y);
 }
 void Rho::getDensityMax( DensityMap * d )
@@ -150,11 +205,13 @@ void Rho::filterDensityPair()
 void Rho::filterDensity( DensityMap * d )
 {
     int c, t = d->kalman.value, v = d->variance, g = t - v, l = d->length, punishf = 5;
+    if(g < 0) g = 0;
+    
     for( int i = 0; i < l; i++ )
     {
         c = d->map[i];
         if(c > (t+1)) c = t - punishf*(c - t);
-        d->map[i] = (c < g)?0:c;
+        d->map[i] = (c < g)?0:c-g;
     }
 }
 
@@ -166,7 +223,7 @@ void Rho::analyzeDensityPair()
 
 void Rho::analyzeDensity( DensityMap * d, PeakList * p )
 {
-    int c, l = d->length;
+    int c, max = 0, l = d->length;
     p->length = 0;
     bool has = false;
     double cavg = 0, mavg = 0;
@@ -180,14 +237,22 @@ void Rho::analyzeDensity( DensityMap * d, PeakList * p )
             if(!has) has = true;
             cma((double)c, &cavg, count);
             cma((double)(c*i), &mavg, count);
+            if(c > max) max = c;
         }
         else if(has)
         {
             if(p->length < MAX_PEAKS_RHO)
             {
-                p->map[p->length] = mavg/cavg;
-                p->den[p->length] = cavg;
+                p->map[p->length] = (int)mavg/cavg;
+                p->den[p->length] = (int)cavg;
+                p->max[p->length] = max;
+                
+                
+                if(cavg < 0)
+                    cavg = 0;
+//                if(p->den[p->length] < 0) p->den[p->length] = 0;
                 p->length++;
+                
             }
             mavg = 0;
             cavg = 0;
@@ -199,38 +264,70 @@ void Rho::analyzeDensity( DensityMap * d, PeakList * p )
 
 void Rho::selectPeakListPair( PredictionPair * p )
 {
-    selectPeakList( &peak_list_pair.x, &p->x );
-    selectPeakList( &peak_list_pair.y, &p->y );
+    selectPeakList( 2*density_map_pair.x.variance, &peak_list_pair.x, &p->x );
+    selectPeakList( 2*density_map_pair.y.variance, &peak_list_pair.y, &p->y );
 }
 
-void Rho::selectPeakList( PeakList * p, Prediction * o )
+void Rho::selectPeakList( double v, PeakList * p, Prediction * o )
 {
-    int l = p->length, denc = 0, den1 = 0, den2 = 0, locc = 0, loc1 = 0, loc2 = 0;
+    int l = p->length, denc = 0, locc = 0, maxc = 0;
+    int den[] = {0,0,0}, loc[] = {0,0,0}, max[] = {0,0,0};
     for(int i = 0; i < l; i++)
     {
         denc = p->den[i];
         locc = p->map[i];
-        if( denc > den1 )
+        maxc = p->max[i];
+        if( denc > den[0] )
         {
-            den2 = den1;
-            loc2 = loc1;
-            den1 = denc;
-            loc1 = locc;
+            den[2] = den[1];
+            loc[2] = loc[1];
+            max[2] = max[1];
+            den[1] = den[0];
+            loc[1] = loc[0];
+            max[1] = max[0];
+            den[0] = denc;
+            loc[0] = locc;
+            max[0] = maxc;
         }
-        else if( denc > den2 )
+        else if( denc > den[1] )
         {
-            den2 = denc;
-            loc2 = locc;
+            den[2] = den[1];
+            loc[2] = loc[1];
+            max[2] = max[1];
+            den[1] = denc;
+            loc[1] = locc;
+            max[1] = maxc;
         }
     }
-    if(loc1 < loc2)
+    
+    o->primary   = loc[0];
+    o->secondary = loc[1];
+    
+    o->primary_probability   = ((double)max[0])/v;
+    o->secondary_probability = ((double)max[1])/v;
+    o->alternate_probability = ((double)max[2])/v;
+    
+    o->alternate_probability *= 2;
+}
+void Rho::updatePredictions( PredictionPair * p )
+{
+    int Ax = p->x.primary, Ay = p->y.primary, Bx = p->x.secondary, By = p->y.secondary;
+    double  Axp = p->x.primary_probability, Bxp = p->x.secondary_probability,
+            Ayp = p->y.primary_probability, Byp = p->y.secondary_probability;
+    
+    if(Ax > Bx)
     {
-        o->primary   = loc1;
-        o->secondary = loc2;
+        p->x.primary    = Bx;
+        p->x.secondary  = Ax;
+        p->x.primary_probability = Bxp;
+        p->x.secondary_probability = Axp;
     }
-    else
+    
+    if(Q[0] < Q[1] ^ Ay < By)
     {
-        o->primary   = loc2;
-        o->secondary = loc1;
+        p->y.primary    = By;
+        p->y.secondary  = Ay;
+        p->y.primary_probability = Byp;
+        p->y.secondary_probability = Ayp;
     }
 }

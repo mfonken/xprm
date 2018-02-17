@@ -59,12 +59,12 @@
 #define CAM_HEIGHT              720//1080
 #define CAM_FRAME_RATE          60
 #define FNL_RESIZE_S            2
-#define FNL_RESIZE_W            500//CAM_WIDTH/FNL_RESIZE_S
-#define FNL_RESIZE_H            500//CAM_HEIGHT/FNL_RESIZE_S
+#define FNL_RESIZE_W            700//CAM_WIDTH/FNL_RESIZE_S
+#define FNL_RESIZE_H            700//CAM_HEIGHT/FNL_RESIZE_S
 
 #define THRESHOLD_MAX           254
 #define THRESHOLD_MIN           150
-#define THRESH_STEP             5
+#define THRESH_STEP             1
 
 #define THRESHOLD               THRESHOLD_MIN
 #define BRIGHTNESS              100

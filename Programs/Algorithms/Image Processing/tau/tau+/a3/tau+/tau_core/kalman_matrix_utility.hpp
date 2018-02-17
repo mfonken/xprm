@@ -22,20 +22,21 @@
 #include "kalman.hpp"
 
 /* KALMAN / KMAT SETUP */
-#define KMAT_LIFESPAN       0.25
-#define VALUE_UNCERTAINTY   0.7//0.01
-#define BIAS_UNCERTAINTY    0.005//0.003
+#define KMAT_LIFESPAN       1.0
+#define VALUE_UNCERTAINTY   0.1//0.01
+#define BIAS_UNCERTAINTY    0.05//0.003
 #define SENSOR_UNCERTAINTY  0.001
 
 #define MAX_KALMANS             3
 //#define KALMAN_IS_TIMELESS            // NOTE: Currently breaks kalman gain and thus state machine
-#define MAX_DENSITY_DIFF        20      // Pixels
-#define KALMAN_SORT_SCALE_STEP  1       // Pixels
+#define MAX_VALUE_DIFF          20
+#define MAX_DENSITY_DIFF        10      // Pixels
+#define KALMAN_SORT_SCALE_STEP  10       // Pixels
 #define KALMAN_PAIR_MAX         3       // Pair/sorting steps
-#define MIN_PROB                0.1     // Gain units
+#define MIN_PROB                0.4     // Gain units
 #define SELECTION_THRESHOLD     0.01    // Gain units
-#define MIN_PEAK                20      // Pixels
-#define SIMILARITY_TOLERANCE    5       // Pixels
+#define MIN_PEAK                10      // Pixels
+#define SIMILARITY_TOLERANCE    3       // Pixels
 #define PUNISH_FACTOR           0.8     // Gain / Gain
 
 typedef int lookup_t;
@@ -48,7 +49,7 @@ typedef struct
     int  persistence;
 } kmat_coupling_t;
 
-#define COUPLING_DEGREDATION 100
+#define COUPLING_DEGREDATION 10
 #define MAX_PERSISTENCE ( 1 << 7 ) - 1 // MAX OF SIGNED BYTE
 static inline void discourageCouple( kmat_coupling_t * c )
 {

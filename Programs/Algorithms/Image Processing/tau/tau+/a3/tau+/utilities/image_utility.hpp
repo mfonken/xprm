@@ -44,6 +44,7 @@ public:
     VideoCapture cam;
     Mat outframe, frame, image;
     cimage_t outimage;
+    pthread_mutex_t outframe_mutex, outimage_mutex;
     
     ImageUtility( std::string );
     ImageUtility( std::string, std::string );
@@ -59,6 +60,7 @@ public:
     void drawOutframe();
     
     kpoint_t bea[2];
+    int thresh;
     
 private:
     

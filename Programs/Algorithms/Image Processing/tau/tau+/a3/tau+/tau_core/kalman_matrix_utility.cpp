@@ -25,37 +25,37 @@ void KalmanMatrixPair::predict( PredictionPair * o )
     int xpv = 0, xsv = 0, ypv = 0, ysv = 0;
     double xpp = 0.0, xsp = 0.0, xap = 0.0, ypp = 0.0, ysp = 0.0, yap = 0.0;
     int il;
-    KalmanFilter * kalp;
+    KalmanFilter k;
     for(; xk >= 0; --xk)
     {
         il = x.lookup[xk];
-        kalp = &x.kalmans[il][x.selection[il]];
-        if( xk >= 2) xap += kalp->K[0];
+        k = x.kalmans[il][x.selection[il]];
+        if( xk >= 2) xap += k.K[0];
         else if( xk == 1 )
         {
-            xsv = kalp->value;
-            xsp = kalp->K[0];
+            xsv = k.value;
+            xsp = k.K[0];
         }
         else
         {
-            xpv = kalp->value;
-            xpp = kalp->K[0];
+            xpv = k.value;
+            xpp = k.K[0];
         }
     }
     for(; yk >= 0; --yk)
     {
         il = y.lookup[yk];
-        kalp = &y.kalmans[il][y.selection[il]];
-        if( yk >= 2) yap += kalp->K[0];
+        k = y.kalmans[il][y.selection[il]];
+        if( yk >= 2) yap += k.K[0];
         else if( yk == 1 )
         {
-            ysv = kalp->value;
-            ysp = kalp->K[0];
+            ysv = k.value;
+            ysp = k.K[0];
         }
         else
         {
-            ypv = kalp->value;
-            ypp = kalp->K[0];
+            ypv = k.value;
+            ypp = k.K[0];
         }
     }
     o->x.primary                = xpv;
@@ -118,17 +118,20 @@ KalmanMatrix::KalmanMatrix()
 
 void KalmanMatrix::update( PeakList * p )
 {
-    /*** 1) Add new kalmans for new peaks and update them ***/
-    updateWithPeaks( p );
-    
-    /*** 2) Find highest kalman tracking values by tracking row ***/
-    selectPeaks( p->length );
-    
-    /*** 3) Find density pairs in KalmanFilter matrix and give them a sorting bias ***/
-    getCouples();
-    
-    /*** 4) Sort KalmanFilter Matrix ***/
-    quickSort( 0, k_index-1, WEIGHTED );
+    if(p->length)
+    {
+        /*** 1) Add new kalmans for new peaks and update them ***/
+        updateWithPeaks( p );
+        
+        /*** 2) Find highest kalman tracking values by tracking row ***/
+        selectPeaks( p->length );
+        
+        /*** 3) Find density pairs in KalmanFilter matrix and give them a sorting bias ***/
+        getCouples();
+        
+        /*** 4) Sort KalmanFilter Matrix ***/
+        quickSort( 0, k_index-1, WEIGHTED );
+    }
     
     /*** 5) Purge kalmans by selection if expired or best is still too small ***/
     purge();
@@ -156,11 +159,9 @@ void KalmanMatrix::updateWithPeaks( PeakList * p )
     {
         kalp                = &kalmans[il][i];
         kalp->update(p->map[i], 0.);
-        kalp->value         = p->map[i];
+//        kalp->value         = p->map[i];
         kalp->density       = p->den[i];
         selection[il]       = i;
-        if(i > 10 || i < 0)
-            i++;
         
 #ifdef KMAT_DEBUG
         printf("i-%d il-%d\n",i, il);
@@ -195,14 +196,18 @@ void KalmanMatrix::updateWithPeaks( PeakList * p )
 #ifdef EXT_DEBUG
             printf("#%d-%d: %d|%d\n", il, j, val, den);
 #endif
-            if( den > MIN_PEAK )
+            if( den > MIN_PEAK )//&& INRANGE(val, t.value, MAX_VALUE_DIFF) )
             {
                 double vel = val - s.value;
                 t.update(val, vel);
                 t.density = den;
             }
+            else
+            {
+                t.last_update = -val;
+            }
             kalmans[il][j] = t;
-            density[il] = den;
+            density[il] = t.density;
             value[il] = t.K[0];
         }
     }
@@ -219,6 +224,7 @@ void KalmanMatrix::selectPeaks( int pl )
 {
     int ml = k_index;
     
+    if( pl > p_index ) pl = p_index - 1;
     for(int i = 0, il = lookup[0]; i < ml; i++, il = lookup[i])
     {
         selectRow( pl, il );
@@ -272,9 +278,11 @@ void KalmanMatrix::selectRow( int pl, int il )
     printf("\n");
 #endif
     
+#ifdef KMAT_DEBUG
+    printf("Selecting %d for row %d\n", s, il);
+#endif
+    
     selection[il] = s;
-    if(s > 10 || s < 0)
-        s++;
     value[il] = v;
     density[il] = d;
 }
@@ -461,11 +469,11 @@ void KalmanMatrix::purge()
         }
         else if( kalp->isExpired() )
         {
-            kalp->init(0.0);
+            kalp->init(0.0, KMAT_LIFESPAN, VALUE_UNCERTAINTY, BIAS_UNCERTAINTY, SENSOR_UNCERTAINTY);
         }
     }
     /* Recount useful kalmans */
-    int c = 0, ki = k_index;
+    int c = 0;
     for(int i = 0, il = lookup[0]; i < ml; i++, il = lookup[i] )
     {
         if( kalmans[il][selection[il]].K[0] >= MIN_PROB ) c++;
@@ -479,11 +487,7 @@ void KalmanMatrix::punishRow( int i )
     int lim = k_index - 1;
     int t = lookup[i];
     for(int k = i; k < lim; k++)
-    {
-        if(lookup[k+1] > 10 || lookup[k+1] < 0)
-            lookup[k+1] = 0;
         lookup[k] = lookup[k+1];
-    }
     lookup[lim] = t;
 }
 
@@ -513,7 +517,7 @@ int KalmanMatrix::partition( int l, int h, bool w )
     
     for (int j = h; j > l; j--)
     {
-        if( weightedValue(j) <= pivot) swap(--i,j);
+        if( (w)?weightedValue(j):value[lookup[j]] <= pivot) swap(--i,j);
     }
 #ifdef EXT_DEBUG
 #ifdef KMAT_DEBUG

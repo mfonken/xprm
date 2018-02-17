@@ -215,7 +215,7 @@ void TauDraw::drawDensityGraph(Mat M)
     int c, /*p1,*/ p2, u, o, f, w = tau->width, h = tau->height;
     Vec3b greyish(25,25,25), bluish(255,255,100), greenish(100,255,100), redish(50,100,255), orangish(100,150,255), yellowish(100,255,255), white(255,255,255);
     
-    tau->updatePrediction();
+//    tau->updatePrediction();
     
     KalmanFilter * xk = &tau->rho.density_map_pair.x.kalman, * yk = &tau->rho.density_map_pair.y.kalman;
     int mXv = tau->rho.density_map_pair.x.variance, mYv = tau->rho.density_map_pair.y.variance;
@@ -277,10 +277,10 @@ void TauDraw::drawDensityGraph(Mat M)
     Point2f a((double)tau->predictions.x.primary,   (double)tau->predictions.y.primary),
     b((double)tau->predictions.x.secondary, (double)tau->predictions.y.secondary);
     
-    line(M, Point(a.y, 0), Point(a.y, h), bluish);
-    line(M, Point(b.y, 0), Point(b.y, h), bluish);
-    line(M, Point(0, a.x), Point(w, a.x), bluish);
-    line(M, Point(0, b.x), Point(w, b.x), bluish);
+//    line(M, Point(a.y, 0), Point(a.y, h), bluish);
+//    line(M, Point(b.y, 0), Point(b.y, h), bluish);
+//    line(M, Point(0, a.x), Point(w, a.x), bluish);
+//    line(M, Point(0, b.x), Point(w, b.x), bluish);
     
     putText(M, "A", Point(a.y, a.x), FONT_HERSHEY_PLAIN, 2, Vec3b(0,55,255), 3);
     putText(M, "B", Point(b.y, b.x), FONT_HERSHEY_PLAIN, 2, Vec3b(0,255,55), 3);

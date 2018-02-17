@@ -32,15 +32,19 @@ int main( int argc, const char * argv[] )
 //    env.addTest(&combine, &comm, 20);
     
     env.start();
-    usleep(1000000);
+    usleep(100000);
     env.pause();
     
+    pthread_mutex_lock(&utility.outframe_mutex);
     TauDraw drawer(&tau, utility.outframe);
+    pthread_mutex_unlock(&utility.outframe_mutex);
 
     while(1)
     {
+        pthread_mutex_lock(&utility.outframe_mutex);
         drawer.drawDensitiesOnFrame(utility.outframe);
         imshow("Outframe", drawer.frame);
+        pthread_mutex_unlock(&utility.outframe_mutex);
         
         string xks = tau.rho.density_map_pair.x.kalman.toString();
         string yks = tau.rho.density_map_pair.y.kalman.toString();        

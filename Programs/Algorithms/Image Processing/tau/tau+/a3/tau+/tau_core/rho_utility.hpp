@@ -29,6 +29,8 @@ class Rho
 public:
     int                width;
     int                height;
+    int                comX, comY;
+    int                Q[4];
     cimage_t                image;
     cv::Mat                 frame;
     DensityMapPair          density_map_pair;
@@ -38,8 +40,10 @@ public:
     Rho( int, int );
     void perform( cimage_t *, PredictionPair * );
     void perform( cv::Mat, PredictionPair * );
+    void generateCenterOfMass( PredictionPair * );
     void generateDensityMap();
     void generateDensityMapFromCImage();
+    void generateDensityMapFromCImageWithQuadrantMasses();
     void getDensityMaxPair();
     void getDensityMax( DensityMap * );
     void updateDensityKalmanPair();
@@ -49,7 +53,8 @@ public:
     void analyzeDensityPair();
     void analyzeDensity( DensityMap *, PeakList * );
     void selectPeakListPair( PredictionPair * );
-    void selectPeakList( PeakList * p, Prediction * );
+    void selectPeakList( double, PeakList *, Prediction * );
+    void updatePredictions( PredictionPair * );
 };
 
 #endif /* rho_utility_hpp */

@@ -33,6 +33,7 @@ public:
     Tau( std::string, ImageUtility *, int, int );
     double perform( cv::Mat );
     double perform( cimage_t * );
+    void updateThresh();
     void updatePrediction();
     void updatePredictionFromPeaks();
     

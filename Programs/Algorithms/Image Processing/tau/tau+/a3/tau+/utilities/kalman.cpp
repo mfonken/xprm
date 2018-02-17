@@ -69,10 +69,7 @@ void KalmanFilter::update( double value_new, double rate_new )
     value     += delta_time * rate;
 
     double dt_P_1_1 = delta_time * P[1][1];
-    P[0][0] +=   delta_time * ( dt_P_1_1 -
-                                   P[0][1] -
-                                   P[1][0] +
-                                   uncertainty.value );
+    P[0][0] +=   delta_time * ( dt_P_1_1 - P[0][1] - P[1][0] + uncertainty.value );
     P[0][1] -=   dt_P_1_1;
     P[1][0] -=   dt_P_1_1;
     P[1][1] +=   uncertainty.bias * delta_time;

@@ -32,6 +32,9 @@ ImageUtility::ImageUtility( std::string n, std::string f, int num, int width, in
     size.width = width;
     size.height = height;
     cimageInit(&outimage, width, height);
+    pthread_mutex_init(&outframe_mutex, NULL);
+    pthread_mutex_init(&outimage_mutex, NULL);
+    thresh = THRESHOLD;
 }
 
 void ImageUtility::init()
@@ -76,7 +79,9 @@ void ImageUtility::initFile()
     }
     
     resize(image,frame,size);
+    pthread_mutex_lock(&outframe_mutex);
     outframe = frame;
+    pthread_mutex_unlock(&outframe_mutex);
     live = true;
 }
 
@@ -108,14 +113,24 @@ void ImageUtility::initCamera()
     live = true;
     
     resize(image,frame,size);
+    pthread_mutex_lock(&outframe_mutex);
     outframe = frame;
+    pthread_mutex_unlock(&outframe_mutex);
 }
 
 void ImageUtility::trigger()
 {
     if(has_file) getNextImage();
     else getNextFrame();
+    
+    pthread_mutex_lock(&outframe_mutex);
+    Mat temp = outframe;
+    cv::threshold(temp, outframe, thresh, 255, 0);
+    pthread_mutex_unlock(&outframe_mutex);
+    
+    pthread_mutex_lock(&outimage_mutex);
     cimageFromMat(outframe, &outimage);
+    pthread_mutex_unlock(&outimage_mutex);
 }
 
 std::string ImageUtility::serialize()
@@ -172,7 +187,9 @@ Mat ImageUtility::getImage()
     }
     
     resize(image,frame,size);
+    pthread_mutex_lock(&outframe_mutex);
     outframe = frame;
+    pthread_mutex_unlock(&outframe_mutex);
     return frame;
 }
 
@@ -193,7 +210,9 @@ Mat ImageUtility::getNextFrame()
     frame = grey;
 #endif
     
+    pthread_mutex_lock(&outframe_mutex);
     outframe = frame;
+    pthread_mutex_unlock(&outframe_mutex);
     return frame;
 }
 

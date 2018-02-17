@@ -40,10 +40,12 @@ PeakListPair::PeakListPair()
     x.map      = (int*)malloc(sizeof(int)*MAX_PEAKS);
     x.den      = (int*)malloc(sizeof(int)*MAX_PEAKS);
     x.dir      = (int*)malloc(sizeof(int)*MAX_PEAKS);
+    x.max      = (int*)malloc(sizeof(int)*MAX_PEAKS);
     x.length   = 0;
     y.map      = (int*)malloc(sizeof(int)*MAX_PEAKS);
     y.den      = (int*)malloc(sizeof(int)*MAX_PEAKS);
     y.dir      = (int*)malloc(sizeof(int)*MAX_PEAKS);
+    y.max      = (int*)malloc(sizeof(int)*MAX_PEAKS);
     y.length   = 0;
 }
 
