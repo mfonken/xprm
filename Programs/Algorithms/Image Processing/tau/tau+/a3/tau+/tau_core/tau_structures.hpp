@@ -102,6 +102,11 @@ public:
     double overall;
 };
 
+#define PREDICTION_LIFESPAN             1.0
+#define PREDICTION_VALUE_UNCERTAINTY    0.5
+#define PREDICTION_BIAS_UNCERTAINTY     0.01
+#define PREDICTION_SENSOR_UNCERTAINTY   0.001
+
 class Prediction
 {
 public:
@@ -110,6 +115,8 @@ public:
     double  primary_probability,
             secondary_probability,
             alternate_probability;
+    
+    KalmanFilter    a, b;
     
     Prediction();
 };
@@ -133,6 +140,7 @@ class DensityMap
 {
 public:
     int *      map;
+    int *      fil;
     int        length;
     int        max;
     double          variance;

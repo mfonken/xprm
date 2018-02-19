@@ -66,8 +66,8 @@
 #define THRESHOLD_MIN           150
 #define THRESH_STEP             1
 
-#define THRESHOLD               THRESHOLD_MIN
-#define BRIGHTNESS              100
+#define THRESHOLD               222
+#define BRIGHTNESS              155
 
 /* TAU SETUP */
 #define DRAW_HEIGHT             300

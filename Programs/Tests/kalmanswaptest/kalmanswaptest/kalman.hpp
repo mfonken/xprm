@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <sys/time.h>
-#include <math.h>
+#include <math.h> 
 
 #define DEFAULT_LS      5
 #define DEFAULT_VU      0.001
@@ -17,7 +17,7 @@
 #define DEFAULT_SU      0.7
 
 /** Kalman Uncertainties */
-typedef struct
+typedef struct 
 {
     double value;
     double bias;
@@ -31,7 +31,7 @@ class KalmanFilter
 {
 public:
     double lifespan;
-    
+
     double      K[2],
                 P[2][2],
                 rate,

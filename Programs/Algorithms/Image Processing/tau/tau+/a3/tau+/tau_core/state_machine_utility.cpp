@@ -252,6 +252,7 @@ void System::updateState()
 #ifdef STATEM_DEBUG
         printf("Updating state from %s to %s\n", stateString((int)state), stateString((int)next));
 #endif
+        if(next != state) printf("~~~ State is %s ~~~\n", stateString(next));
         prev = state;
         state = next;
         next = UNKNOWN_STATE;

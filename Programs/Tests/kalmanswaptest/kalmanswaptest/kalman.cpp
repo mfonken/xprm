@@ -39,7 +39,7 @@ KalmanFilter::KalmanFilter( double v, double ls, double v_u, double b_u, double 
     density     = 0;
     
     last_update = 0;
-    
+
     lifespan    = ls;
     uncertainty.value   = v_u;
     uncertainty.bias    = b_u;
@@ -49,10 +49,10 @@ KalmanFilter::KalmanFilter( double v, double ls, double v_u, double b_u, double 
 void KalmanFilter::update( double value_new, double rate_new )
 {
 #ifdef TIMELESS
-    //    double delta_time = 0.25;
+//    double delta_time = 0.25;
 #else
     double delta_time = now() - timestamp;
-    
+
     /* Quick expiration check */
     if(delta_time > lifespan)
     {
@@ -65,20 +65,20 @@ void KalmanFilter::update( double value_new, double rate_new )
     prev       = value;
     rate       = rate_new - bias;
     value     += delta_time * rate;
-    
+
     double dt_P_1_1 = delta_time * P[1][1];
     P[0][0] +=   delta_time * ( dt_P_1_1 - P[0][1] - P[1][0] + uncertainty.value );
     P[0][1] -=   dt_P_1_1;
     P[1][0] -=   dt_P_1_1;
     P[1][1] +=   uncertainty.bias * delta_time;
-    
+
     double S   = P[0][0] + uncertainty.sensor;
     K[0]       = P[0][0] / S;
     K[1]       = P[1][0] / S;
     double delta_value = value_new - value;
     value     += K[0] * delta_value;
     bias      += K[1] * delta_value;
-    
+
     P[0][0] -= K[0] * P[0][0];
     P[0][1] -= K[0] * P[0][1];
     P[1][0] -= K[1] * P[0][0];
@@ -122,4 +122,3 @@ int KalmanFilter::isExpired()
 {
     return ((now() - timestamp) > lifespan);
 }
-

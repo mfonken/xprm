@@ -17,8 +17,8 @@
 using namespace cv;
 using namespace std;
 
-#define FPS         30
-#define FRAME_DELAY 1000/FPS
+#define FPS         10
+#define KEY_DELAY   1000/FPS
 
 int main( int argc, const char * argv[] )
 {
@@ -27,37 +27,55 @@ int main( int argc, const char * argv[] )
     Combine combine("Combine", &tau, FNL_RESIZE_W, FNL_RESIZE_H);
     SerialWriter comm(SFILE, FILENAME);
     
-    Environment env(&utility, 10);
+    Environment env(&utility, 15);
     env.addTest(&tau, 60);
 //    env.addTest(&combine, &comm, 20);
     
     env.start();
-    usleep(100000);
+    usleep(1000000);
     env.pause();
     
     pthread_mutex_lock(&utility.outframe_mutex);
     TauDraw drawer(&tau, utility.outframe);
     pthread_mutex_unlock(&utility.outframe_mutex);
-
+    
+//    usleep(1000000);
+//    env.resume();
+    
     while(1)
     {
+//        if(env.status == LIVE)
+//        {
         pthread_mutex_lock(&utility.outframe_mutex);
         drawer.drawDensitiesOnFrame(utility.outframe);
-        imshow("Outframe", drawer.frame);
+        cv::Mat O;
+        drawer.frame.copyTo(O);
+        imshow("Outframe", O);
         pthread_mutex_unlock(&utility.outframe_mutex);
         
-        string xks = tau.rho.density_map_pair.x.kalman.toString();
-        string yks = tau.rho.density_map_pair.y.kalman.toString();        
+//        string xks = tau.rho.density_map_pair.x.kalman.toString();
+//        string yks = tau.rho.density_map_pair.y.kalman.toString();
+        string xks = tau.predictions.x.a.toString();
+        string yks = tau.predictions.x.b.toString();
         Mat dataframe(34, 800, CV_8UC3, Scalar(245,245,245));
         putText(dataframe, xks, Point(0,12), FONT_HERSHEY_PLAIN, 1, Scalar(15,15,15));
         putText(dataframe, yks, Point(0,28), FONT_HERSHEY_PLAIN, 1, Scalar(15,15,15));
         imshow("Kalman Data", dataframe);
+//        }
     
-        switch(waitKey(FRAME_DELAY))
+        char c = waitKey(KEY_DELAY);
+        switch(c)
         {
             case ' ':
                 if(env.status != LIVE) env.resume();
                 else env.pause();
+                break;
+            default:
+                if(utility.loop(c))
+                {
+                    utility.trigger();
+                    tau.trigger();
+                }
                 break;
             case 's':
                 env.pause();
@@ -68,8 +86,6 @@ int main( int argc, const char * argv[] )
                 usleep(10000000);
                 env.pause();
                 printf("Tau averaged %fms for %d iterations\n", tau.avg*1000, tau.count);
-                break;
-            default:
                 break;
         }
         

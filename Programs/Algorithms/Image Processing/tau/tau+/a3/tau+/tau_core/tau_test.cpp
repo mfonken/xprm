@@ -212,34 +212,49 @@ void TauDraw::drawDensitiesOnFrame(Mat M)
 
 void TauDraw::drawDensityGraph(Mat M)
 {
-    int c, /*p1,*/ p2, u, o, f, w = tau->width, h = tau->height;
+    int c, /*p1,*/ p2, u, v, o, f, w = tau->width, h = tau->height;
     Vec3b greyish(25,25,25), bluish(255,255,100), greenish(100,255,100), redish(50,100,255), orangish(100,150,255), yellowish(100,255,255), white(255,255,255);
     
 //    tau->updatePrediction();
     
-    KalmanFilter * xk = &tau->rho.density_map_pair.x.kalman, * yk = &tau->rho.density_map_pair.y.kalman;
+    KalmanFilter xk = tau->rho.density_map_pair.x.kalman, yk = tau->rho.density_map_pair.y.kalman;
     int mXv = tau->rho.density_map_pair.x.variance, mYv = tau->rho.density_map_pair.y.variance;
 
     int min_thresh = 10;
-    int n = h-(xk->value/DENSITY_SCALE), m = w-(yk->value/DENSITY_SCALE);
+    int n = h-(xk.value/DENSITY_SCALE), m = w-(yk.value/DENSITY_SCALE);
     int nt = h-min_thresh, mt = w-min_thresh;
 
     int nv1 = n-(mXv/DENSITY_SCALE), nv2 = n+(mXv/DENSITY_SCALE), mv1 = m-(mYv/DENSITY_SCALE), mv2 = m+(mYv/DENSITY_SCALE);
 
-    int *dX = tau->rho.density_map_pair.x.map, *dY = tau->rho.density_map_pair.y.map;
-
+    
+//    int *dX = tau->rho.density_map_pair.x.map, *dY = tau->rho.density_map_pair.y.map;
+    pthread_mutex_lock(&tau->rho.density_map_pair_mutex);
+    int dX[h], dY[w], fX[h], fY[w];
+    for( int y = 0; y < h; y++ )
+    {
+        dX[y] = tau->rho.density_map_pair.x.map[y];
+        fX[y] = tau->rho.density_map_pair.x.fil[y];
+    }
+    for( int x = 0; x < w; x++ )
+    {
+        dY[x] = tau->rho.density_map_pair.y.map[x];
+        fY[x] = tau->rho.density_map_pair.y.fil[x];
+    }
+    pthread_mutex_unlock(&tau->rho.density_map_pair_mutex);
+    
     line(M, Point(n,0), Point(n,W), orangish);
     line(M, Point(nv1,0), Point(nv1,W), yellowish);
     line(M, Point(nv2,0), Point(nv2,W), yellowish);
     for( int y = 0, p1 = p2 = 0; y < h; y++ )
     {
-        u = INR(w-(dX[y]/DENSITY_SCALE),M.rows);
+        u = INR(w-(fX[y]/DENSITY_SCALE),M.rows);
+        v = INR(w-(dX[y]/DENSITY_SCALE),M.rows);
         o = abs(n - u);
         c = INR(n+o,M.rows);
 
         if(c>nv2)M.at<Vec3b>(y,c) = greyish;
         else M.at<Vec3b>(y,c) = bluish;
-        if(u<n) M.at<Vec3b>(y,u) = redish;
+        if(u<n) M.at<Vec3b>(y,v) = redish;
 
         f = w-(dX[y]/DENSITY_SCALE);
         if(f < 0) f = 0; if(f >= w) f = w-1;
@@ -254,13 +269,14 @@ void TauDraw::drawDensityGraph(Mat M)
     line(M, Point(0,mv2), Point(H,mv2), yellowish);
     for( int x = 0, p1 = p2 = 0; x < w; x++ )
     {
-        u = INR(h-(dY[x]/DENSITY_SCALE),M.cols);
+        u = INR(h-(fY[x]/DENSITY_SCALE),M.cols);
+        v = INR(h-(dY[x]/DENSITY_SCALE),M.cols);
         o = abs(m - u);
         c = INR(m+o,M.cols);
 
         if(c>mv2) M.at<Vec3b>(c,x) = greyish;
-//        else M.at<Vec3b>(c,x) = bluish;
-//        if(u<m) M.at<Vec3b>(u,x) = redish;
+        else M.at<Vec3b>(c,x) = bluish;
+        if(u<m) M.at<Vec3b>(v,x) = redish;
 
         f = h-(dY[x]/DENSITY_SCALE);
         if(f < 0) f = 0; if(f >= h) f = w-1;
@@ -274,8 +290,10 @@ void TauDraw::drawDensityGraph(Mat M)
     for( int i = 0; i < nbY; i++ ) line(M, Point(tau->rho.peak_list_pair.y.map[i],0), Point(tau->rho.peak_list_pair.y.map[i],h), greenish);
     for( int i = 0; i < nbX; i++ ) line(M, Point(0,tau->rho.peak_list_pair.x.map[i]), Point(W,tau->rho.peak_list_pair.x.map[i]), greenish);
     
+    pthread_mutex_lock(&tau->predictions_mutex);
     Point2f a((double)tau->predictions.x.primary,   (double)tau->predictions.y.primary),
-    b((double)tau->predictions.x.secondary, (double)tau->predictions.y.secondary);
+            b((double)tau->predictions.x.secondary, (double)tau->predictions.y.secondary);
+    pthread_mutex_unlock(&tau->predictions_mutex);
     
 //    line(M, Point(a.y, 0), Point(a.y, h), bluish);
 //    line(M, Point(b.y, 0), Point(b.y, h), bluish);
@@ -293,9 +311,14 @@ void TauDraw::drawDensityMaps(Mat M)
     if(!mX) mX = 1;
     if(!mY) mY = 1;
     int *dX = tau->rho.density_map_pair.x.map, *dY = tau->rho.density_map_pair.y.map;
+    
+    double a,b;
     for( int y = 0; y < h; y++ )
     {
-        int v = (double)dX[y]/(double)mX * 255;
+        a = (double)dX[y];
+        b = (double)mX;
+        int v = (a/b) * 255;
+//        int v = (double)dX[y]/(double)mX * 255;
         c = densityColor(v);
         line(M, Point(w,y), Point(W,y), c);
     }

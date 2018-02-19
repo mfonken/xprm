@@ -42,7 +42,7 @@ public:
     void initCamera();
     
     VideoCapture cam;
-    Mat outframe, frame, image;
+    Mat preoutframe, outframe, frame, image;
     cimage_t outimage;
     pthread_mutex_t outframe_mutex, outimage_mutex;
     
@@ -53,7 +53,7 @@ public:
     
     Mat getNextImage();
     Mat getImage();
-    void loop(char c);
+    int loop(char c);
     Mat getNextFrame();
     bool isLive();
     void getBeacons();

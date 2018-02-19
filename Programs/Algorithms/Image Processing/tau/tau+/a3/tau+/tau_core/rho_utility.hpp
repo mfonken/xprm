@@ -24,18 +24,26 @@
 
 #include "utility_functions.hpp"
 
+#define RHO_K_TARGET        0.3
+#define RHO_VARIANCE_NORMAL 5
+#define RHO_VARIANCE_SCALE  20
+
 class Rho
 {
 public:
     int                width;
     int                height;
     int                comX, comY;
-    int                Q[4];
+    int                Q[4], Qp[4];
+    bool               ABswap;
     cimage_t                image;
     cv::Mat                 frame;
     DensityMapPair          density_map_pair;
+    pthread_mutex_t         density_map_pair_mutex;
     PeakListPair            peak_list_pair;
     Gaussian                gaussian;
+    KalmanFilter        KAx, KAy, KBx, KBy;
+    PredictionPair      rho_predictions;
     
     Rho( int, int );
     void perform( cimage_t *, PredictionPair * );
@@ -54,7 +62,7 @@ public:
     void analyzeDensity( DensityMap *, PeakList * );
     void selectPeakListPair( PredictionPair * );
     void selectPeakList( double, PeakList *, Prediction * );
-    void updatePredictions( PredictionPair * );
+    void updatePredictions( PredictionPair *, PredictionPair * );
 };
 
 #endif /* rho_utility_hpp */

@@ -50,6 +50,7 @@ public:
     Rho                 rho;
     Sigma               sigma;
     PredictionPair      predictions;
+    pthread_mutex_t     predictions_mutex;
 };
 
 #endif /* tau_utility_hpp */

@@ -21,7 +21,7 @@ ImageUtility::ImageUtility( std::string n, std::string f, int width, int height)
     printf("IU: Still\n");
 }
 
-ImageUtility::ImageUtility( std::string n, std::string f, int num, int width, int height ) : cam(0), image(Size(CAM_WIDTH, CAM_HEIGHT), CV_8UC3, Scalar(0,0,0)), frame(Size(FNL_RESIZE_W, FNL_RESIZE_H), CV_8UC3, Scalar(0,0,0)), outframe(Size(FNL_RESIZE_W, FNL_RESIZE_H), CV_8UC3, Scalar(0,0,0))
+ImageUtility::ImageUtility( std::string n, std::string f, int num, int width, int height ) : cam(0), image(Size(CAM_WIDTH, CAM_HEIGHT), CV_8UC3, Scalar(0,0,0)), frame(Size(FNL_RESIZE_W, FNL_RESIZE_H), CV_8UC3, Scalar(0,0,0)), preoutframe(Size(FNL_RESIZE_W, FNL_RESIZE_H), CV_8UC3, Scalar(0,0,0)), outframe(Size(FNL_RESIZE_W, FNL_RESIZE_H), CV_8UC3, Scalar(0,0,0))
 {
     this->name = n;
     this->subdir = f;
@@ -79,9 +79,7 @@ void ImageUtility::initFile()
     }
     
     resize(image,frame,size);
-    pthread_mutex_lock(&outframe_mutex);
-    outframe = frame;
-    pthread_mutex_unlock(&outframe_mutex);
+    preoutframe = frame;
     live = true;
 }
 
@@ -113,9 +111,7 @@ void ImageUtility::initCamera()
     live = true;
     
     resize(image,frame,size);
-    pthread_mutex_lock(&outframe_mutex);
-    outframe = frame;
-    pthread_mutex_unlock(&outframe_mutex);
+    preoutframe = frame;
 }
 
 void ImageUtility::trigger()
@@ -124,8 +120,7 @@ void ImageUtility::trigger()
     else getNextFrame();
     
     pthread_mutex_lock(&outframe_mutex);
-    Mat temp = outframe;
-    cv::threshold(temp, outframe, thresh, 255, 0);
+    cv::threshold(preoutframe, outframe, thresh, BRIGHTNESS, 0);
     pthread_mutex_unlock(&outframe_mutex);
     
     pthread_mutex_lock(&outimage_mutex);
@@ -138,29 +133,27 @@ std::string ImageUtility::serialize()
     return this->name;
 }
 
-void ImageUtility::loop(char c)
+int ImageUtility::loop(char c)
 {
-    if (c == ' ')
+    switch(c)
     {
-        live = !live;
-        getImage();
-        return;
+        case ' ':
+            live = !live;
+            break;
+        case 03:    
+//            counter %= num_frames;
+////            counter++;
+//          printf("Next frame.\n");
+            break;
+        case 02:
+            counter-=2;
+            if( counter < 1 ) counter += num_frames;
+            break;
+        default:
+            return 0;
     }
-    if (c == 03)
-    {
-        counter %= num_frames;
-        counter++;
-        //        printf("Next frame.\n");
-    }
-    else if (c == 02)
-    {
-        counter--;
-        if( counter < 1 ) counter += num_frames;
-        
-        //        printf("Last frame. %d\n ", counter);
-    }
-    else return;
     getImage();
+    return 1;
 }
 
 Mat ImageUtility::getNextImage()
@@ -187,9 +180,7 @@ Mat ImageUtility::getImage()
     }
     
     resize(image,frame,size);
-    pthread_mutex_lock(&outframe_mutex);
-    outframe = frame;
-    pthread_mutex_unlock(&outframe_mutex);
+    preoutframe = frame;
     return frame;
 }
 
@@ -210,9 +201,7 @@ Mat ImageUtility::getNextFrame()
     frame = grey;
 #endif
     
-    pthread_mutex_lock(&outframe_mutex);
-    outframe = frame;
-    pthread_mutex_unlock(&outframe_mutex);
+    preoutframe = frame;
     return frame;
 }
 

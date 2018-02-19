@@ -24,15 +24,17 @@ void fillDensityMapDataInt( int * m, int * v, int l )
 DensityMapPair::DensityMapPair( int w, int h )
 {
     x.map = (int*)malloc(sizeof(int)*h);
+    x.fil = (int*)malloc(sizeof(int)*h);
     x.length = 0;
     x.max = 0;
     x.variance = 0;
-    x.kalman.init(0);
+    x.kalman = KalmanFilter(0);
     y.map = (int*)malloc(sizeof(int)*w);
+    y.fil = (int*)malloc(sizeof(int)*w);
     y.length = 0;
     y.max = 0;
     y.variance = 0;
-    y.kalman.init(0);
+    y.kalman = KalmanFilter(0);
 }
 
 PeakListPair::PeakListPair()
@@ -56,4 +58,7 @@ Prediction::Prediction()
     primary_probability   = 0;
     secondary_probability = 0;
     alternate_probability = 0;
+    
+    a = KalmanFilter(0., PREDICTION_LIFESPAN, PREDICTION_VALUE_UNCERTAINTY, PREDICTION_BIAS_UNCERTAINTY, PREDICTION_SENSOR_UNCERTAINTY);
+    b = KalmanFilter(0., PREDICTION_LIFESPAN, PREDICTION_VALUE_UNCERTAINTY, PREDICTION_BIAS_UNCERTAINTY, PREDICTION_SENSOR_UNCERTAINTY);
 }

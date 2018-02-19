@@ -109,7 +109,7 @@ KalmanMatrix::KalmanMatrix()
         for(int j = 0; j < MAX_PEAKS; j++)
         {
             KalmanFilter * k = &kalmans[i][j];
-            k->init(0.0, KMAT_LIFESPAN, VALUE_UNCERTAINTY, BIAS_UNCERTAINTY, SENSOR_UNCERTAINTY);
+            (*k) = KalmanFilter(0.0, KMAT_LIFESPAN, VALUE_UNCERTAINTY, BIAS_UNCERTAINTY, SENSOR_UNCERTAINTY);
         }
     }
     k_index = 0;
@@ -469,7 +469,7 @@ void KalmanMatrix::purge()
         }
         else if( kalp->isExpired() )
         {
-            kalp->init(0.0, KMAT_LIFESPAN, VALUE_UNCERTAINTY, BIAS_UNCERTAINTY, SENSOR_UNCERTAINTY);
+            (*kalp) = KalmanFilter(0.0, KMAT_LIFESPAN, VALUE_UNCERTAINTY, BIAS_UNCERTAINTY, SENSOR_UNCERTAINTY);
         }
     }
     /* Recount useful kalmans */

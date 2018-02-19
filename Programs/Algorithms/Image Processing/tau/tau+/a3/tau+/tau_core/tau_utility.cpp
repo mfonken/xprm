@@ -40,6 +40,7 @@ Tau::Tau( std::string name, ImageUtility * util, int width, int height ) : rho(w
     this->width = width;
     this->height = height;
     cimageInit(&image, width, height);
+    pthread_mutex_init(&predictions_mutex, NULL);
 }
 
 double Tau::perform( Mat M )
@@ -114,8 +115,8 @@ void Tau::updatePrediction()
     A = { a.y, a.x };
     B = { b.y, b.x };
     
-    putText(utility->outframe, "A", Point(A.x, A.y), FONT_HERSHEY_PLAIN, 2, Vec3b(0,155,255), 3);
-    putText(utility->outframe, "B", Point(B.x, B.y), FONT_HERSHEY_PLAIN, 2, Vec3b(0,255,155), 3);
+    putText(utility->outframe, "A", Point(A.x, A.y), FONT_HERSHEY_PLAIN, 2, Vec3b(0,5,10), 3);
+    putText(utility->outframe, "B", Point(B.x, B.y), FONT_HERSHEY_PLAIN, 2, Vec3b(0,10,5), 3);
 }
 
 void Tau::updatePredictionFromPeaks()

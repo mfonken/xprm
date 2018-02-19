@@ -12,6 +12,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include <unistd.h>
+
 using namespace cv;
 
 #define opsign(X,Y)     (X<0)^(Y<0)
@@ -29,16 +31,20 @@ Rho::Rho( int width, int height ) : gaussian(DEFAULT_GAUSS_LEN), density_map_pai
     this->height = height;
     gaussian.generate( DEFAULT_GAUSS_LEN, DEFAULT_SIGMA);
     cimageInit(&image, width, height);
+    pthread_mutex_init(&density_map_pair_mutex, NULL);
+
+    memset(Qp, 0, sizeof(int) * 4);
+    ABswap = false;
 }
 
 void Rho::perform( Mat M, PredictionPair * p )
 {
-    frame = M;
-    generateDensityMap();
-    getDensityMaxPair();
-    updateDensityKalmanPair();
-    filterDensityPair();
-    analyzeDensityPair();
+//    frame = M;
+//    generateDensityMap();
+//    getDensityMaxPair();
+//    updateDensityKalmanPair();
+//    filterDensityPair();
+//    analyzeDensityPair();
 //    selectPeakListPair(p);
 }
 
@@ -46,19 +52,26 @@ void Rho::perform( cimage_t * img, PredictionPair * p )
 {
     image = *img;
     generateCenterOfMass(p);
+    
+    pthread_mutex_lock(&density_map_pair_mutex);
     generateDensityMapFromCImageWithQuadrantMasses();
     getDensityMaxPair();
     updateDensityKalmanPair();
     filterDensityPair();
     analyzeDensityPair();
-    selectPeakListPair(p);
-    updatePredictions(p);
+    selectPeakListPair(&rho_predictions);
+//    pthread_mutex_lock(&p->predictions_mutex);
+    updatePredictions(&rho_predictions, p);
+//    pthread_mutex_unlock(&p->predictions_mutex);
+    pthread_mutex_unlock(&density_map_pair_mutex);
 }
 
-void Rho::generateCenterOfMass( PredictionPair * p )
+void Rho::generateCenterOfMass( PredictionPair * r )
 {
-    comX = ((int)(p->x.primary + p->x.secondary)) >> 1;
-    comY = ((int)(p->y.primary + p->y.secondary)) >> 1;
+    comX = ((int)(r->x.primary + r->x.secondary)) >> 1;
+    comY = ((int)(r->y.primary + r->y.secondary)) >> 1;
+    if(comX < 0) comX = 0;
+    if(comY < 0) comY = 0;
 }
 
 void Rho::generateDensityMap()
@@ -130,9 +143,13 @@ void Rho::generateDensityMapFromCImageWithQuadrantMasses()
     density_map_pair.y.length = w;
     density_map_pair.x.length = h;
     
-    int x_tog = 0, y_tog = 0;
+    int x_tog = 0;//, y_tog = 0;
     
-    memset(Q, 0, sizeof(int) * 4);
+    for(int i = 0; i < 4; i++)
+    {
+        Qp[i] = Q[i];
+        Q[i] = 0;
+    }
     memset(mapy, 0, sizeof(int) * w);
     memset(mapx, 0, sizeof(int) * h);
     
@@ -191,8 +208,7 @@ void Rho::updateDensityKalmanPair()
 void Rho::updateDensityKalman( DensityMap * d )
 {
     d->kalman.update(d->max, 0.);
-    const double target = 0.15, normalv = 10, scalev = 20;
-    d->variance = normalv * ( 1 + scalev*(target - d->kalman.K[0]) );
+    d->variance = RHO_VARIANCE_NORMAL * ( 1 + RHO_VARIANCE_SCALE*(RHO_K_TARGET - d->kalman.K[0]) );
     //printf("mXv is %.3f & mYv is %.3f\n", mXv, mYv);}
 }
 
@@ -211,7 +227,7 @@ void Rho::filterDensity( DensityMap * d )
     {
         c = d->map[i];
         if(c > (t+1)) c = t - punishf*(c - t);
-        d->map[i] = (c < g)?0:c-g;
+        d->fil[i] = (c < g)?0:c-g;
     }
 }
 
@@ -230,7 +246,8 @@ void Rho::analyzeDensity( DensityMap * d, PeakList * p )
     int count = 0;
     for( int i = 0; i < l; i++ )
     {
-        c = d->map[i];
+///TODO: FIX THIS!! 
+        c = d->fil[i];
         if(c)
         {
             count++;
@@ -262,13 +279,13 @@ void Rho::analyzeDensity( DensityMap * d, PeakList * p )
     }
 }
 
-void Rho::selectPeakListPair( PredictionPair * p )
+void Rho::selectPeakListPair( PredictionPair * r )
 {
-    selectPeakList( 2*density_map_pair.x.variance, &peak_list_pair.x, &p->x );
-    selectPeakList( 2*density_map_pair.y.variance, &peak_list_pair.y, &p->y );
+    selectPeakList( 2*density_map_pair.x.variance, &peak_list_pair.x, &r->x );
+    selectPeakList( 2*density_map_pair.y.variance, &peak_list_pair.y, &r->y );
 }
 
-void Rho::selectPeakList( double v, PeakList * p, Prediction * o )
+void Rho::selectPeakList( double v, PeakList * p, Prediction * r )
 {
     int l = p->length, denc = 0, locc = 0, maxc = 0;
     int den[] = {0,0,0}, loc[] = {0,0,0}, max[] = {0,0,0};
@@ -300,34 +317,131 @@ void Rho::selectPeakList( double v, PeakList * p, Prediction * o )
         }
     }
     
-    o->primary   = loc[0];
-    o->secondary = loc[1];
+    r->primary   = loc[0];
+    r->secondary = loc[1];
     
-    o->primary_probability   = ((double)max[0])/v;
-    o->secondary_probability = ((double)max[1])/v;
-    o->alternate_probability = ((double)max[2])/v;
+    r->primary_probability   = ((double)max[0])/v;
+    r->secondary_probability = ((double)max[1])/v;
+    r->alternate_probability = ((double)max[2])/v;
     
-    o->alternate_probability *= 2;
+    r->alternate_probability *= 2;
 }
-void Rho::updatePredictions( PredictionPair * p )
+
+
+int matchKalmans(KalmanFilter * K1, KalmanFilter * K2, double i1, double i2)
 {
-    int Ax = p->x.primary, Ay = p->y.primary, Bx = p->x.secondary, By = p->y.secondary;
-    double  Axp = p->x.primary_probability, Bxp = p->x.secondary_probability,
-            Ayp = p->y.primary_probability, Byp = p->y.secondary_probability;
+    double x_1 = K1->value, v1 = K1->velocity, v2 = K2->velocity;
+    double x1 = x_1 + v1;
+    double p1 = fabs(x1-i1), p2 = fabs(x1-i2);
     
-    if(Ax > Bx)
+    if( p1 < p2 )
     {
-        p->x.primary    = Bx;
-        p->x.secondary  = Ax;
-        p->x.primary_probability = Bxp;
-        p->x.secondary_probability = Axp;
+        K1->update(i1, v1);
+        K2->update(i2, v2);
+        return 0;
+    }
+    else
+    {
+        K1->update(i2, v1);
+        K2->update(i1, v2);
+        return 1;
+    }
+}
+
+void Rho::updatePredictions( PredictionPair * i, PredictionPair * r )
+{
+    double Ax = i->x.primary, Ay = i->y.primary, Bx = i->x.secondary, By = i->y.secondary;
+    double Afx = Ax, Afy = Ay, Bfx = Bx, Bfy = By;
+    double  Axp = i->x.primary_probability, Bxp = i->x.secondary_probability,
+            Ayp = i->y.primary_probability, Byp = i->y.secondary_probability;
+    double Afxp = Axp, Afyp = Ayp, Bfxp = Bxp, Bfyp = Byp;
+    if( !Ax || !Ay || !Bx || !By ) return;
+
+    if( Q[0] > Q[1])
+    {
+        if( ( Ax < Bx ) )
+        {
+            Afx = Ax;
+            Bfx = Bx;
+            Afxp = Bxp;
+            Bfxp = Axp;
+        }
+        else
+        {
+            Afx = Bx;
+            Bfx = Ax;
+            Afxp = Axp;
+            Bfxp = Bxp;
+        }
+        if(Ay < By)
+        {
+            Afy = Ay;
+            Bfy = By;
+            Afyp = Ayp;
+            Bfyp = Byp;
+        }
+        else
+        {
+            Afy = By;
+            Bfy = Ay;
+            Afyp = Byp;
+            Bfyp = Ayp;
+        }
+    }
+    else
+    {
+        if( ( Ax < Bx ) )
+        {
+            Afx = Bx;
+            Bfx = Ax;
+            Afxp = Bxp;
+            Bfxp = Axp;
+        }
+        else
+        {
+            Afx = Ax;
+            Bfx = Bx;
+            Afxp = Axp;
+            Bfxp = Bxp;
+        }
+        if(Ay < By)
+        {
+            Afy = Ay;
+            Bfy = By;
+            Afyp = Ayp;
+            Bfyp = Byp;
+        }
+        else
+        {
+            Afy = By;
+            Bfy = Ay;
+            Afyp = Byp;
+            Bfyp = Ayp;
+        }
     }
     
-    if(Q[0] < Q[1] ^ Ay < By)
+    if(matchKalmans(&r->x.a, &r->x.b, Afx, Bfx))
     {
-        p->y.primary    = By;
-        p->y.secondary  = Ay;
-        p->y.primary_probability = Byp;
-        p->y.secondary_probability = Ayp;
+        r->y.a.update(Afy, 0.);
+        r->y.b.update(Bfy, 0.);
+        Afyp = Ayp;
+        Bfyp = Byp;
     }
+    else
+    {
+        r->y.a.update(Bfy, 0.);
+        r->y.b.update(Afy, 0.);
+        Afyp = Byp;
+        Bfyp = Ayp;
+    }
+
+    r->x.primary    = r->x.a.value;
+    r->y.primary    = r->y.a.value;
+    r->x.secondary  = r->x.b.value;
+    r->y.secondary  = r->y.b.value;
+    
+    r->x.primary_probability    = Axp;
+    r->y.primary_probability    = Ayp;
+    r->x.secondary_probability  = Bxp;
+    r->y.secondary_probability  = Byp;
 }
