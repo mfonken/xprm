@@ -18,6 +18,7 @@
 
 /* DEBUGGING */
 //#define MAIN_DEBUG
+//#define RHO_DEBUG
 //#define STATEM_DEBUG
 //#define KMAT_DEBUG
 //#define EXT_DEBUG

@@ -57,7 +57,7 @@ int main( int argc, const char * argv[] )
 //        string yks = tau.rho.density_map_pair.y.kalman.toString();
         string xks = tau.predictions.x.a.toString();
         string yks = tau.predictions.x.b.toString();
-        Mat dataframe(34, 800, CV_8UC3, Scalar(245,245,245));
+        Mat dataframe(34, 960, CV_8UC3, Scalar(245,245,245));
         putText(dataframe, xks, Point(0,12), FONT_HERSHEY_PLAIN, 1, Scalar(15,15,15));
         putText(dataframe, yks, Point(0,28), FONT_HERSHEY_PLAIN, 1, Scalar(15,15,15));
         imshow("Kalman Data", dataframe);

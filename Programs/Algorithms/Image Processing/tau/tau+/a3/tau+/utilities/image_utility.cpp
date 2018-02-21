@@ -67,8 +67,6 @@ void ImageUtility::initFile()
         printf("With a single %dx%d frame.\n", size.width, size.height);
         file.append(".bmp");
     }
-    
-
     printf("\tOpening file: %s\n", file.c_str());
     
     image = imread(file, IMREAD_COLOR );

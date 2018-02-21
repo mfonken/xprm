@@ -32,9 +32,6 @@ Rho::Rho( int width, int height ) : gaussian(DEFAULT_GAUSS_LEN), density_map_pai
     gaussian.generate( DEFAULT_GAUSS_LEN, DEFAULT_SIGMA);
     cimageInit(&image, width, height);
     pthread_mutex_init(&density_map_pair_mutex, NULL);
-
-    memset(Qp, 0, sizeof(int) * 4);
-    ABswap = false;
 }
 
 void Rho::perform( Mat M, PredictionPair * p )
@@ -60,9 +57,7 @@ void Rho::perform( cimage_t * img, PredictionPair * p )
     filterDensityPair();
     analyzeDensityPair();
     selectPeakListPair(&rho_predictions);
-//    pthread_mutex_lock(&p->predictions_mutex);
     updatePredictions(&rho_predictions, p);
-//    pthread_mutex_unlock(&p->predictions_mutex);
     pthread_mutex_unlock(&density_map_pair_mutex);
 }
 
@@ -74,6 +69,7 @@ void Rho::generateCenterOfMass( PredictionPair * r )
     if(comY < 0) comY = 0;
 }
 
+// Deprecated
 void Rho::generateDensityMap()
 {
     int h = height, w = width;
@@ -104,6 +100,7 @@ void Rho::generateDensityMap()
     }
 }
 
+// Deprecated
 void Rho::generateDensityMapFromCImage()
 {
     int h = height, w = width, d = 0, dR = 0;
@@ -135,7 +132,6 @@ void Rho::generateDensityMapFromCImage()
 //    density_map_pair.x.max = mX;
 }
 
-
 void Rho::generateDensityMapFromCImageWithQuadrantMasses()
 {
     int h = height, w = width, d = 0, dR = 0, y, x;
@@ -143,48 +139,45 @@ void Rho::generateDensityMapFromCImageWithQuadrantMasses()
     density_map_pair.y.length = w;
     density_map_pair.x.length = h;
     
-    int x_tog = 0;//, y_tog = 0;
-    
-    for(int i = 0; i < 4; i++)
-    {
-        Qp[i] = Q[i];
-        Q[i] = 0;
-    }
+    Q[0] = Q[1] = QT = 0;
     memset(mapy, 0, sizeof(int) * w);
     memset(mapx, 0, sizeof(int) * h);
     
+    unsigned char p = 0;
     for( y = 0; y < comY; y++ )
     {
-        for( x = 0, dR = 0; x < w; x++, x_tog=x<comX )
+        for( x = 0, dR = 0; x < w; x++)
         {
             d = x + y*h;
-            int p = (unsigned char)image.pixels[d];
+            p = (unsigned char)image.pixels[d];
             if(p > 10)
             {
                 dR      ++;
                 mapy[x] ++;
-                Q[x_tog]++;
+                Q[x<comX]++;
             }
         }
         mapx[y] = dR;
+        QT += dR;
     }
-    for( y = comY; y < h; y++ )
+    for( ; y < h; y++ )
     {
-        for( x = 0, dR = 0; x < w; x++)//, x_tog=x<comX )
+        for( x = 0, dR = 0; x < w; x++)
         {
             d = x + y*h;
-            int p = (unsigned char)image.pixels[d];
+            p = (unsigned char)image.pixels[d];
             if(p > 10)
             {
                 dR      ++;
                 mapy[x] ++;
-//                Q[y_tog << 1 | x_tog]++;
             }
         }
         mapx[y] = dR;
+        QT += dR;
     }
-    
-//    printf("Q[0]=%d Q[1]=%d\nQ[2]=%d Q[3]=%d\n", Q[0], Q[1], Q[2], Q[3]);
+#ifdef RHO_DEBUG
+    printf("# Total coverage is %.3f%%\n", ((double)QT)/((double)w*h)*100);
+#endif
 }
 
 void Rho::getDensityMaxPair()
@@ -209,7 +202,6 @@ void Rho::updateDensityKalman( DensityMap * d )
 {
     d->kalman.update(d->max, 0.);
     d->variance = RHO_VARIANCE_NORMAL * ( 1 + RHO_VARIANCE_SCALE*(RHO_K_TARGET - d->kalman.K[0]) );
-    //printf("mXv is %.3f & mYv is %.3f\n", mXv, mYv);}
 }
 
 void Rho::filterDensityPair()
@@ -244,6 +236,7 @@ void Rho::analyzeDensity( DensityMap * d, PeakList * p )
     bool has = false;
     double cavg = 0, mavg = 0;
     int count = 0;
+    QF = 0;
     for( int i = 0; i < l; i++ )
     {
 ///TODO: FIX THIS!! 
@@ -270,6 +263,7 @@ void Rho::analyzeDensity( DensityMap * d, PeakList * p )
 //                if(p->den[p->length] < 0) p->den[p->length] = 0;
                 p->length++;
                 
+                QF += (int)cavg;
             }
             mavg = 0;
             cavg = 0;
@@ -277,6 +271,10 @@ void Rho::analyzeDensity( DensityMap * d, PeakList * p )
             has = false;
         }
     }
+    FT = ((double)QF)/((double)QT);
+#ifdef RHO_DEBUG
+    printf("* Filtered coverage is %.3f%%\n", FT*100);
+#endif
 }
 
 void Rho::selectPeakListPair( PredictionPair * r )
@@ -322,9 +320,17 @@ void Rho::selectPeakList( double v, PeakList * p, Prediction * r )
     
     r->primary_probability   = ((double)max[0])/v;
     r->secondary_probability = ((double)max[1])/v;
-    r->alternate_probability = ((double)max[2])/v;
     
-    r->alternate_probability *= 2;
+    
+    double comp = 1 - FT/FILTERED_CONVERAGE_TARGET;
+    if(comp < 0)
+        r->alternate_probability = ((double)max[2])/v;
+    else
+        r->alternate_probability = comp;
+#ifdef RHO_DEBUG
+    printf("Alternate probability is %.3f\n", r->alternate_probability);
+#endif
+    
 }
 
 
@@ -444,4 +450,6 @@ void Rho::updatePredictions( PredictionPair * i, PredictionPair * r )
     r->y.primary_probability    = Ayp;
     r->x.secondary_probability  = Bxp;
     r->y.secondary_probability  = Byp;
+    r->x.alternate_probability  = i->x.alternate_probability;
+    r->y.alternate_probability  = i->y.alternate_probability;
 }

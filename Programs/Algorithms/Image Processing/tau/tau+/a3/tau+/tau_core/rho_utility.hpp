@@ -28,13 +28,16 @@
 #define RHO_VARIANCE_NORMAL 5
 #define RHO_VARIANCE_SCALE  20
 
+#define FILTERED_CONVERAGE_TARGET  0.01
+
 class Rho
 {
 public:
     int                width;
     int                height;
     int                comX, comY;
-    int                Q[4], Qp[4];
+    int                Q[2], QT, QF;
+    double             FT;
     bool               ABswap;
     cimage_t                image;
     cv::Mat                 frame;

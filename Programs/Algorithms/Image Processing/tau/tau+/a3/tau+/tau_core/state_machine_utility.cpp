@@ -16,6 +16,8 @@
 #define PROBABILITY_STABILITY_THRESHOLD 0.5
 #define STATE_DISTANCE                  2.0
 
+#define SHADOW_TOLERANCE 0.2
+
 /* Temporary macros */
 #define numberOfSelectedPeaks 1
 
@@ -28,7 +30,7 @@ BayesianMap::BayesianMap()
     {
         for( int j = 0; j < l; j++ )
         {
-            map[i][j] = 0.0;//DEF_BAYESIAN_MAP[i][j];
+            map[i][j] = 0.0;
         }
         map[i][i] = 1.0;
     }
@@ -38,7 +40,6 @@ BayesianMap::BayesianMap()
 void BayesianMap::normalizeMap()
 {
     for( int i = 0; i < length; i++ ) normalizeState( i );
-    //    b->scheduled_normalize = false;
 }
 
 void BayesianMap::normalizeState( int i )
@@ -51,7 +52,7 @@ void BayesianMap::normalizeState( int i )
 
 void BayesianMap::resetState( int i )
 {
-    for( int j = 0; j < length; j++ ) map[j][i] = 0.0;//DEF_BAYESIAN_MAP[j][i];
+    for( int j = 0; j < length; j++ ) map[j][i] = 0.0;
     map[i][i] = 1.0;
     normalizeState( i );
 }
@@ -117,8 +118,6 @@ void System::update( PredictionPair * p )
 #endif
     
     /* Update self-diagnostics based on state */
-    
-#define SHADOW_TOLERANCE 0.2
     double prob[] = {0.0, 0.0, 0.0, 0.0};
     double xpp = p->x.primary_probability, xsp = p->x.secondary_probability, ypp = p->y.primary_probability, ysp = p->y.secondary_probability;
     if( ( xpp > SHADOW_TOLERANCE || xsp > SHADOW_TOLERANCE ) && ( ypp > SHADOW_TOLERANCE || ysp > SHADOW_TOLERANCE ) )
@@ -242,7 +241,6 @@ void System::updateProbabilities( double p[4] )
             probabilities.map[k][c] += p[i];
         }
     }
-    //    probabilities.scheduled_normalize = true;
 }
 
 void System::updateState()
@@ -251,8 +249,8 @@ void System::updateState()
     {
 #ifdef STATEM_DEBUG
         printf("Updating state from %s to %s\n", stateString((int)state), stateString((int)next));
-#endif
         if(next != state) printf("~~~ State is %s ~~~\n", stateString(next));
+#endif
         prev = state;
         state = next;
         next = UNKNOWN_STATE;

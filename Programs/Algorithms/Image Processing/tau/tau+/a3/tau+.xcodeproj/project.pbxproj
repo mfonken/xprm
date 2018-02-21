@@ -153,6 +153,8 @@
 				49954A6F202D63CC003748EC /* file_writer.cpp */,
 				49954A6A202D63CB003748EC /* serial_wrapper.hpp */,
 				49954A6C202D63CC003748EC /* serial_wrapper.cpp */,
+				49954A6D202D63CC003748EC /* sercom.h */,
+				49954A70202D63CC003748EC /* sercom.c */,
 				49954A43202D3173003748EC /* utility_functions.hpp */,
 				49954A42202D3173003748EC /* utility_functions.cpp */,
 				49954A1A202C3581003748EC /* image_utility.hpp */,
@@ -163,8 +165,6 @@
 				49954A25202C3582003748EC /* kalman.cpp */,
 				49954A26202C3582003748EC /* gaussian.hpp */,
 				49954A1F202C3582003748EC /* gaussian.cpp */,
-				49954A6D202D63CC003748EC /* sercom.h */,
-				49954A70202D63CC003748EC /* sercom.c */,
 			);
 			path = utilities;
 			sourceTree = "<group>";

@@ -22,32 +22,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "tau+/tau_core/rho_utility.cpp"
-            timestampString = "540711521.332574"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "269"
-            endingLineNumber = "269"
-            landmarkName = "Rho::analyzeDensity( DensityMap * d, PeakList * p )"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "tau+/tau_core/rho_utility.cpp"
-            timestampString = "540711521.332685"
+            timestampString = "540774362.020521"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "213"
-            endingLineNumber = "213"
-            landmarkName = "Rho::updateDensityKalman( DensityMap * d )"
+            startingLineNumber = "208"
+            endingLineNumber = "208"
+            landmarkName = "Rho::filterDensityPair()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
