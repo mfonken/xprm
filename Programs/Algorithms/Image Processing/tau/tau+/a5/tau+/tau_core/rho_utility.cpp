@@ -18,12 +18,13 @@
 //#define FOR(X,L) for( int X = L; X > 0; --X )
 #define FOR(X,L) for( int X = 0; X < L; X++)
 #define FORA(X,L,A) for( int X = L; X > 0; --X, A )
+#define ZDIV(X,Y) (!Y?2<<10:X/Y)
 
 using namespace cv;
 
 Rho::Rho( int width, int height ) : gaussian(DEFAULT_GAUSS_LEN), density_map_pair(width, height), frame(height, width, CV_8UC3, Scalar(0,0,0))
 {
-    printf("Initializing Rho Utility: %dx%d\n", width, height);
+    printf("Initializing Rho Utility: %dx%d & [%.3f, %.3f, %.3f]\n", width, height, RHO_K_TARGET, RHO_VARIANCE_NORMAL, RHO_VARIANCE_SCALE);
     this->width  = width;
     this->height = height;
     gaussian.generate( DEFAULT_GAUSS_LEN, DEFAULT_SIGMA);
@@ -39,8 +40,7 @@ void Rho::perform( cimage_t * img, PredictionPair * p )
     
     pthread_mutex_lock(&density_map_pair_mutex);
     generateDensityMapFromCImageWithQuadrantMasses();
-    getDensityMaxAndUpdateVariancePair();
-    filterAnalyzeAndSelectDensityPair(p);
+    getDensityMaxAndUpdateVarianceThenFilterAnalyzeAndSelectPeakPair(p);
     updatePredictions(p);
     pthread_mutex_unlock(&density_map_pair_mutex);
 }
@@ -100,35 +100,30 @@ void Rho::generateDensityMapFromCImageWithQuadrantMasses()
 #endif
 }
 
-void Rho::getDensityMaxAndUpdateVariancePair()
+
+void Rho::getDensityMaxAndUpdateVarianceThenFilterAnalyzeAndSelectPeakPair( PredictionPair * r )
 {
-    getDensityMaxAndUpdateVariance(&density_map_pair.x);
-    getDensityMaxAndUpdateVariance(&density_map_pair.y);
+    getDensityMaxAndUpdateVarianceThenFilterAnalyzeAndSelectPeak( &density_map_pair.x, &peak_list_pair.x, &r->x );
+    getDensityMaxAndUpdateVarianceThenFilterAnalyzeAndSelectPeak( &density_map_pair.y, &peak_list_pair.y, &r->y );
 }
 
-void Rho::getDensityMaxAndUpdateVariance( DensityMap * d )
+void Rho::getDensityMaxAndUpdateVarianceThenFilterAnalyzeAndSelectPeak( DensityMap * d, PeakList * p, Prediction * r )
 {
-    int l = d->length, c = 0, m = 0;
+    int l = d->length, c = 0, m = 0, t, v, g = 0;
     FORA(i,l,c = d->map[i]) if( c > m ) m = c;
+    d->kalman.update(m, 0.);
+    t = d->kalman.value;
+    v = RHO_VARIANCE_NORMAL * ( 1 + RHO_VARIANCE_SCALE*(RHO_K_TARGET - d->kalman.K[0]) );
+    if( v < t ) g = t - v;
+    
     d->max = m;
-    d->kalman.update(d->max, 0.);
-    d->variance = RHO_VARIANCE_NORMAL * ( 1 + RHO_VARIANCE_SCALE*(RHO_K_TARGET - d->kalman.K[0]) );
-}
-
-void Rho::filterAnalyzeAndSelectDensityPair( PredictionPair * r )
-{
-    filterAnalyzeAndSelectDensity( &density_map_pair.x, &peak_list_pair.x, &r->x );
-    filterAnalyzeAndSelectDensity( &density_map_pair.y, &peak_list_pair.y, &r->y );
-}
-
-void Rho::filterAnalyzeAndSelectDensity( DensityMap * d, PeakList * p, Prediction * r )
-{
-    int c1 = 0, c2 = 0, count = 0, t = d->kalman.value, v = d->variance, g = t - v, l = d->length;
+    d->variance = v;
+    
+    int c1 = 0, c2 = 0, count = 0;
     bool has = false;
     double cavg = 0, mavg = 0;
     
     QF = 0;
-    if(g < 0) g = 0;
     
     int denc = 0, locc = 0, maxc = 0;
     int den[] = {0,0}, loc[] = {0,0}, max[] = {0,0,0};
@@ -148,25 +143,22 @@ void Rho::filterAnalyzeAndSelectDensity( DensityMap * d, PeakList * p, Predictio
         }
         else if(has)
         {
-            if(p->length < MAX_PEAKS_RHO)
+            locc = (int)mavg/cavg;
+            denc = (int)cavg;
+
+            if( denc > den[0] )
             {
-                locc = (int)mavg/cavg;
-                denc = (int)cavg;
-                
-                if( denc > den[0] )
-                {
-                    loc[1] = loc[0]; loc[0] = locc;
-                    den[1] = den[0]; den[0] = denc;
-                    max[2] = max[1]; max[1] = max[0]; max[0] = maxc;
-                }
-                else if( denc > den[1] )
-                {
-                    loc[1] = locc;
-                    den[1] = denc;
-                    max[2] = max[1]; max[1] = maxc;
-                }
-                QF += cavg;
+                loc[1] = loc[0]; loc[0] = locc;
+                den[1] = den[0]; den[0] = denc;
+                max[2] = max[1]; max[1] = max[0]; max[0] = maxc;
             }
+            else if( denc > den[1] )
+            {
+                loc[1] = locc;
+                den[1] = denc;
+                max[2] = max[1]; max[1] = maxc;
+            }
+            QF += cavg;
             mavg = cavg = 0;
             count = 0;
             has = false;
@@ -182,12 +174,14 @@ void Rho::filterAnalyzeAndSelectDensity( DensityMap * d, PeakList * p, Predictio
     r->primary_new   = loc[0];
     r->secondary_new = loc[1];
     
-    r->probabilities.primary   = ((double)max[0])/v;
-    r->probabilities.secondary = ((double)max[1])/v;
+    double v_ = ZDIV(1.0,v);
+    
+    r->probabilities.primary   = ((double)max[0]) * v_;
+    r->probabilities.secondary = ((double)max[1]) * v_;
     
     double comp = 1 - FT/FILTERED_CONVERAGE_TARGET;
     if(comp < 0)
-        r->probabilities.alternate = ((double)max[2])/v;
+        r->probabilities.alternate = ((double)max[2]) * v_;
     else
         r->probabilities.alternate = comp;
 #ifdef RHO_DEBUG
@@ -206,16 +200,16 @@ void Rho::updatePredictions( PredictionPair * r )
 
     if( p1 > p2 )
     {
-        r->x.primary.update(Bx, 0.);//r->x.primary.velocity);
-        r->x.secondary.update(Ax, 0.);//r->x.secondary.velocity);
+        r->x.primary.update(Bx, 0.);
+        r->x.secondary.update(Ax, 0.);
         r->y.primary.update(Ay, 0.);
         r->y.secondary.update(By, 0.);
         r->selection_pair = OPPOSITE;
     }
     else
     {
-        r->x.primary.update(Ax, 0.);//r->x.primary.velocity);
-        r->x.secondary.update(Bx, 0.);//r->x.secondary.velocity);
+        r->x.primary.update(Ax, 0.);
+        r->x.secondary.update(Bx, 0.);
         r->y.primary.update(By, 0.);
         r->y.secondary.update(Ay, 0.);
         r->selection_pair = SIMILAR;

@@ -12,32 +12,23 @@
 #define TITLE_STRING   "Tau+ Alpha v0.1"
 
 /* GLOBAL SETUP */
-//#define SHOW_IMAGES
 //#define HAS_CAMERA
-//#define TIME_FULL_FRAME
 
 /* DEBUGGING */
 //#define MAIN_DEBUG
 //#define RHO_DEBUG
 //#define STATEM_DEBUG
-//#define KMAT_DEBUG
-//#define EXT_DEBUG
 //#define IMUT_DEBUG
 
-#ifndef SHOW_IMAGES
-#define ITERATIONS
+#ifndef HAS_CAMERA
+#define FISHEYE
 #endif
 
 #define MAX_PEAKS               3
 
-#define INIT_ITERATIONS         100     // Cycles
-
 #define CHAOS                   5
 #define NUM_OF_SELECTIONS       1
 
-#define TEXT_OFFSET_X 0//-26
-#define TEXT_OFFSET_Y 0// 18
-#define DETECT_BORDER_OFFSET 10
 #define STRENGTH 2.0
 #define ZOOM     1.1
 
@@ -54,20 +45,25 @@
 
 #define FILENAME                "/Users/matthewfonken/Desktop/out.txt"
 
-#define FRAME_DELAY_MS          100
 
 #define CAM_WIDTH               1280//1920
 #define CAM_HEIGHT              720//1080
 #define CAM_FRAME_RATE          60
-#define FNL_RESIZE_S            2
-#define FNL_RESIZE_W            700//CAM_WIDTH/FNL_RESIZE_S
-#define FNL_RESIZE_H            700//CAM_HEIGHT/FNL_RESIZE_S
+#define FNL_RESIZE_S            1
 
-#define THRESHOLD_MAX           254
+#ifdef HAS_CAMERA
+#define FNL_RESIZE_W            CAM_WIDTH/FNL_RESIZE_S
+#define FNL_RESIZE_H            CAM_HEIGHT/FNL_RESIZE_S
+#else
+#define FNL_RESIZE_W            700
+#define FNL_RESIZE_H            700
+#endif
+
+#define THRESHOLD_MAX           225
 #define THRESHOLD_MIN           150
 #define THRESH_STEP             1
 
-#define THRESHOLD               222
+#define THRESHOLD               205
 #define BRIGHTNESS              155
 
 /* TAU SETUP */

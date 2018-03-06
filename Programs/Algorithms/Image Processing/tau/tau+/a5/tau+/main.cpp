@@ -22,18 +22,22 @@ using namespace std;
 
 int main( int argc, const char * argv[] )
 {
-    ImageUtility utility("ImageUtility", "frames/small", 26, FNL_RESIZE_W, FNL_RESIZE_H);
+#ifdef HAS_CAMERA
+    ImageUtility utility("ImageUtility");
+#else
+    ImageUtility utility("ImageUtility", "frames/noiseS4", 22, FNL_RESIZE_W, FNL_RESIZE_H);
+#endif
     Tau tau("Tau", &utility, FNL_RESIZE_W, FNL_RESIZE_H);
     Combine combine("Combine", &tau, FNL_RESIZE_W, FNL_RESIZE_H);
     SerialWriter comm(SFILE, FILENAME);
     
-    Environment env(&utility, 15);
+    Environment env(&utility, 10);
     env.addTest(&tau, 60);
 //    env.addTest(&combine, &comm, 20);
     
     env.start();
-//    usleep(1000000);
-//    env.pause();
+    usleep(1000000);
+    env.pause();
     
     pthread_mutex_lock(&utility.outframe_mutex);
     TauDraw drawer(&tau, utility.outframe);
@@ -46,17 +50,10 @@ int main( int argc, const char * argv[] )
     {
         pthread_mutex_lock(&utility.outframe_mutex);
         drawer.drawDensitiesOnFrame(utility.outframe);
-        cv::Mat O;
-        drawer.frame.copyTo(O);
-        imshow("Outframe", O);
+        imshow("Outframe", drawer.frame);
         pthread_mutex_unlock(&utility.outframe_mutex);
-    
-        string xks = tau.predictions.x.primary.toString();
-        string yks = tau.predictions.x.secondary.toString();
-        Mat dataframe(34, 960, CV_8UC3, Scalar(245,245,245));
-        putText(dataframe, xks, Point(0,12), FONT_HERSHEY_PLAIN, 1, Scalar(15,15,15));
-        putText(dataframe, yks, Point(0,28), FONT_HERSHEY_PLAIN, 1, Scalar(15,15,15));
-        imshow("Kalman Data", dataframe);
+
+        drawer.drawKalmans();
         
         char c = waitKey(KEY_DELAY);
         switch(c)

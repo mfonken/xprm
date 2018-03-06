@@ -89,15 +89,20 @@ void Tau::updateThresh()
 
 void Tau::updatePrediction()
 {
-    Point2f a((double)predictions.x.primary.value,   (double)predictions.y.primary.value),
-            b((double)predictions.x.secondary.value, (double)predictions.y.secondary.value);
+    Point2f a((double)predictions.y.primary.value,   (double)predictions.x.primary.value),
+            b((double)predictions.y.secondary.value, (double)predictions.x.secondary.value);
+    if( a.x > b.x )
+    {
+        Point2f t = b;
+        b = a;
+        a = t;
+    }
+#ifdef FISHEYE
     invfisheye(&a, FNL_RESIZE_W, FNL_RESIZE_H, STRENGTH, ZOOM);
     invfisheye(&b, FNL_RESIZE_W, FNL_RESIZE_H, STRENGTH, ZOOM);
-    A = { a.y, a.x };
-    B = { b.y, b.x };
-    
-    putText(utility->outframe, "A", Point(A.x, A.y), FONT_HERSHEY_PLAIN, 2, Vec3b(0,5,10), 3);
-    putText(utility->outframe, "B", Point(B.x, B.y), FONT_HERSHEY_PLAIN, 2, Vec3b(0,10,5), 3);
+#endif
+    A = { a.x, a.y };
+    B = { b.x, b.y };
 }
 
 void Tau::updatePredictionFromPeaks()

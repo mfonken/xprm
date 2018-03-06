@@ -1,4 +1,4 @@
- //
+//
 //  tau_test.cpp
 //  tau+
 //
@@ -35,174 +35,6 @@ TauDraw::TauDraw( Tau * tau, Mat inframe )
     frame = N;
 }
 
-/*
-void TauDraw::drawTau(Mat M, DensityMapPair * m, PeakListPair * p, PredictionPair * e)
-{
-    int h       = m->x.length;
-    int w       = m->y.length;
-    int width   = M.rows;
-    int height  = M.cols;
-    
-    if( h > width )  h = width;
-    if( w > height ) w = height;
-    
-    double x_scale = 1;
-    double y_scale = 1;
-    
-    int pos = 0;
-    
-    int xp = e->x.primary.value;
-    int xs = e->x.secondary.value;
-    int yp = e->y.primary.value;
-    int ys = e->y.secondary.value;
-    
-    for(int x=0; x<h; x++)
-    {
-        pos = m->x.map[x] * x_scale * 2;
-        if(pos >= height) pos = height-1;
-        M.at<Vec3b>(x,pos) = pos_color;
-        
-    }
-    for(int i=0; i<p->x.length; i++)
-    {
-        int l = p->x.map[i];
-        for(int q = 0; q < p->x.den[i]; q++)
-        {
-//            int dir = p->x.dir[i];
-//            if( dir == 1) M.at<Vec3b>(l,q) = red;
-            else if( dir == 2 ) M.at<Vec3b>(l,q) = blue;
-            else M.at<Vec3b>(l,q) = white;
-        }
-    }
-    
-    for(int j=0; j<height; j++)
-    {
-        M.at<Vec3b>(xp,j) = ap;
-        M.at<Vec3b>(xs,j) = bp;
-    }
-    
-    for(int y=0; y<w; y++)
-    {
-        pos = m->y.map[y] * y_scale * 2;
-        if(pos >= height) pos = width-1;
-        M.at<Vec3b>(pos,y) = pos_color;
-    }
-    
-    for(int i=0; i<p->y.length; i++)
-    {
-        int l = p->y.map[i];
-        for(int q = 0; q < p->y.den[i]; q++)
-        {
-//            int dir = p->y.dir[i];
-//            if( dir == 1) M.at<Vec3b>(q,l) = red;
-            else if( dir == 2 ) M.at<Vec3b>(q,l) = blue;
-            else M.at<Vec3b>(q,l) = white;
-        }
-    }
-    
-    for(int j = 0; j < width; j++)
-    {
-        M.at<Vec3b>(j,yp) = ap;
-        M.at<Vec3b>(j,ys) = bp;
-    }
-    
-    Mat overlay;
-    float alpha = 0.3;
-    M.copyTo(overlay);
-    rectangle(overlay,Point(yp,xp), Point(ys,xs), Scalar(0,255,255), -1);
-    addWeighted(overlay, alpha, M, 1 - alpha, 0, M);
-    
-    imshow(TITLE_STRING, M);
-}
- */
-
-void TauDraw::drawDensityMaps(DensityMapPair * m)
-{
-    int MAX_DENSITY = 150;
-    int GAP = 10;
-    int xl = m->x.length, yl = m->y.length;
-    int xoh = GAP+MAX_DENSITY, yoh = 2*(GAP+MAX_DENSITY);
-    int width = xl > yl ? xl:yl, height = 2*MAX_DENSITY+3*GAP;
-    Mat M(height, width, CV_8UC3, Scalar(245,245,245));
-    Mat V(height, width, CV_8UC3, Scalar(245,245,245));
-    Mat A(height, width, CV_8UC3, Scalar(245,245,245));
-    
-    double map_f = 0.5;
-    
-    Point prev(0,0), curr(0,0);
-    line(M, Point(0,xoh), Point(width,xoh), Scalar::all(100), 1,8);
-    for(int x = 0; x < xl; x++)
-    {
-        int h = m->x.map[x]*map_f;
-        if(h > MAX_DENSITY) h = MAX_DENSITY;
-        else if( h < 0 ) h = 0;
-        curr.x = x;
-        curr.y = xoh-h;
-        line(M, Point(x,xoh), Point(x,xoh-h), Scalar::all(0), 1,8);
-        line(M, prev, curr, Scalar::all(0), 1,8);
-        prev = curr;
-    }
-    prev.x = 0;
-    prev.y = 0;
-    line(M, Point(0,yoh), Point(width,yoh), Scalar::all(100), 1,8);
-    for(int y = 0; y < yl; y++)
-    {
-        int h = m->y.map[y]*map_f;
-        if(h > MAX_DENSITY) h = MAX_DENSITY;
-        else if( h < 0 ) h = 0;
-        curr.x = y;
-        curr.y = yoh-h;
-        line(M, Point(y,yoh), Point(y,yoh-h), Scalar::all(0), 1,8);
-        line(M, prev, curr, Scalar::all(0), 1,8);
-        prev = curr;
-    }
-    
-    imshow("Density Maps", M);
-}
-
-void TauDraw::drawTiming( double *p, int n)
-{
-    const char *names[] = {"RHO", "SIGMA", "STATE"};
-    
-    int width = 1000, height = 36;
-    Mat O(height, width, CV_8UC3, Scalar(245,245,245));
-    
-    int colors[5][3] =  { { 255,   0, 255},
-        { 255, 255,   0},
-        {   0, 255,   0},
-        {   0, 255, 255},
-        {   0,   0, 255}
-    };
-    Vec3b color[5];
-    for(int i = 0; i < 5; i++)
-    {
-        color[i][0] = colors[i][0];
-        color[i][1] = colors[i][1];
-        color[i][2] = colors[i][2];
-    }
-    double total = p[n-1] - 0;
-    double scale = width/total;
-    
-    Mat overlay;
-    float alpha = 0.3;
-    O.copyTo(overlay);
-    char buff[32];
-    snprintf(buff, sizeof(buff), "TOTAL: %.4f(s)",total);
-    putText(overlay, buff, Point(width-135,height-2), FONT_HERSHEY_SIMPLEX, 0.5, Scalar::all(0), 1,8);
-    for(int i = 1; i < n; i++)
-    {
-        int a = p[i-1]*scale;
-        int b = p[i]*scale;
-        rectangle(overlay,Point(a,2), Point(b,20), color[i%5], -1);
-        snprintf(buff, sizeof(buff), "%i%% %s", (int)(((p[i]-p[i-1])/total)*100), names[(i-1)%3]);
-        std::string text = buff;
-        putText(overlay, text, Point(a,18), FONT_HERSHEY_SIMPLEX, 0.5, Scalar::all(0), 1,8);
-        
-    }
-    
-    addWeighted(overlay, alpha, O, 1 - alpha, 0, O);
-    imshow("Timing", O);
-}
 
 void TauDraw::drawDensitiesOnFrame(Mat M)
 {
@@ -210,26 +42,24 @@ void TauDraw::drawDensitiesOnFrame(Mat M)
     M.copyTo(frame(Rect(0,0,w,h)));
     drawDensityGraph(frame);
     drawDensityMaps(frame);
+    
+    putText(frame, "X", Point(tau->rho.comX, tau->rho.comY), FONT_HERSHEY_PLAIN, 2, Vec3b(0,255,255), 4);
 }
 
 void TauDraw::drawDensityGraph(Mat M)
 {
     int c, /*p1,*/ p2, u, v, o, f, w = tau->width, h = tau->height;
-    Vec3b greyish(25,25,25), bluish(255,255,100), greenish(100,255,100), redish(50,100,255), orangish(100,150,255), yellowish(100,255,255), white(255,255,255);
+    Vec3b greyish(100,90,90), bluish(255,255,100), greenish(100,255,100), redish(50,100,255), orangish(100,150,255), yellowish(100,255,255), white(255,255,255);
     
-//    tau->updatePrediction();
+    KalmanFilter yk = tau->rho.density_map_pair.x.kalman, xk = tau->rho.density_map_pair.y.kalman;
+    int mYv = tau->rho.density_map_pair.x.variance, mXv = tau->rho.density_map_pair.y.variance;
+
+    int m = OP_ALIGN((xk.value/DENSITY_SCALE),h), n = OP_ALIGN((yk.value/DENSITY_SCALE),w);
+    int mv1 = OP_ALIGN((mXv/DENSITY_SCALE),m), mv2 = OP_ALIGN(-(mXv/DENSITY_SCALE),m), nv1 = OP_ALIGN((mYv/DENSITY_SCALE),n), nv2 = OP_ALIGN(-(mYv/DENSITY_SCALE),n);
+
+//    int min_thresh = 10;
+//    int nt = h-min_thresh, mt = w-min_thresh;
     
-    KalmanFilter xk = tau->rho.density_map_pair.x.kalman, yk = tau->rho.density_map_pair.y.kalman;
-    int mXv = tau->rho.density_map_pair.x.variance, mYv = tau->rho.density_map_pair.y.variance;
-
-    int min_thresh = 10;
-    int n = h-(xk.value/DENSITY_SCALE), m = w-(yk.value/DENSITY_SCALE);
-    int nt = h-min_thresh, mt = w-min_thresh;
-
-    int nv1 = n-(mXv/DENSITY_SCALE), nv2 = n+(mXv/DENSITY_SCALE), mv1 = m-(mYv/DENSITY_SCALE), mv2 = m+(mYv/DENSITY_SCALE);
-
-    
-//    int *dX = tau->rho.density_map_pair.x.map, *dY = tau->rho.density_map_pair.y.map;
     pthread_mutex_lock(&tau->rho.density_map_pair_mutex);
     int dX[h], dY[w], fX[h], fY[w];
     for( int y = 0; y < h; y++ )
@@ -244,44 +74,42 @@ void TauDraw::drawDensityGraph(Mat M)
     }
     pthread_mutex_unlock(&tau->rho.density_map_pair_mutex);
     
-    line(M, Point(n,0), Point(n,W), orangish);
-    line(M, Point(nv1,0), Point(nv1,W), yellowish);
-    line(M, Point(nv2,0), Point(nv2,W), yellowish);
+    line(M, Point(n,0), Point(n,H), orangish);
+    line(M, Point(nv1,0), Point(nv1,H), yellowish);
+    line(M, Point(nv2,0), Point(nv2,H), yellowish);
     for( int y = 0, p1 = p2 = 0; y < h; y++ )
     {
-        u = INR(w-(fX[y]/DENSITY_SCALE),M.rows);
-        v = INR(w-(dX[y]/DENSITY_SCALE),M.rows);
+        u = INR(OP_ALIGN((fX[y]/DENSITY_SCALE),M.cols),w);
+        v = INR(OP_ALIGN((dX[y]/DENSITY_SCALE),M.cols),w);
         o = abs(n - u);
-        c = INR(n+o,M.rows);
+        c = INR(n+o,M.cols);
 
-        if(c>nv2)M.at<Vec3b>(y,c) = greyish;
+        if(c>nv2)M.at<Vec3b>(y,c) = redish;
         else M.at<Vec3b>(y,c) = bluish;
         if(u<n) M.at<Vec3b>(y,v) = redish;
 
-        f = w-(dX[y]/DENSITY_SCALE);
-        if(f < 0) f = 0; if(f >= w) f = w-1;
+        f = INR(OP_ALIGN((dX[y]/DENSITY_SCALE),w),w);
         M.at<Vec3b>(y,f) = white;
 //        if(c < nt && p1 < c && p1 <= p2) line(M, Point(0,y), Point(w,y), greenish);
         p2 = p1;
         p1 = c;
     }
 
-    line(M, Point(0,m), Point(H,m), orangish);
-    line(M, Point(0,mv1), Point(H,mv1), yellowish);
-    line(M, Point(0,mv2), Point(H,mv2), yellowish);
+    line(M, Point(0,m), Point(W,m), orangish);
+    line(M, Point(0,mv1), Point(W,mv1), yellowish);
+    line(M, Point(0,mv2), Point(W,mv2), yellowish);
     for( int x = 0, p1 = p2 = 0; x < w; x++ )
     {
-        u = INR(h-(fY[x]/DENSITY_SCALE),M.cols);
-        v = INR(h-(dY[x]/DENSITY_SCALE),M.cols);
+        u = INR(OP_ALIGN((fY[x]/DENSITY_SCALE),M.rows),h);
+        v = INR(OP_ALIGN((dY[x]/DENSITY_SCALE),M.rows),h);
         o = abs(m - u);
-        c = INR(m+o,M.cols);
+        c = INR(m+o,M.rows);
 
-        if(c>mv2) M.at<Vec3b>(c,x) = greyish;
+        if(c>mv2) M.at<Vec3b>(c,x) = redish;
         else M.at<Vec3b>(c,x) = bluish;
         if(u<m) M.at<Vec3b>(v,x) = redish;
 
-        f = h-(dY[x]/DENSITY_SCALE);
-        if(f < 0) f = 0; if(f >= h) f = w-1;
+        f = INR(OP_ALIGN((dY[x]/DENSITY_SCALE),h),h);
         M.at<Vec3b>(f,x) = white;
 //        if(c < mt && p1 < c && p1 <= p2) line(M, Point(x,0), Point(x,h), greenish);
         p2 = p1;
@@ -301,9 +129,8 @@ void TauDraw::drawDensityGraph(Mat M)
 //    line(M, Point(b.y, 0), Point(b.y, h), bluish);
 //    line(M, Point(0, a.x), Point(w, a.x), bluish);
 //    line(M, Point(0, b.x), Point(w, b.x), bluish);
-    
-    putText(M, "A", Point(a.y, a.x), FONT_HERSHEY_PLAIN, 2, Vec3b(0,55,255), 3);
-    putText(M, "B", Point(b.y, b.x), FONT_HERSHEY_PLAIN, 2, Vec3b(0,255,55), 3);
+    putText(M, "A", Point(tau->A.x, tau->A.y), FONT_HERSHEY_PLAIN, 2, Vec3b(0,55,150), 3);
+    putText(M, "B", Point(tau->B.x, tau->B.y), FONT_HERSHEY_PLAIN, 2, Vec3b(0,150,55), 3);
 }
 
 void TauDraw::drawDensityMaps(Mat M)
@@ -320,6 +147,8 @@ void TauDraw::drawDensityMaps(Mat M)
         a = (double)dX[y];
         b = (double)mX;
         int v = (a/b) * 255;
+        if(v > 255)
+            v++;
 //        int v = (double)dX[y]/(double)mX * 255;
         c = densityColor(v);
         line(M, Point(w,y), Point(W,y), c);
@@ -367,4 +196,14 @@ Vec3b TauDraw::hsv2bgr(Vec3b hsv)
     }
     
     return Vec3b(r*255,g*255,b*255);
+}
+
+void TauDraw::drawKalmans()
+{
+    string xks = tau->predictions.x.primary.toString();
+    string yks = tau->predictions.x.secondary.toString();
+    Mat dataframe(34, 960, CV_8UC3, Scalar(245,245,245));
+    putText(dataframe, xks, Point(0,12), FONT_HERSHEY_PLAIN, 1, Scalar(15,15,15));
+    putText(dataframe, yks, Point(0,28), FONT_HERSHEY_PLAIN, 1, Scalar(15,15,15));
+    imshow("Kalman Data", dataframe);
 }

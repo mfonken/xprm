@@ -31,7 +31,8 @@
 #define MAX_BLOBS 10
 
 #define INR(X,H)     INRLH(X,0,H)
-#define INRLH(X,L,H) (X>=H)?H-1:((X<L)?L:X)
+#define INRLH(X,L,H) ((X>=H)?H-1:((X<L)?L:X))
+#define OP_ALIGN(X,Y) (Y-X)
 
 using namespace cv;
 //
@@ -43,15 +44,13 @@ public:
     int w, h, W, H;
     
     TauDraw( Tau * tau, cv::Mat );
-    void drawTau(Mat M, DensityMapPair * m, PeakListPair * p, PredictionPair * e);
-    void drawDensityMaps(DensityMapPair * m);
-    void drawTiming( double *p, int n);
     void drawDensitiesOnFrame(Mat);
     void drawDensityGraph(Mat M);
     void drawDensityMaps(Mat M);
     Vec3b densityColor( int v );
     int pixelDensity( Vec3b p );
     Vec3b hsv2bgr(Vec3b hsv);
+    void drawKalmans();
 };
 
 #endif /* tau_test_hpp */

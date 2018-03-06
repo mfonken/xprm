@@ -18,15 +18,18 @@
 
 /* Global Included */
 #include "global_types.h"
+#include "test_setup.h"
 #include "tau_structures.hpp"
 #include "gaussian.hpp"
 #include "kalman.hpp"
 
 #include "utility_functions.hpp"
 
-#define RHO_K_TARGET        0.3
-#define RHO_VARIANCE_NORMAL 5
-#define RHO_VARIANCE_SCALE  20
+#define RHO_DIM_INFLUENCE   0.1
+#define RHO_K_TARGET_IND    0.3
+#define RHO_K_TARGET        RHO_K_TARGET_IND+(10/sqrt(FNL_RESIZE_H)*RHO_DIM_INFLUENCE)          //0.3
+#define RHO_VARIANCE_NORMAL sqrt(FNL_RESIZE_H)/5.0             //5
+#define RHO_VARIANCE_SCALE  sqrt(FNL_RESIZE_H)/3.0//1.32        //20
 
 #define RHO_PUNISH_FACTOR   5
 
@@ -52,28 +55,18 @@ public:
     pthread_mutex_t         density_map_pair_mutex;
     PeakListPair            peak_list_pair;
     Gaussian                gaussian;
-    KalmanFilter        KAx, KAy, KBx, KBy;
     PredictionPair      rho_predictions;
     
     Rho( int, int );
     void perform( cimage_t *, PredictionPair * );
     void perform( cv::Mat, PredictionPair * );
     void generateCenterOfMass( PredictionPair * );
+    
     void generateDensityMap();
     void generateDensityMapFromCImage();
     void generateDensityMapFromCImageWithQuadrantMasses();
-    void getDensityMaxAndUpdateVariancePair();
-    void getDensityMaxAndUpdateVariance( DensityMap * );
-    void updateDensityKalmanPair();
-    void updateDensityKalman( DensityMap * );
-    void filterDensityPair();
-    void filterDensity( DensityMap * );
-    void analyzeDensityPair();
-    void analyzeDensity( DensityMap *, PeakList * );
-    void filterAnalyzeAndSelectDensityPair( PredictionPair * r );
-    void filterAnalyzeAndSelectDensity( DensityMap *, PeakList *, Prediction * );
-    void selectPeakListPair( PredictionPair * );
-    void selectPeakList( double, PeakList *, Prediction * );
+    void getDensityMaxAndUpdateVarianceThenFilterAnalyzeAndSelectPeakPair( PredictionPair * );
+    void getDensityMaxAndUpdateVarianceThenFilterAnalyzeAndSelectPeak( DensityMap *, PeakList *, Prediction * );
     void updatePredictions( PredictionPair * );
 };
 
