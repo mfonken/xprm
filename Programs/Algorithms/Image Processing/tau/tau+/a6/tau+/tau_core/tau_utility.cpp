@@ -114,7 +114,7 @@ void Tau::updatePredictionFromPeaks()
     predictions.x.secondary.value = rho.peak_list_pair.x.map[1];
     predictions.y.secondary.value = rho.peak_list_pair.y.map[1];
     
-    Point2f a((double)predictions.x.primary.value,   (double)predictions.y.primary.value),
+    Point2f a((double)predictions.x.primary.value,   (double)predictions.y.primary.value  ),
             b((double)predictions.x.secondary.value, (double)predictions.y.secondary.value);
     
     putText(utility->outframe, "A", Point(a.y, a.x), FONT_HERSHEY_PLAIN, 2, Vec3b(0,55,255), 3);

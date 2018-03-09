@@ -15,6 +15,8 @@
 
 /* RHO PIXEL CHECK */
 #define RPC(X) if(X&0xf8)
+#define RPCB(X,Y) {RPC(X){Q##Y++;mapy[x]++;}}
+
 //#define FOR(X,L) for( int X = L; X > 0; --X )
 #define FOR(X,L) for( int X = 0; X < L; X++)
 #define FORA(X,L,A) for( int X = L; X > 0; --X, A )
@@ -66,30 +68,31 @@ void Rho::generateDensityMapFromCImageWithQuadrantMasses()
     density_map_pair.y.length = w;
     density_map_pair.x.length = h;
     
-    int dR, y, x, p;
+    int y, x, p;
     
     pthread_mutex_lock(&c_mutex);
-    Q[0] = Q[1] = Q[2] = Q[3] = QT = dR = p = 0;
+    Q[0] = Q[1] = Q[2] = Q[3] = QT = p = 0;
     memset(mapy, 0, sizeof(int) * w);
     memset(mapx, 0, sizeof(int) * h);
-
-    unsigned char q = 0;
-    
-    for( y = 0, p = 0; y < h; y++ )
+    int Q0 = 0, Q1 = 0, Q2 = 0, Q3 = 0, QN = 0, QN_ = 0;
+    for( y = 0, p = 0; y < Cy; y++ )
     {
-        for( x = 0, dR = 0; x < w; x++)
-        {
-            RPC( image.pixels[p++] )
-            {
-                q = ( ( y < Cy ) << 1 ) + ( x < Cx );
-                dR      ++;
-                mapy[x] ++;
-                Q[q]    ++;
-            }
-        }
-        mapx[y] = dR;
+        for( x = 0; x < Cx; x++, p++ ) RPCB(image.pixels[p], 0);
+        for(      ; x <  w; x++, p++ ) RPCB(image.pixels[p], 1);
+        QN = Q0 + Q1;
+        mapx[y] = QN - QN_;
+        QN_ = QN;
+    }
+    for( ; y < h; y++ )
+    {
+        for( x = 0; x < Cx; x++, p++ ) RPCB(image.pixels[p], 2);
+        for(      ; x <  w; x++, p++ ) RPCB(image.pixels[p], 3);
+        QN = Q2 + Q3;
+        mapx[y] = QN - QN_;
+        QN_ = QN;
     }
     pthread_mutex_unlock(&c_mutex);
+    Q[0] = Q0; Q[1] = Q1; Q[2] = Q2; Q[3] = Q3;
     QT = Q[0] + Q[1] + Q[2] + Q[3];
 
 #ifdef RHO_DEBUG
@@ -124,6 +127,7 @@ void Rho::getDensityMaxAndUpdateVarianceThenFilterAnalyzeAndSelectPeak( DensityM
         den[]   = {0,0},
         loc[]   = {0,0},
         max[]   = {0,0,0};
+    
     double cavg = 0,
            mavg = 0;
     
