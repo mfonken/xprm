@@ -1,11 +1,3 @@
-//
-//  main.cpp
-//  tau+
-//
-//  Created by Matthew Fonken on 8/23/17.
-//  Copyright © 2017 Marbl. All rights reserved.
-//
-
 #include <stdio.h>
 #include <stdint.h>
 
@@ -32,8 +24,8 @@ int main( int argc, const char * argv[] )
     SerialWriter comm(SFILE, FILENAME);
     
     Environment env(&utility, 15);
-    env.addTest(&tau, 60);
-//    env.addTest(&combine, &comm, 20);
+    env.addTest( (TestInterface *)&tau, 60);
+    env.addTest(&combine, &comm, 20);
     
     env.start();
     usleep(1000000);
@@ -43,8 +35,8 @@ int main( int argc, const char * argv[] )
     TauDraw drawer(&tau, utility.outframe);
     pthread_mutex_unlock(&utility.outframe_mutex);
     
-//    usleep(1000000);
-//    env.resume();
+    usleep(1000000);
+    env.resume();
     
     while(1)
     {
@@ -55,8 +47,6 @@ int main( int argc, const char * argv[] )
         imshow("Rho Y Map", drawer.RMY);
         drawer.drawKalmans();
         pthread_mutex_unlock(&utility.outframe_mutex);
-
-//        drawer.drawKalmans();
         
         char c = waitKey(KEY_DELAY);
         switch(c)
@@ -83,7 +73,6 @@ int main( int argc, const char * argv[] )
                 printf("Tau averaged %fms for %d iterations\n", tau.avg*1000, tau.count);
                 break;
         }
-        
     }
     return 0;
 }

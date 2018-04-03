@@ -1,11 +1,3 @@
-//
-//  main.cpp
-//  tau+
-//
-//  Created by Matthew Fonken on 8/23/17.
-//  Copyright © 2017 Marbl. All rights reserved.
-//
-
 #include <stdio.h>
 #include <stdint.h>
 
@@ -28,11 +20,11 @@ int main( int argc, const char * argv[] )
     ImageUtility utility("ImageUtility", "frames/small", 26, FNL_RESIZE_W, FNL_RESIZE_H);
 #endif
     Tau tau("Tau", &utility, FNL_RESIZE_W, FNL_RESIZE_H);
-    Combine combine("Combine", &tau, FNL_RESIZE_W, FNL_RESIZE_H);
-    SerialWriter comm(SFILE, FILENAME);
+//    Combine combine("Combine", &tau, FNL_RESIZE_W, FNL_RESIZE_H);
+//    SerialWriter comm(SFILE, FILENAME);
     
     Environment env(&utility, 15);
-    env.addTest(&tau, 60);
+    env.addTest( (TestInterface *)&tau, 30);
 //    env.addTest(&combine, &comm, 20);
     
     env.start();
@@ -43,20 +35,18 @@ int main( int argc, const char * argv[] )
     TauDraw drawer(&tau, utility.outframe);
     pthread_mutex_unlock(&utility.outframe_mutex);
     
-//    usleep(1000000);
-//    env.resume();
+    usleep(1000000);
+    env.resume();
     
     while(1)
     {
         pthread_mutex_lock(&utility.outframe_mutex);
         drawer.drawDensitiesOnFrame(utility.outframe);
-        imshow("Outframe", drawer.frame);
+        imshow("Outframe",  drawer.frame);
         imshow("Rho X Map", drawer.RMX);
         imshow("Rho Y Map", drawer.RMY);
         drawer.drawKalmans();
         pthread_mutex_unlock(&utility.outframe_mutex);
-
-//        drawer.drawKalmans();
         
         char c = waitKey(KEY_DELAY);
         switch(c)
@@ -83,7 +73,6 @@ int main( int argc, const char * argv[] )
                 printf("Tau averaged %fms for %d iterations\n", tau.avg*1000, tau.count);
                 break;
         }
-        
     }
     return 0;
 }
