@@ -15,7 +15,7 @@
 
 using namespace cv;
 
-#define TARGET  0.004//1000
+#define TARGET  0.007//1000
 #define RANGE   0.50//50
 
 #define RSCALE  10000
@@ -82,10 +82,9 @@ int main(int argc, const char * argv[])
         
         RhoPID.Update(&PID, actual, target);
         
-//        printf("(%4d) actual:%3.6f target:%3.6f | ", i+1, actual, target);
+        printf("(%4d) actual:%3.6f target:%3.6f value:%3.4f | ", i+1, actual, target, PID.Value);
 //        RhoPID.Print(&PID);
-//        printf("\n");
-        
+        printf("\n");
         actual -= PID.Value;
         
         a.x = x;
