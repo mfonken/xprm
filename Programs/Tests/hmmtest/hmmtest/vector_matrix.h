@@ -9,8 +9,6 @@
 #ifndef gmm_vector_matrix_h
 #define gmm_vector_matrix_h
 
-#include "control_types.h"
-
 typedef struct
 {
     double a,b,c,d;
@@ -111,7 +109,5 @@ static double CalculateMahalanobisDistanceSquared(mat2x2 * inv_covariance, vec2 
     vec2DotVec2(delta, &inv_covariance_delta, & mahalanobis_distance_squared);
     return mahalanobis_distance_squared;
 }
-
-
 
 #endif /* gmm_vector_matrix_h */

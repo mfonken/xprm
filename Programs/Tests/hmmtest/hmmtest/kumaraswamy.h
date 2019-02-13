@@ -9,7 +9,7 @@
 #ifndef kumaraswamy_h
 #define kumaraswamy_h
 
-#define KUMARASWAMY_CDF(X,A,B) (1 - pow( 1 - pow( X, A ), B))
+#define KUMARASWAMY_CDF(X,A,B) ( 1 - pow( 1 - pow( X, A ), B) )
 
 typedef struct
 {
@@ -27,7 +27,7 @@ static inline double PerformKumaraswamyCDF( kumaraswamy_t * k, double x )
     return KUMARASWAMY_CDF( x, k->alpha, k->beta );
 }
 
-static inline void GetKumaraswamyVector( kumaraswamy_t * k, double alpha, double * interval, double * boundary, uint8_t num_intervals ) // boundaries are between 0 to 1
+static void GetKumaraswamyVector( kumaraswamy_t * k, double alpha, double * interval, double * boundary, uint8_t num_intervals ) // boundaries are between 0 to 1
 {
     k->alpha = alpha;
     double curr_CDF, prev_CDF = 0.;
@@ -38,7 +38,5 @@ static inline void GetKumaraswamyVector( kumaraswamy_t * k, double alpha, double
         prev_CDF = curr_CDF;
     }
 }
-
-
 
 #endif /* kumaraswamy_h */

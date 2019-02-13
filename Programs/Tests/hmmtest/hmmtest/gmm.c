@@ -32,25 +32,8 @@ void UpdateGaussianMixtureCluster( gaussian_mixture_cluster_t * cluster, vec2 * 
     cluster->score += weight * ( cluster->probability_condition_input - cluster->score );
     weight = ALPHA * cluster->probability_condition_input;
     
-    vec2 mean_in_delta, mean_out_delta;
-    vec2SubVec2( input, &cluster->gaussian_in.mean, &mean_in_delta );
-    scalarMulVec2( weight, &mean_in_delta, &cluster->gaussian_in.mean );
-    vec2SubVec2( output, &cluster->gaussian_out.mean, &mean_out_delta );
-    scalarMulVec2( weight, &mean_out_delta, &cluster->gaussian_out.mean );
-    
-    double delta_mean_in_factor = ( mean_in_delta.a * mean_in_delta.a ) + ( mean_in_delta.b * mean_in_delta.b );
-    mat2x2 covariance_delta_factor, unweighted_in_covariance_factor =
-    { delta_mean_in_factor, SMALL_VALUE_ERROR_OFFSET, SMALL_VALUE_ERROR_OFFSET, SMALL_VALUE_ERROR_OFFSET };
-    mat2x2SubMat2x2( &unweighted_in_covariance_factor, &cluster->gaussian_in.covariance, &covariance_delta_factor );
-    scalarMulMat2x2( weight, &covariance_delta_factor, &covariance_delta_factor );
-    mat2x2AddMat2x2( &cluster->gaussian_in.covariance, &covariance_delta_factor, &cluster->gaussian_in.covariance );
-    
-    double delta_mean_in_out_factor = ( mean_in_delta.a * mean_out_delta.a ) + ( mean_in_delta.b * mean_out_delta.b );
-    mat2x2 unweighted_in_out_covariance_factor =
-    { delta_mean_in_out_factor, SMALL_VALUE_ERROR_OFFSET, SMALL_VALUE_ERROR_OFFSET, SMALL_VALUE_ERROR_OFFSET };
-    mat2x2SubMat2x2( &unweighted_in_out_covariance_factor, &cluster->gaussian_in.covariance, &covariance_delta_factor );
-    scalarMulMat2x2( weight, &covariance_delta_factor, &covariance_delta_factor );
-    mat2x2AddMat2x2( &cluster->gaussian_out.covariance, &covariance_delta_factor, &cluster->gaussian_out.covariance );
+    UpdateCovarianceWithWeight(  input, &cluster->gaussian_in,  weight );
+    UpdateCovarianceWithWeight( output, &cluster->gaussian_out, weight );
     
     GMMFunctions.Cluster.UpdateNormal( cluster );
     
@@ -87,7 +70,6 @@ void ContributeToOutputOfGaussianMixtureCluster( gaussian_mixture_cluster_t * cl
     scalarMulVec2( cluster->probability_condition_input, &pre_condition, &pre_output );
     vec2AddVec2( output, &pre_output, output);
 }
-
 double GetScoreSumOfClustersInGaussianMixtureModel( gaussian_mixture_model_t * model, vec2 * input )
 {
     double score_sum = 0;

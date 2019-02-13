@@ -11,16 +11,6 @@
 
 #include "control_types.h"
 
-static float safe_exp(double x)
-{
-    if (x < -UNCALCULABILTY_BOUND_FOR_SAFE_EXPONENT)
-        return 0.0f;
-    else if (x > UNCALCULABILTY_BOUND_FOR_SAFE_EXPONENT)
-        return SAFE_EXPONENT_MAX_VALUE;
-    else
-        return exp(x);
-}
-
 /* Cluster functions */
 void InitializeGaussianMixtureCluster(                 gaussian_mixture_cluster_t *, vec2 *, vec2 *, double );
 void UpdateGaussianMixtureCluster(                     gaussian_mixture_cluster_t *, vec2 *, vec2 * );

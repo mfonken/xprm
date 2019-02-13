@@ -11,6 +11,7 @@
 		34F91E832210EDD200F8CBBE /* hmm.c in Sources */ = {isa = PBXBuildFile; fileRef = 34F91E822210EDD200F8CBBE /* hmm.c */; };
 		34F91E8822127D8000F8CBBE /* state_machine_utility.c in Sources */ = {isa = PBXBuildFile; fileRef = 34F91E8722127D8000F8CBBE /* state_machine_utility.c */; };
 		34F91E8C221293D000F8CBBE /* gmm.c in Sources */ = {isa = PBXBuildFile; fileRef = 34F91E8B221293D000F8CBBE /* gmm.c */; };
+		34F91E902213E46D00F8CBBE /* psm.c in Sources */ = {isa = PBXBuildFile; fileRef = 34F91E8F2213E46D00F8CBBE /* psm.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -37,6 +38,8 @@
 		34F91E8A221293D000F8CBBE /* gmm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gmm.h; sourceTree = "<group>"; };
 		34F91E8B221293D000F8CBBE /* gmm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gmm.c; sourceTree = "<group>"; };
 		34F91E8D221294D700F8CBBE /* control_types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = control_types.h; sourceTree = "<group>"; };
+		34F91E8E2213E46D00F8CBBE /* psm.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = psm.h; sourceTree = "<group>"; };
+		34F91E8F2213E46D00F8CBBE /* psm.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = psm.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,6 +80,8 @@
 				34F91E8B221293D000F8CBBE /* gmm.c */,
 				34F91E812210EDD200F8CBBE /* hmm.h */,
 				34F91E822210EDD200F8CBBE /* hmm.c */,
+				34F91E8E2213E46D00F8CBBE /* psm.h */,
+				34F91E8F2213E46D00F8CBBE /* psm.c */,
 				34F91E8522127D8000F8CBBE /* state_control */,
 			);
 			path = hmmtest;
@@ -149,6 +154,7 @@
 			files = (
 				34F91E832210EDD200F8CBBE /* hmm.c in Sources */,
 				34F91E8822127D8000F8CBBE /* state_machine_utility.c in Sources */,
+				34F91E902213E46D00F8CBBE /* psm.c in Sources */,
 				34F91E7B2210EDBB00F8CBBE /* main.cpp in Sources */,
 				34F91E8C221293D000F8CBBE /* gmm.c in Sources */,
 			);
