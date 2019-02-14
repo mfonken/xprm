@@ -39,6 +39,11 @@
 #define UNCALCULABILTY_BOUND_FOR_SAFE_EXPONENT 30.
 #define SAFE_EXPONENT_MAX_VALUE 2.35385266837019985408e17f
 
+#define MAX_LABELS 10
+#define LABEL_MOVING_AVERAGE_MAX_HISTORY 10
+#define NULL_LABEL 0xff
+#define MIN_LABEL_CONTRIBUTION 0.1
+
 static float safe_exp(double x)
 {
     if (x < -UNCALCULABILTY_BOUND_FOR_SAFE_EXPONENT)
@@ -57,6 +62,18 @@ typedef struct
 
 typedef struct
 {
+    double a, b;
+    uint8_t label;
+} observation_t;
+
+typedef struct
+{
+    double average[MAX_LABELS];
+    uint8_t count[MAX_LABELS];
+} label_manager_t;
+
+typedef struct
+{
     gaussian2d_t
         gaussian_in,
         gaussian_out;
@@ -68,6 +85,7 @@ typedef struct
     mat2x2
         inv_covariance_in,
         llt_in;
+    label_manager_t labels;
 } gaussian_mixture_cluster_t;
 
 typedef struct
@@ -86,7 +104,7 @@ typedef struct
 typedef struct
 {
     double map[NUM_OBSERVATION_SYMBOLS][NUM_STATES];
-    uint8_t num_observation_symbols, num_states;
+    uint8_t num_observation_symbols;
 } observation_matrix_t;
 
 typedef struct
@@ -106,13 +124,13 @@ typedef struct
 } hidden_markov_model_t;
 
 typedef struct
-{
+{ /* Predictive State Model */
     gaussian_mixture_model_t gmm;
     hidden_markov_model_t hmm;
     kumaraswamy_t kumaraswamy;
-} pcr_state_prediction_model_t;
+} psm_t;
 
-void UpdateCovarianceWithWeight( vec2 * new_val, gaussian2d_t * gaussian, double weight )
+static void UpdateCovarianceWithWeight( vec2 * new_val, gaussian2d_t * gaussian, double weight )
 {
     vec2 delta_mean;
     vec2SubVec2( new_val, &gaussian->mean, &delta_mean );
@@ -124,6 +142,51 @@ void UpdateCovarianceWithWeight( vec2 * new_val, gaussian2d_t * gaussian, double
     mat2x2SubMat2x2( &unweighted_covariance_factor, &gaussian->covariance, &covariance_delta_factor );
     scalarMulMat2x2( weight, &covariance_delta_factor, &covariance_delta_factor );
     mat2x2AddMat2x2( &gaussian->covariance, &covariance_delta_factor, &gaussian->covariance );
+}
+
+static bool ReportLabel( label_manager_t * labels, uint8_t new_label )
+{
+    if( new_label > MAX_LABELS ) return false;
+    labels->count[new_label]++;
+    double sum = 0;
+    for( uint8_t i = 0; i < MAX_LABELS; i++ )
+        sum += (double)labels->count[i];
+    for( uint8_t i = 0; i < MAX_LABELS; i++ )
+        labels->average[i] = (double)labels->count[i] / sum;
+    return true;
+}
+
+static void GetTopTwoLabels( label_manager_t * labels, uint8_t * first, uint8_t * second )
+{
+    *first = 0; *second = 1;
+    double first_value = labels->average[0], second_value = labels->average[1], current = 0.;
+    for( uint8_t i = 2; i < MAX_LABELS; i++ )
+    {
+        current = labels->average[i];
+        if( current > first_value )
+        {
+            second_value = first_value;
+            *second = *first;
+            first_value = current;
+            *first = i;
+        }
+        else if ( current > second_value )
+        {
+            second_value = current;
+            *second = i;
+        }
+    }
+}
+
+static uint8_t GetNumLabels( label_manager_t * labels )
+{
+    uint8_t num = 0;
+    for( uint8_t i = 0; i < MAX_LABELS; i++ )
+    {
+        if( labels->average[i] > MIN_LABEL_CONTRIBUTION )
+            num++;
+    }
+    return num;
 }
 
 #endif /* control_types_h */

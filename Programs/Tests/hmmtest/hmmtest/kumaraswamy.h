@@ -16,9 +16,8 @@ typedef struct
     double alpha, beta;
 } kumaraswamy_t;
 
-void InitializeKumaraswamy( kumaraswamy_t * k, double alpha, double beta )
+static void InitializeKumaraswamy( kumaraswamy_t * k, double beta )
 {
-    k->alpha = alpha;
     k->beta = beta;
 }
 
@@ -38,5 +37,19 @@ static void GetKumaraswamyVector( kumaraswamy_t * k, double alpha, double * inte
         prev_CDF = curr_CDF;
     }
 }
+
+typedef struct
+{
+    void (*Initialize)( kumaraswamy_t *, double );
+    double(*PerformCDF)( kumaraswamy_t *, double );
+    void (*GetVector)( kumaraswamy_t *, double, double *, double *, uint8_t );
+} kumaraswamy_functions_t;
+
+static const kumaraswamy_functions_t KumaraswamyFunctions =
+{
+    .Initialize = InitializeKumaraswamy,
+    .PerformCDF = PerformKumaraswamyCDF,
+    .GetVector = GetKumaraswamyVector
+};
 
 #endif /* kumaraswamy_h */
