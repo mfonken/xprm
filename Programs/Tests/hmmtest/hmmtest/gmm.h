@@ -9,7 +9,11 @@
 #ifndef gmm_h
 #define gmm_h
 
-#include "control_types.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "fsm.h"
 
 /* Cluster functions */
 void InitializeGaussianMixtureCluster(                 gaussian_mixture_cluster_t *, observation_t *, vec2 *, double );
@@ -18,6 +22,8 @@ void GetScoreOfGaussianMixtureCluster(                 gaussian_mixture_cluster_
 void UpdateNormalOfGaussianMixtureCluster(             gaussian_mixture_cluster_t * );
 void UpdateInputProbabilityOfGaussianMixtureCluster(   gaussian_mixture_cluster_t *, double );
 void ContributeToOutputOfGaussianMixtureCluster(       gaussian_mixture_cluster_t *, vec2 *, vec2 * );
+void UpdateLimitsOfGaussianMixtureCluster(             gaussian_mixture_cluster_t * );
+void WeighGaussianMixtureCluster(                      gaussian_mixture_cluster_t * );
 
 /* Model functions */
 void InitializeGaussianMixtureModel(                   gaussian_mixture_model_t * );
@@ -27,6 +33,7 @@ double GetMaxErrorOfGaussianMixtureModel(              gaussian_mixture_model_t 
 void AddClusterToGaussianMixtureModel(                 gaussian_mixture_model_t *, observation_t *, vec2 * );
 void UpdateGaussianMixtureModel(                       gaussian_mixture_model_t *, observation_t *, vec2 * );
 void AddValueToGaussianMixtureModel(                   gaussian_mixture_model_t *, observation_t *, vec2 * );
+void SortClusterBoundariesOfGaussianMixtureModel(      gaussian_mixture_model_t *, cluster_boundary_list_t * );
 
 typedef struct
 {
@@ -36,6 +43,8 @@ typedef struct
     void (*UpdateNormal)(               gaussian_mixture_cluster_t * );
     void (*UpdateInputProbability)(     gaussian_mixture_cluster_t *, double );
     void (*ContributeToOutput)(         gaussian_mixture_cluster_t *, vec2 *, vec2 * );
+    void (*UpdateLimits)(               gaussian_mixture_cluster_t * );
+    void (*Weigh)(                      gaussian_mixture_cluster_t * );
 } gaussian_mixture_cluster_functions;
 
 typedef struct
@@ -47,6 +56,7 @@ typedef struct
     void   (*AddCluster)(               gaussian_mixture_model_t *, observation_t *, vec2 * );
     void   (*Update)(                   gaussian_mixture_model_t *, observation_t *, vec2 * );
     void   (*AddValue)(                 gaussian_mixture_model_t *, observation_t *, vec2 * );
+    void   (*SortClusterBoundaries)(    gaussian_mixture_model_t *, cluster_boundary_list_t * );
 } gaussian_mixture_model_functions;
 
 typedef struct
@@ -63,6 +73,8 @@ static gaussian_mixture_functions GMMFunctions =
     .Cluster.UpdateNormal           = UpdateNormalOfGaussianMixtureCluster,
     .Cluster.UpdateInputProbability = UpdateInputProbabilityOfGaussianMixtureCluster,
     .Cluster.ContributeToOutput     = ContributeToOutputOfGaussianMixtureCluster,
+    .Cluster.UpdateLimits           = UpdateLimitsOfGaussianMixtureCluster,
+    .Cluster.Weigh                  = WeighGaussianMixtureCluster,
     
     .Model.Initialize               = InitializeGaussianMixtureModel,
     .Model.GetScoreSumOfClusters    = GetScoreSumOfClustersInGaussianMixtureModel,
@@ -71,6 +83,11 @@ static gaussian_mixture_functions GMMFunctions =
     .Model.AddCluster               = AddClusterToGaussianMixtureModel,
     .Model.Update                   = UpdateGaussianMixtureModel,
     .Model.AddValue                 = AddValueToGaussianMixtureModel,
+    .Model.SortClusterBoundaries    = SortClusterBoundariesOfGaussianMixtureModel,
 };
 
+#ifdef __cplusplus
+}
+#endif
+    
 #endif /* gmm_h */

@@ -40,6 +40,7 @@ void UpdateGaussianMixtureCluster( gaussian_mixture_cluster_t * cluster, observa
     UpdateCovarianceWithWeight( output, &cluster->gaussian_out, weight );
     
     GMMFunctions.Cluster.UpdateNormal( cluster );
+    GMMFunctions.Cluster.UpdateLimits( cluster );
     
     GetMat2x2LLT( &cluster->gaussian_in.covariance, &cluster->llt_in );
     getMat2x2Inverse( &cluster->gaussian_in.covariance, &cluster->inv_covariance_in );
@@ -75,6 +76,34 @@ void ContributeToOutputOfGaussianMixtureCluster( gaussian_mixture_cluster_t * cl
     vec2AddVec2( &cluster->gaussian_out.mean, &input_covariance, &pre_condition);
     scalarMulVec2( cluster->probability_condition_input, &pre_condition, &pre_output );
     vec2AddVec2( output, &pre_output, output);
+}
+void UpdateLimitsOfGaussianMixtureCluster( gaussian_mixture_cluster_t * cluster )
+{
+    double radius_y = cluster->gaussian_out.covariance.d * VALID_CLUSTER_STD_DEV;
+    cluster->max_y = cluster->gaussian_out.mean.b + radius_y;
+    cluster->min_y = cluster->gaussian_out.mean.b - radius_y;
+}
+void WeighGaussianMixtureCluster( gaussian_mixture_cluster_t * cluster )
+{
+    /* Find best two label contributes */
+    double first = cluster->labels.average[0], second = 0.;
+    for( uint8_t i = 1; i < MAX_LABELS; i++ )
+    {
+        double check = cluster->labels.average[i];
+        if( check > first )
+        {
+            second = first;
+            first = check;
+        }
+        else if ( check > second )
+            second = check;
+    }
+    double a = ( cluster->gaussian_out.covariance.b * cluster->gaussian_out.covariance.c ),
+    b = ( cluster->gaussian_out.covariance.a * cluster->gaussian_out.covariance.d );
+    double eccentricity_factor = a / b;
+    cluster->weight = ( first + second ) * eccentricity_factor;
+    cluster->primary_id = first;
+    cluster->secondary_id = second;
 }
 
 void InitializeGaussianMixtureModel( gaussian_mixture_model_t * model )
@@ -147,4 +176,54 @@ void AddValueToGaussianMixtureModel( gaussian_mixture_model_t * model, observati
        || ( ( max_error > MAX_ERROR )
            && ( best_distance > MIN_MAHALANOBIS_DISTANCE_SQ ) ) )
         GMMFunctions.Model.AddCluster( model, observation, value );
+}
+void SortClusterBoundariesOfGaussianMixtureModel( gaussian_mixture_model_t * model, cluster_boundary_list_t * cluster_boundaries )
+{
+    /* Cluster sort list
+     * - Min boundaries are sorted as -<index+1>
+     * - Max boundaries are sorted as +<index+1>
+     * - Index is offset one to account for index 0
+     */
+    uint8_t sorted[MAX_CLUSTERS], left_to_sort = model->num_clusters, num_boundaries = 0;
+    for( uint8_t i = 0; i < model->num_clusters; i++ )
+        sorted[i] = i+1;
+    
+    do
+    {
+        for( uint8_t i = 0; i < model->num_clusters; i++ )
+        {
+            if( sorted[i] == 0 ) continue;
+            bool next_is_min = true;
+            double next_boundary = model->cluster[0].min_y;
+            int8_t next_cluster = 1;
+            for( uint8_t j = 1; j < model->num_clusters; j++ )
+            {
+                if( model->cluster[j].min_y < next_boundary )
+                {
+                    next_boundary = model->cluster[j].min_y;
+                    next_cluster = j+1;
+                    next_is_min = true;
+                }
+                if( model->cluster[j].max_y < next_boundary )
+                {
+                    next_boundary = model->cluster[j].max_y;
+                    next_cluster = j+1;
+                    next_is_min = false;
+                }
+            }
+            
+            if( next_is_min )
+            {
+                cluster_boundaries->list[num_boundaries++] = (cluster_boundary_t){ next_boundary, -next_cluster };
+            }
+            else
+            {
+                cluster_boundaries->list[num_boundaries++] = (cluster_boundary_t){ next_boundary, next_cluster };
+                sorted[next_cluster-1] = 0;
+                left_to_sort--;
+            }
+            /* End if sort list is filled */
+            if( num_boundaries >= cluster_boundaries->length ) left_to_sort = 0;
+        }
+    } while( left_to_sort > 0 );
 }

@@ -1,20 +1,20 @@
 //
-//  state_machine_utility.cpp
-//  tau+
+//  fsm.cpp
+//  Finite State Machine
 //
 //  Created by Matthew Fonken on 2/8/18.
-//  Copyright © 2018 Marbl. All rights reserved.
+//  Copyright © 2019 Marbl. All rights reserved.
 //
 
-#include "state_machine_utility.h"
+#include "fsm.h"
 
-typedef define_loop_variable_template_struct(state_dimension_t, state_global_t);
+typedef define_loop_variable_template_struct(uint8_t, state_global_t);
 state_global_t _;
 
-static inline void reset_loop_variables( state_global_t * _, state_dimension_t l )
+static inline void reset_loop_variables( state_global_t * _, uint8_t l )
 { _->l = l; _->i = 0; _->j = 0; _->u = 0; _->v = 0.; }
 
-void InitializeBayesianMap( bayesian_map_t * bm )
+void InitializeFSMMap( fsm_map_t * bm )
 {
     LOG_STATEM(DEBUG_2, "Initializeializing State Machine.\n");
     reset_loop_variables( &_, NUM_STATES );
@@ -27,14 +27,14 @@ void InitializeBayesianMap( bayesian_map_t * bm )
     }
 }
 
-void NormalizeBayesianMap( bayesian_map_t * bm )
+void NormalizeFSMMap( fsm_map_t * bm )
 {
     reset_loop_variables( &_, bm->length );
     for(  _.i = 0; _.i < _.l; _.i++ )
-        BayesianFunctions.Map.NormalizeState( bm, _.i );
+        FSMFunctions.Map.NormalizeState( bm, _.i );
 }
 
-void NormalizeBayesianState( bayesian_map_t * bm, state_dimension_t i )
+void NormalizeFSMState( fsm_map_t * bm, uint8_t i )
 {
     reset_loop_variables( &_, bm->length );
     double * total = &_.v;
@@ -54,33 +54,14 @@ void NormalizeBayesianState( bayesian_map_t * bm, state_dimension_t i )
     else bm->map[_.i][i] = 1.0;
 }
 
-void ResetBayesianState( bayesian_map_t * bm, state_dimension_t i )
+void ResetFSMState( fsm_map_t * bm, uint8_t i )
 {
     reset_loop_variables( &_, bm->length );
     for( _.j = 0; _.j < _.l; _.j++ ) bm->map[i][_.j] = 0.0;
     bm->map[i][i] = 1.0;
 }
 
-void PrintBayesianMap( bayesian_map_t * bm, state_t s )
-{
-#ifdef STATEM_DEBUG
-    reset_loop_variables( &_, bm->length );
-    for( _.i = 0; _.i < _.l; _.i++ ) printf("\t\t %s-[%d]", stateString((state_dimension_t)_.i), _.i);
-    for( _.i = 0; _.i < _.l; _.i++ )
-    {
-        printf("\n%s-[%d]", stateString((state_dimension_t)_.i), _.i);
-        for( _.j = 0; _.j < _.l; _.j++ )
-        {
-            char c = ' ';
-            if(_.j == (state_dimension_t)s) c = '|';
-            printf("\t%c[%.5f]%c",c, bm->map[_.j][_.i],c);
-        }
-    }
-    printf("\n");
-#endif
-}
-
-void InitializeBayesianSystem( bayesian_system_t * sys )
+void InitializeFSMSystem( fsm_system_t * sys )
 {
     sys->state                = STABLE_NONE;
     sys->prev                 = UNKNOWN_STATE;
@@ -91,10 +72,10 @@ void InitializeBayesianSystem( bayesian_system_t * sys )
     sys->stability.alternate  = 0.;
     sys->stability.overall    = 0.;
     
-    BayesianFunctions.Map.InitializeMap( &sys->probabilities );
+    FSMFunctions.Map.InitializeMap( &sys->probabilities );
 }
 
-void DecayInactiveBayesianSystem( bayesian_system_t * sys )
+void DecayInactiveFSMSystem( fsm_system_t * sys )
 {
     reset_loop_variables( &_, NUM_STATES );
     uint8_t c = sys->state;
@@ -112,19 +93,19 @@ void DecayInactiveBayesianSystem( bayesian_system_t * sys )
     }
 }
 
-void UpdateBayesianSystem( bayesian_system_t * sys, double p[4] )
+void UpdateFSMSystem( fsm_system_t * sys, double p[4] )
 {
     reset_loop_variables( &_, NUM_STATES );
     
-    BayesianFunctions.Sys.UpdateProbabilities( sys, p );
-    BayesianFunctions.Map.NormalizeState( &sys->probabilities, sys->state );
+    FSMFunctions.Sys.UpdateProbabilities( sys, p );
+    FSMFunctions.Map.NormalizeState( &sys->probabilities, sys->state );
     
     state_t next = sys->state;
     
     /* Find most probable next state */
     for( ; _.i < _.l; _.i++ )
     {
-        _.v = sys->probabilities.map[(state_dimension_t)sys->state][_.i];
+        _.v = sys->probabilities.map[(uint8_t)sys->state][_.i];
         if( _.v > _.u )
         {
             _.u = _.v;
@@ -134,15 +115,15 @@ void UpdateBayesianSystem( bayesian_system_t * sys, double p[4] )
     /* Only update sys->next state on change */
     if( next != sys->state ) sys->next = next;
     
-    BayesianFunctions.Sys.UpdateState( sys );
-    BayesianFunctions.Sys.DecayInactive( sys );
-    PrintBayesianMap( &sys->probabilities, sys->state );
+    FSMFunctions.Sys.UpdateState( sys );
+    FSMFunctions.Sys.DecayInactive( sys );
+    PrintFSMMap( &sys->probabilities, sys->state );
 }
 
-void UpdateBayesianProbabilities( bayesian_system_t * sys, double p[4] )
+void UpdateFSMProbabilities( fsm_system_t * sys, double p[4] )
 {
     state_t           c = sys->state;
-    state_dimension_t x = stateNumber(c);
+    uint8_t x = stateNumber(c);
     int8_t            k = -1;
     bool              stable = isStable(c);
 
@@ -192,7 +173,7 @@ void UpdateBayesianProbabilities( bayesian_system_t * sys, double p[4] )
     }
 }
 
-void UpdateBayesianState( bayesian_system_t * sys )
+void UpdateFSMState( fsm_system_t * sys )
 {
     if(sys->next != UNKNOWN_STATE )
     {
@@ -201,6 +182,25 @@ void UpdateBayesianState( bayesian_system_t * sys )
         sys->prev   = sys->state;
         sys->state  = sys->next;
         sys->next   = UNKNOWN_STATE;
-//        BayesianFunctions.Map.ResetState( &sys->probabilities, sys->prev );
+//        FSMFunctions.Map.ResetState( &sys->probabilities, sys->prev );
     }
+}
+
+void PrintFSMMap( fsm_map_t * bm, state_t s )
+{
+#ifdef STATEM_DEBUG
+    reset_loop_variables( &_, bm->length );
+    for( _.i = 0; _.i < _.l; _.i++ ) printf("\t\t %s-[%d]", stateString((uint8_t)_.i), _.i);
+    for( _.i = 0; _.i < _.l; _.i++ )
+    {
+        printf("\n%s-[%d]", stateString((uint8_t)_.i), _.i);
+        for( _.j = 0; _.j < _.l; _.j++ )
+        {
+            char c = ' ';
+            if(_.j == (uint8_t)s) c = '|';
+            printf("\t%c[%.5f]%c",c, bm->map[_.j][_.i],c);
+        }
+    }
+    printf("\n");
+#endif
 }
