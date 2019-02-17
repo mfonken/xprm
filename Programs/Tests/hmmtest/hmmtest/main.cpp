@@ -14,8 +14,8 @@
 observation_t observation_list[NUM_OBSERVATIONS] =
 {
     { 1, 1, 0 },
-    { 1, 1, 1 },
-    { 2, 3, 2 }
+    { 1.5, 1, 1 },
+    { 0.9, 1.1, 2 }
 };
 
 double nu = 3;

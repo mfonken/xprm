@@ -20,7 +20,7 @@ void InitializeGaussianMixtureCluster( gaussian_mixture_cluster_t * cluster, obs
     cluster->gaussian_in.covariance.b = 0.; cluster->gaussian_in.covariance.c = 0.;
     cluster->score = 1.;
     
-    memset( cluster, NULL_LABEL, MAX_LABELS );
+    memset( &cluster->labels, 0, sizeof(cluster->labels) );
     cluster->labels.average[observation->label] = 1;
     cluster->labels.count[observation->label]++;
     
@@ -57,12 +57,13 @@ void GetScoreOfGaussianMixtureCluster( gaussian_mixture_cluster_t * cluster, vec
 }
 void UpdateNormalOfGaussianMixtureCluster( gaussian_mixture_cluster_t * cluster )
 {
-    double cholesky_dms = cluster->llt_in.a * cluster->llt_in.d;
-    cluster->log_gaussian_norm_factor = -log( sqrt( M_2_PI * M_2_PI * cholesky_dms ) );
+    double cholesky_dms = cluster->llt_in.a * cluster->llt_in.d, norm_factor = -(double)(ZDIV_LNUM);
+    if( cholesky_dms ) norm_factor = -log( M_2_PI * sqrt( cholesky_dms ) );
+    cluster->log_gaussian_norm_factor = norm_factor;
 }
 void UpdateInputProbabilityOfGaussianMixtureCluster( gaussian_mixture_cluster_t * cluster, double total_probability )
 {
-    cluster->probability_condition_input = cluster->score / total_probability;
+    cluster->probability_condition_input = ZDIV( cluster->score, total_probability );
 }
 void ContributeToOutputOfGaussianMixtureCluster( gaussian_mixture_cluster_t * cluster, vec2 * input, vec2 * output )
 {
@@ -100,7 +101,7 @@ void WeighGaussianMixtureCluster( gaussian_mixture_cluster_t * cluster )
     }
     double a = ( cluster->gaussian_out.covariance.b * cluster->gaussian_out.covariance.c ),
     b = ( cluster->gaussian_out.covariance.a * cluster->gaussian_out.covariance.d );
-    double eccentricity_factor = a / b;
+    double eccentricity_factor = ZDIV( a, b );
     cluster->weight = ( first + second ) * eccentricity_factor;
     cluster->primary_id = first;
     cluster->secondary_id = second;
@@ -140,8 +141,8 @@ double GetMaxErrorOfGaussianMixtureModel( gaussian_mixture_model_t * model, vec2
 {
     vec2 output_delta;
     vec2SubVec2( value, output, &output_delta );
-    double a_error = fabs( output_delta.a / min_max_delta->a ),
-    b_error = fabs( output_delta.b / min_max_delta->b );
+    double a_error = fabs( ZDIV( output_delta.a, min_max_delta->a ) ),
+    b_error = fabs( ZDIV( output_delta.b, min_max_delta->b ) );
     return MAX( a_error, b_error );
 }
 void AddClusterToGaussianMixtureModel( gaussian_mixture_model_t * model, observation_t * observation, vec2 * value )
@@ -184,18 +185,26 @@ void SortClusterBoundariesOfGaussianMixtureModel( gaussian_mixture_model_t * mod
      * - Max boundaries are sorted as +<index+1>
      * - Index is offset one to account for index 0
      */
+    
+    /* Initialize list ascending list of all clusters to sort */
     uint8_t sorted[MAX_CLUSTERS], left_to_sort = model->num_clusters, num_boundaries = 0;
     for( uint8_t i = 0; i < model->num_clusters; i++ )
         sorted[i] = i+1;
     
+    /* Cycle and sort all cluster boundaries */
     do
     {
         for( uint8_t i = 0; i < model->num_clusters; i++ )
         {
+            /* Skip clusters already sorted */
             if( sorted[i] == 0 ) continue;
+            
+            /* Reset status variables */
             bool next_is_min = true;
             double next_boundary = model->cluster[0].min_y;
             int8_t next_cluster = 1;
+            
+            /* Cycle through clusters to find next boundary (could be min or max of a cluster) */
             for( uint8_t j = 1; j < model->num_clusters; j++ )
             {
                 if( model->cluster[j].min_y < next_boundary )
@@ -212,18 +221,22 @@ void SortClusterBoundariesOfGaussianMixtureModel( gaussian_mixture_model_t * mod
                 }
             }
             
-            if( next_is_min )
+            /* Store boundary in cluster boundaries and mark cluster as sorted if ended */
+            cluster_boundary_t next_cluster_boundary = (cluster_boundary_t){ next_boundary, -next_cluster };
+            if( !next_is_min )
             {
-                cluster_boundaries->list[num_boundaries++] = (cluster_boundary_t){ next_boundary, -next_cluster };
-            }
-            else
-            {
-                cluster_boundaries->list[num_boundaries++] = (cluster_boundary_t){ next_boundary, next_cluster };
+                next_cluster_boundary.label *= -1;
                 sorted[next_cluster-1] = 0;
                 left_to_sort--;
             }
+            cluster_boundaries->list[num_boundaries++] = next_cluster_boundary;
+            
             /* End if sort list is filled */
-            if( num_boundaries >= cluster_boundaries->length ) left_to_sort = 0;
+            if( num_boundaries >= cluster_boundaries->length )
+            {
+                left_to_sort = 0;
+                break;
+            }
         }
     } while( left_to_sort > 0 );
 }

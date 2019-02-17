@@ -17,9 +17,11 @@ void InitializeHMM( hidden_markov_model_t * model, double nu )
 double ForwardRecursionHMM( hidden_markov_model_t * model, uint8_t j, uint8_t t )
 {
     if( t == model->O.first ) return  model->p[1] * model->B.map[0][j];
+    uint8_t t_ = t - 1;
+    if( !t ) t_ = MAX_OBSERVATION_MASK;
     double forward_sum = 0.;
     for( uint8_t i = 0; i < model->N; i++ )
-        forward_sum += HMMFunctions.ForwardRecursion( model, i, ( t - 1 ) & MAX_OBSERVATION_MASK ) * model->A.probabilities.map[j][i];
+        forward_sum += HMMFunctions.ForwardRecursion( model, i, t_ ) * model->A.probabilities.map[j][i];
     return forward_sum * model->B.map[model->O.data[j]][t];
 }
 

@@ -17,11 +17,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
-#ifndef ZDIV
-#define ZDIV_LNUM 1 << 10
-#define ZDIV(X,Y) ((Y==0)?(X==0?0:ZDIV_LNUM):X/Y)
-#endif
+
     
     /***************************************************************************************/
     /*                          DEFINITIONS & MACROS                                       */
