@@ -281,6 +281,18 @@ extern "C" {
         uint8_t num_valid;
     } label_manager_t;
     
+    static double GetMeanXAtGaussianYOffset( gaussian2d_t * gaussian, double y_offset )
+    { /* See - https://courses.cs.washington.edu/courses/cse590b/02wi/eig2x2.cpp
+       * and http://www.math.harvard.edu/archive/21b_fall_04/exhibits/2dmatrices/index.html
+       */
+        /* Find maximum eigen value */
+        double a = gaussian->covariance.a, b = gaussian->covariance.b, d = gaussian->covariance.d,
+        a_minus_d = a - d,
+        radius = sqrt( a_minus_d * a_minus_d + 4. * b * b ),
+        lambda = a_minus_d + radius;
+        return y_offset * ZDIV( -2 * b, a - lambda );
+    }
+    
     static void UpdateCovarianceWithWeight( vec2 * new_val, gaussian2d_t * gaussian, double weight )
     {
         vec2 delta_mean;

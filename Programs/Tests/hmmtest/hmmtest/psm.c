@@ -35,16 +35,9 @@ void UpdatePSM( psm_t * model, double nu )
     /* Update states/transition matrix */
     FSMFunctions.Sys.Update( &model->hmm.A, state_bands );
     
-    /* Update observation matrix */
+    /* Calculate best cluster/observation and update observation matrix */
     uint8_t estimated_state = PSMFunctions.GetCurrentBand( model, &model->state_bands );
-    for( uint8_t i = 0; i < MAX_OBSERVATIONS; i++ )
-    {
-        model->hmm.B.map[i][estimated_state] += model->gmm.cluster[i].weight;
-        model->hmm.B.map[i][estimated_state] /= 2.;
-    }
-    
-    /* Calculate best cluster/observation */
-    uint8_t best_cluster_id = PSMFunctions.FindBestCluster( model );
+    uint8_t best_cluster_id = PSMFunctions.FindBestCluster( model, estimated_state );
     model->hmm.T = addToObservationBuffer( &model->hmm.O, best_cluster_id );
     
     /* Update state path prediction to best cluster */
@@ -86,16 +79,29 @@ void FindLowerBoundariesOfStateBandPSM( psm_t * model, cluster_boundary_list_t *
     double band_nu = 0;
     for( uint8_t i = 0; i < cluster_boundaries->length ; i++ )
     {
+        /* Estimate mean of cluster in band */
         uint8_t label = cluster_boundaries->list[i].label;
+        gaussian_mixture_cluster_t * cluster = &model->gmm.cluster[label];
+        double mean_y_offset = band_list->band[band_id].true_center.b - cluster->gaussian_out.mean.b;
+        double mean_x_offset = GetMeanXAtGaussianYOffset( &cluster->gaussian_out, mean_y_offset );
+        double max_contrib = cluster->labels.average[0];
+        for( uint j = 1; j < MAX_LABELS; j++ )
+        {
+            if( max_contrib < cluster->labels.average[j] )
+                max_contrib = cluster->labels.average[j];
+        }
+        
+        /* Factored mean accounts for contributing blobs in cluster */
+        double factored_mean_x_offset = mean_x_offset * ZDIV( 1., max_contrib );
         if( BOUNDARY_START(label) )
         {
             num_in_band++;
-            band_nu += model->gmm.cluster[label].gaussian_out.mean.a;
+            band_nu += factored_mean_x_offset;
         }
         else
         {
             num_in_band--;
-            band_nu -= model->gmm.cluster[label].gaussian_out.mean.a;
+            band_nu -= factored_mean_x_offset;
         }
         
         /* Ignore invalid band (bands with too many labels aka too much noise) */
@@ -179,7 +185,7 @@ void FindTrueCentersOfStateBandsPSM( psm_t * model, cluster_boundary_list_t * cl
     }
 }
 
-uint8_t FindBestClusterPSM( psm_t * model )
+uint8_t FindBestClusterPSM( psm_t * model, uint8_t estimated_state )
 {
     uint8_t best_cluster_id = 0;
     double best_cluster_weight = 0.;
@@ -192,6 +198,8 @@ uint8_t FindBestClusterPSM( psm_t * model )
             best_cluster_weight = cluster->weight;
             best_cluster_id = i;
         }
+        model->hmm.B.map[i][estimated_state] += cluster->weight;
+        model->hmm.B.map[i][estimated_state] /= 2.;
     }
     return best_cluster_id;
 }
