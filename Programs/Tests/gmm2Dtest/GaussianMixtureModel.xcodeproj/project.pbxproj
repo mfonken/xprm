@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		34654BA32184D0B4001B5CAE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34654BA22184D0B4001B5CAE /* main.cpp */; };
+		349D298D221FA1B70032E465 /* gaussianmixture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 349D298C221FA1B70032E465 /* gaussianmixture.cpp */; };
 		34F91E6C220FBDFB00F8CBBE /* gmm.c in Sources */ = {isa = PBXBuildFile; fileRef = 34F91E6B220FBDFB00F8CBBE /* gmm.c */; };
 /* End PBXBuildFile section */
 
@@ -27,9 +28,12 @@
 		34492743218E35E70027AD3C /* data.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = data.h; sourceTree = "<group>"; };
 		34654B9F2184D0B4001B5CAE /* GaussianMixtureModel */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = GaussianMixtureModel; sourceTree = BUILT_PRODUCTS_DIR; };
 		34654BA22184D0B4001B5CAE /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		349D2989221D02640032E465 /* control_structures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = control_structures.h; sourceTree = "<group>"; };
+		349D298A221D02640032E465 /* control_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = control_types.h; sourceTree = "<group>"; };
+		349D298B221FA1B60032E465 /* gaussianmixture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gaussianmixture.h; sourceTree = "<group>"; };
+		349D298C221FA1B70032E465 /* gaussianmixture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gaussianmixture.cpp; sourceTree = "<group>"; };
 		34F91E6A220FBDFB00F8CBBE /* gmm.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = gmm.h; sourceTree = "<group>"; };
 		34F91E6B220FBDFB00F8CBBE /* gmm.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = gmm.c; sourceTree = "<group>"; };
-		34F91E6D2210E26100F8CBBE /* gmm_vector_matrix.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = gmm_vector_matrix.h; sourceTree = "<group>"; };
 		34FC20F6218FB489006A2CBD /* image_handler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = image_handler.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -63,12 +67,15 @@
 		34654BA12184D0B4001B5CAE /* GaussianMixtureModel */ = {
 			isa = PBXGroup;
 			children = (
-				34492743218E35E70027AD3C /* data.h */,
-				34FC20F6218FB489006A2CBD /* image_handler.h */,
-				34654BA22184D0B4001B5CAE /* main.cpp */,
-				34F91E6D2210E26100F8CBBE /* gmm_vector_matrix.h */,
+				349D298A221D02640032E465 /* control_types.h */,
+				349D2989221D02640032E465 /* control_structures.h */,
+				349D298B221FA1B60032E465 /* gaussianmixture.h */,
+				349D298C221FA1B70032E465 /* gaussianmixture.cpp */,
 				34F91E6A220FBDFB00F8CBBE /* gmm.h */,
 				34F91E6B220FBDFB00F8CBBE /* gmm.c */,
+				34FC20F6218FB489006A2CBD /* image_handler.h */,
+				34492743218E35E70027AD3C /* data.h */,
+				34654BA22184D0B4001B5CAE /* main.cpp */,
 			);
 			path = GaussianMixtureModel;
 			sourceTree = "<group>";
@@ -130,6 +137,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				34F91E6C220FBDFB00F8CBBE /* gmm.c in Sources */,
+				349D298D221FA1B70032E465 /* gaussianmixture.cpp in Sources */,
 				34654BA32184D0B4001B5CAE /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -305,7 +313,7 @@
 					"-lopencv_objdetect",
 					"-lopencv_xphoto",
 					"-lopencv_imgproc",
-					"-lopencv_core\n\n",
+					"-lopencv_core",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -368,7 +376,7 @@
 					"-lopencv_objdetect",
 					"-lopencv_xphoto",
 					"-lopencv_imgproc",
-					"-lopencv_core\n\n",
+					"-lopencv_core",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

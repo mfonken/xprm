@@ -251,7 +251,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				HEADER_SEARCH_PATHS = (
-					"-I/usr/local/include/eigen3/",
+					/usr/local/include/eigen3/,
 					"/usr/local/Cellar/opencv/**",
 				);
 				LIBRARY_SEARCH_PATHS = "/usr/local/Cellar/opencv/**";
@@ -303,7 +303,7 @@
 					"-lopencv_objdetect",
 					"-lopencv_xphoto",
 					"-lopencv_imgproc",
-					"-lopencv_core\n\n",
+					"-lopencv_core",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -314,7 +314,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				HEADER_SEARCH_PATHS = (
-					"-I/usr/local/include/eigen3/",
+					/usr/local/include/eigen3/,
 					"/usr/local/Cellar/opencv/**",
 				);
 				LIBRARY_SEARCH_PATHS = "/usr/local/Cellar/opencv/**";
@@ -366,7 +366,7 @@
 					"-lopencv_objdetect",
 					"-lopencv_xphoto",
 					"-lopencv_imgproc",
-					"-lopencv_core\n\n",
+					"-lopencv_core",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

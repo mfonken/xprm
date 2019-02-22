@@ -284,7 +284,7 @@ void GaussianMixture::Neuron::update(const Eigen::VectorXf &input,
     // Update the score of the neuron. The weight of the update must already
     // be very small when distance = 1.386 (P(x|c) = 0.50), hence the large
     // multiplication.
-    float score_weight = 0.05f * std::exp(-4.0f * _square_mahalanobis_distance);
+    float score_weight = 0.1f * std::exp(-4.0f * _square_mahalanobis_distance);
 
     _score += score_weight * (_probability_cond_in - _score);
 
