@@ -7,8 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		346602522220FF8E009FE87B /* gmm.c in Sources */ = {isa = PBXBuildFile; fileRef = 346602462220FF8E009FE87B /* gmm.c */; };
+		346602532220FF8E009FE87B /* psm.c in Sources */ = {isa = PBXBuildFile; fileRef = 3466024D2220FF8E009FE87B /* psm.c */; };
+		346602542220FF8E009FE87B /* fsm.c in Sources */ = {isa = PBXBuildFile; fileRef = 346602502220FF8E009FE87B /* fsm.c */; };
 		346602552220FF8E009FE87B /* hmm.c in Sources */ = {isa = PBXBuildFile; fileRef = 346602512220FF8E009FE87B /* hmm.c */; };
-		34944C702221132600570110 /* fsm.c in Sources */ = {isa = PBXBuildFile; fileRef = 34944C6C2221132600570110 /* fsm.c */; };
 		34F91E7B2210EDBB00F8CBBE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34F91E7A2210EDBB00F8CBBE /* main.cpp */; };
 /* End PBXBuildFile section */
 
@@ -25,15 +27,19 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		346602462220FF8E009FE87B /* gmm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gmm.c; sourceTree = "<group>"; };
+		346602472220FF8E009FE87B /* control_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = control_types.h; sourceTree = "<group>"; };
+		346602482220FF8E009FE87B /* fsm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fsm.h; sourceTree = "<group>"; };
+		346602492220FF8E009FE87B /* psm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = psm.h; sourceTree = "<group>"; };
 		3466024A2220FF8E009FE87B /* hmm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hmm.h; sourceTree = "<group>"; };
+		3466024B2220FF8E009FE87B /* gmm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gmm.h; sourceTree = "<group>"; };
 		3466024C2220FF8E009FE87B /* kumaraswamy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kumaraswamy.h; sourceTree = "<group>"; };
+		3466024D2220FF8E009FE87B /* psm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = psm.c; sourceTree = "<group>"; };
+		3466024E2220FF8E009FE87B /* fsm_support.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fsm_support.h; sourceTree = "<group>"; };
 		3466024F2220FF8E009FE87B /* control_structures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = control_structures.h; sourceTree = "<group>"; };
+		346602502220FF8E009FE87B /* fsm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fsm.c; sourceTree = "<group>"; };
 		346602512220FF8E009FE87B /* hmm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hmm.c; sourceTree = "<group>"; };
-		34944C6A222106D800570110 /* fsm_test.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fsm_test.h; sourceTree = "<group>"; };
-		34944C6B2221132600570110 /* control_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = control_types.h; sourceTree = "<group>"; };
-		34944C6C2221132600570110 /* fsm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fsm.c; sourceTree = "<group>"; };
-		34944C6D2221132600570110 /* fsm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fsm.h; sourceTree = "<group>"; };
-		34944C6E2221132600570110 /* fsm_support.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fsm_support.h; sourceTree = "<group>"; };
+		346602562220FFD3009FE87B /* data.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = data.h; sourceTree = "<group>"; };
 		34F91E772210EDBB00F8CBBE /* hmmtest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = hmmtest; sourceTree = BUILT_PRODUCTS_DIR; };
 		34F91E7A2210EDBB00F8CBBE /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -52,10 +58,18 @@
 		346602452220FF8E009FE87B /* statecontrol */ = {
 			isa = PBXGroup;
 			children = (
+				346602472220FF8E009FE87B /* control_types.h */,
 				3466024C2220FF8E009FE87B /* kumaraswamy.h */,
 				3466024F2220FF8E009FE87B /* control_structures.h */,
+				3466024E2220FF8E009FE87B /* fsm_support.h */,
+				346602482220FF8E009FE87B /* fsm.h */,
+				346602502220FF8E009FE87B /* fsm.c */,
+				3466024B2220FF8E009FE87B /* gmm.h */,
+				346602462220FF8E009FE87B /* gmm.c */,
 				3466024A2220FF8E009FE87B /* hmm.h */,
 				346602512220FF8E009FE87B /* hmm.c */,
+				346602492220FF8E009FE87B /* psm.h */,
+				3466024D2220FF8E009FE87B /* psm.c */,
 			);
 			name = statecontrol;
 			path = /Users/matthew/Desktop/marbl/Techincal/combine/experimental/statecontrol;
@@ -64,7 +78,7 @@
 		34F91E6E2210EDBB00F8CBBE = {
 			isa = PBXGroup;
 			children = (
-				34F91E792210EDBB00F8CBBE /* hmmtest */,
+				34F91E792210EDBB00F8CBBE /* statecontroltest */,
 				346602452220FF8E009FE87B /* statecontrol */,
 				34F91E782210EDBB00F8CBBE /* Products */,
 			);
@@ -78,17 +92,13 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		34F91E792210EDBB00F8CBBE /* hmmtest */ = {
+		34F91E792210EDBB00F8CBBE /* statecontroltest */ = {
 			isa = PBXGroup;
 			children = (
-				34944C6A222106D800570110 /* fsm_test.h */,
-				34944C6B2221132600570110 /* control_types.h */,
-				34944C6E2221132600570110 /* fsm_support.h */,
-				34944C6D2221132600570110 /* fsm.h */,
-				34944C6C2221132600570110 /* fsm.c */,
+				346602562220FFD3009FE87B /* data.h */,
 				34F91E7A2210EDBB00F8CBBE /* main.cpp */,
 			);
-			path = hmmtest;
+			path = statecontroltest;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -125,7 +135,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 34F91E722210EDBB00F8CBBE /* Build configuration list for PBXProject "hmmtest" */;
+			buildConfigurationList = 34F91E722210EDBB00F8CBBE /* Build configuration list for PBXProject "statecontroltest" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -147,8 +157,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				34944C702221132600570110 /* fsm.c in Sources */,
+				346602542220FF8E009FE87B /* fsm.c in Sources */,
+				346602532220FF8E009FE87B /* psm.c in Sources */,
 				34F91E7B2210EDBB00F8CBBE /* main.cpp in Sources */,
+				346602522220FF8E009FE87B /* gmm.c in Sources */,
 				346602552220FF8E009FE87B /* hmm.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -388,7 +400,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		34F91E722210EDBB00F8CBBE /* Build configuration list for PBXProject "hmmtest" */ = {
+		34F91E722210EDBB00F8CBBE /* Build configuration list for PBXProject "statecontroltest" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				34F91E7C2210EDBB00F8CBBE /* Debug */,

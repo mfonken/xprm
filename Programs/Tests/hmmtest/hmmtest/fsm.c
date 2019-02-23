@@ -63,7 +63,7 @@ void ResetFSMState( fsm_map_t * bm, uint8_t i )
 
 void InitializeFSMSystem( fsm_system_t * sys )
 {
-    sys->state                = STABLE_NONE;
+    sys->state                = LOW;//STABLE_NONE;
     sys->prev                 = UNKNOWN_STATE;
     sys->next                 = UNKNOWN_STATE;
     sys->selection_index      = 0;
@@ -175,13 +175,13 @@ void UpdateFSMProbabilities( fsm_system_t * sys, double p[4] )
 
 void UpdateFSMState( fsm_system_t * sys )
 {
-    if(sys->next != UNKNOWN_STATE )
+//    if(sys->next != UNKNOWN_STATE )
     {
         LOG_STATEM(DEBUG_2, "Updating state from %s to %s\n", stateString((int)sys->state), stateString((int)sys->next));
         if(sys->next != sys->state) {LOG_STATEM(DEBUG_2, "~~~ State is %s ~~~\n", stateString(sys->next));}
         sys->prev   = sys->state;
         sys->state  = sys->next;
-        sys->next   = UNKNOWN_STATE;
+//        sys->next   = UNKNOWN_STATE;
 //        FSMFunctions.Map.ResetState( &sys->probabilities, sys->prev );
     }
 }

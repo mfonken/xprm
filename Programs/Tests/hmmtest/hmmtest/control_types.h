@@ -18,8 +18,6 @@ extern "C" {
 #include <math.h>
 #include <string.h>
     
-#include "fsm.h"
-    
 #ifndef ZDIV
 #define ZDIV_LNUM 1 << 10
 #define ZDIV(X,Y) ((Y==0)?(X==0?0:ZDIV_LNUM):X/Y)
@@ -28,18 +26,24 @@ extern "C" {
 #define MAX_THRESH 255
     
     //#define NUM_STATES              10
-#define NUM_OBSERVATION_SYMBOLS 5 // Should be max number of clusters in GMM
+#define NUM_OBSERVATION_SYMBOLS 2//5 // Should be max number of clusters in GMM
 #define MAX_OBSERVATIONS        (1 << 5) // Length of history
 #define MAX_OBSERVATION_MASK    (MAX_OBSERVATIONS-1)
     
-#define MAX_DISTANCE 100
-#define MAX_CLUSTERS 5
-#define MAX_ERROR 1e-5
-#define MIN_MAHALANOBIS_DISTANCE_SQ 1
-#define MAX_MAHALANOBIS_SQ_FOR_UPDATE 9
-#define SMALL_VALUE_ERROR_OFFSET 1e-4
+#define MAX_DISTANCE 10000.f
+#define MIN_TOTAL_MIXTURE_PROBABILITY 1e-15f
+#define MAX_CLUSTERS 100
+#define MAX_ERROR 20
+#define INITIAL_VARIANCE 1
+#define INV_INITIAL_VARIANCE (1/INITIAL_VARIANCE)
+#define MIN_MAHALANOBIS_DISTANCE_SQ 1.386f
+#define MAX_MAHALANOBIS_SQ_FOR_UPDATE 1000.f
+#define SMALL_VALUE_ERROR_OFFSET 1e-4f
 #define VALID_CLUSTER_STD_DEV 2.
-    
+#define MIN_CLUSTER_SCORE 1e-3f
+#define FALLBACK_MAX_ERROR 1e-2f
+
+#define MIN(A,B) (A<B?A:B)
 #define MAX(A,B) (A>B?A:B)
     
 #define ALPHA 0.5
@@ -93,7 +97,7 @@ extern "C" {
             res->d = mat->d / det;
         }
         else
-            memset( res, ZDIV_LNUM, sizeof(res) );
+            memset( res, ZDIV_LNUM, sizeof(mat2x2) );
     }
     static double * GetMat2x2ValuePointerByIndex(mat2x2 * mat, uint8_t a, uint8_t b)
     {
@@ -161,17 +165,22 @@ extern "C" {
 
     typedef enum
     {
-        UNKNOWN_STATE = 0,
-        STABLE_NONE,
-        UNSTABLE_NONE,
-        STABLE_SINGLE,
-        UNSTABLE_SINGLE,
-        STABLE_DOUBLE,
-        UNSTABLE_DOUBLE,
-        STABLE_MANY,
-        UNSTABLE_MANY,
+        LOW = 0,
+        HIGH,
         NUM_STATES
+//        UNKNOWN_STATE = 0,
+//        STABLE_NONE,
+//        UNSTABLE_NONE,
+//        STABLE_SINGLE,
+//        UNSTABLE_SINGLE,
+//        STABLE_DOUBLE,
+//        UNSTABLE_DOUBLE,
+//        STABLE_MANY,
+//        UNSTABLE_MANY,
+//        NUM_STATES
     } state_t;
+    
+#define UNKNOWN_STATE LOW
     
 #define NUM_STATE_GROUPS ((uint8_t)NUM_STATES/2)
     
@@ -293,15 +302,27 @@ extern "C" {
         return y_offset * ZDIV( -2 * b, a - lambda );
     }
     
-    static void UpdateCovarianceWithWeight( vec2 * new_val, gaussian2d_t * gaussian, double weight )
+    static vec2 WeightedIncreaseMean( vec2 * new_val, gaussian2d_t * gaussian, double weight )
     {
-        vec2 delta_mean;
+        vec2 delta_mean, weighted_mean;
         vec2SubVec2( new_val, &gaussian->mean, &delta_mean );
-        scalarMulVec2( weight, &delta_mean, &gaussian->mean );
-        
-        double delta_mean_factor = ( delta_mean.a * delta_mean.a ) + ( delta_mean.b * delta_mean.b );
+        scalarMulVec2( weight, &delta_mean, &weighted_mean );
+        vec2AddVec2( &weighted_mean, &gaussian->mean, &gaussian->mean );
+        return delta_mean;
+    }
+    
+    static void UpdateCovarianceWithWeight( vec2 * A, vec2 * B, gaussian2d_t * gaussian, double weight )
+    {
+        double delta_mean_a_a = A->a * B->a,
+        delta_mean_a_b = A->a * B->b,
+        delta_mean_b_b = A->b * B->b;
+        if( delta_mean_a_a == 0. ) delta_mean_a_a += SMALL_VALUE_ERROR_OFFSET;
+        if( delta_mean_b_b == 0. ) delta_mean_b_b += SMALL_VALUE_ERROR_OFFSET;
         mat2x2 covariance_delta_factor, unweighted_covariance_factor =
-        { delta_mean_factor, SMALL_VALUE_ERROR_OFFSET, SMALL_VALUE_ERROR_OFFSET, SMALL_VALUE_ERROR_OFFSET };
+        { delta_mean_a_a, delta_mean_a_b, delta_mean_a_b, delta_mean_b_b };
+        
+        printf("m_covf: <%.2f %.2f> [%.2f %.2f | %.2f %.2f]\n", A->a, A->b, unweighted_covariance_factor.a, unweighted_covariance_factor.b, unweighted_covariance_factor.c, unweighted_covariance_factor.d);
+        
         mat2x2SubMat2x2( &unweighted_covariance_factor, &gaussian->covariance, &covariance_delta_factor );
         scalarMulMat2x2( weight, &covariance_delta_factor, &covariance_delta_factor );
         mat2x2AddMat2x2( &gaussian->covariance, &covariance_delta_factor, &gaussian->covariance );

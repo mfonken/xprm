@@ -7,26 +7,25 @@
 //
 
 #include <iostream>
-#include "psm.h"
+#include "fsm_test.h"
 
-#define NUM_OBSERVATIONS 3
+using namespace std;
 
-observation_t observation_list[NUM_OBSERVATIONS] =
-{
-    { 1, 1, 0 },
-    { 1.5, 1, 1 },
-    { 0.9, 1.1, 2 }
-};
+#define NUM_UPDATES 30
 
-double nu = 3;
-
-psm_t psm;
+hidden_markov_model_t hmm;
 
 int main(int argc, const char * argv[])
 {
-    PSMFunctions.Initialize( &psm );
-    PSMFunctions.ReportObservations( &psm, observation_list, NUM_OBSERVATIONS );
-    PSMFunctions.Update( &psm, nu );
-    
+    HMMFunctions.Initialize( &hmm );
+    InitTest( &hmm );
+    while(1)
+    {
+//        for( uint32_t i = 0; i < NUM_UPDATES; i++ )
+//            UpdateFSM( &hmm.A );
+        
+        HMMFunctions.ForwardSolve( &hmm );
+        while(1);
+    }
     return 0;
 }

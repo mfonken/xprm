@@ -11,7 +11,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "control_structures.h"
 #include "fsm_support.h"
 
 #ifdef __cplusplus
