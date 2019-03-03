@@ -25,9 +25,11 @@
 using namespace cv;
 
 #define DATA_LEN 10000
-#define HEIGHT 1000
-#define WIDTH 1000
-#define SCALE 1
+#define HEIGHT_ABS 100
+#define WIDTH_ABS 100
+#define SCALE 10
+#define WIDTH WIDTH_ABS * SCALE
+#define HEIGHT HEIGHT_ABS * SCALE
 
 static int N = DATA_LEN;
 static int K = 6;
@@ -41,6 +43,7 @@ using namespace cv;
 
 typedef Vec3b Color;
 typedef vector<vec2> SampleList;
+typedef observation_t * ObservationList;
 
 static Color colors[6] =
 {
@@ -122,7 +125,7 @@ static Matrix2d A_cov = [] {
 static normal_random_variable A_gaus(A_mean, A_cov);
 
 static uint8_t B_label = 'B';
-static int B_var = 700;
+static int B_var = 300;
 static int B_co = 100;
 static Vector2d B_mean(750,250);
 static Matrix2d B_cov = [] {
@@ -133,7 +136,7 @@ static Matrix2d B_cov = [] {
 static normal_random_variable B_gaus(B_mean, B_cov);
 
 static uint8_t C_label = 'C';
-static int C_var = 700;
+static int C_var = 300;
 static int C_co = -100;
 static Vector2d C_mean(250,750);
 static Matrix2d C_cov = [] {
@@ -162,4 +165,12 @@ static void PlotSamples( Mat &M, SampleList l, int r, Color &c )
         circle(M, Point(sample.a,sample.b), r, c, FILLED);
 }
 
+static void ConvertSampleListToObservationList( SampleList &sl , ObservationList &ol, uint8_t label )
+{
+    int i = 0;
+    for( vec2 &sample : sl )
+    {
+        ol[i++] = (observation_t){ sample.a, sample.b, label };
+    }
+}
 #endif /* data_h */

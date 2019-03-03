@@ -11,22 +11,18 @@
 
 #include "hmm.h"
 
-#define THETA_STEP M_PI/20
-
-static kumaraswamy_t dist;
-static double theta = 0.;
-static double nu = 0.;
-
-static double spoof_intervals[NUM_STATE_GROUPS];
-
 typedef enum
 {
     I = 0,
     O
 } OBSERVATAION;
 
-static OBSERVATAION observations[10]
-{ I, I, I, I, I, O, O, I, I, I };
+static OBSERVATAION observations[]
+{
+    I, I, I, I, I,
+    O, O, I
+    , I, I
+};
 
 static observation_buffer_t spoof_observataions;
 
@@ -67,35 +63,16 @@ static void InitTest( hidden_markov_model_t * hmm )
     
 
     
-    hmm->T = hmm->O.last;
+    hmm->T = 0;
     hmm->N = 2;
     hmm->M = 2;
     
     hmm->p[0] = initial[0];
     hmm->p[1] = initial[1];
-    
-//    KumaraswamyFunctions.Initialize( &dist, NUM_STATES+1 );
-//    double curr = 0, prev = 0;
-//    for( uint8_t i = 0; i < spoof_bands.length; i++ )
-//    {
-//        curr = (double)(1+1)/NUM_STATE_GROUPS;
-//        spoof_bands.band[i].lower_boundary = curr;
-//        spoof_bands.band[i].true_center = { 5, (curr+prev)/2 };
-//        prev = curr;
-//    }
 }
 
 static void UpdateFSM( fsm_system_t * fsm )
 {
-//    nu = dist.beta * fabs( sin( theta ) );
-//    theta += THETA_STEP;
-//    KumaraswamyFunctions.GetVector( &dist, nu, spoof_intervals, &spoof_bands );
-    
-//    FSMFunctions.Sys.Update( fsm, spoof_intervals );
-    
-    
-    
-    
 }
 
 #endif /* fsm_test_h */

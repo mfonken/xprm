@@ -17,38 +17,37 @@ extern "C" {
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-
     
 #ifndef ZDIV
-#define ZDIV_LNUM 1 << 16
+#define ZDIV_LNUM 1 << 10
 #define ZDIV(X,Y) ((Y==0)?(X==0?0:ZDIV_LNUM):X/Y)
 #endif
     
 #define MAX_THRESH 255
     
     //#define NUM_STATES              10
-#define NUM_OBSERVATION_SYMBOLS 5 // Should be max number of clusters in GMM
+#define NUM_OBSERVATION_SYMBOLS 2//5 // Should be max number of clusters in GMM
 #define MAX_OBSERVATIONS        (1 << 5) // Length of history
 #define MAX_OBSERVATION_MASK    (MAX_OBSERVATIONS-1)
     
 #define MAX_DISTANCE 10000.f
 #define MIN_TOTAL_MIXTURE_PROBABILITY 1e-15f
 #define MAX_CLUSTERS 100
-#define MAX_ERROR 0.8
-#define INITIAL_VARIANCE 14//3//3
-#define INV_INITIAL_VARIANCE (1./INITIAL_VARIANCE)
-#define MAX_MAHALANOBIS_SQ 1.386f
+#define MAX_ERROR 20
+#define INITIAL_VARIANCE 1
+#define INV_INITIAL_VARIANCE (1/INITIAL_VARIANCE)
+#define MIN_MAHALANOBIS_DISTANCE_SQ 1.386f
 #define MAX_MAHALANOBIS_SQ_FOR_UPDATE 1000.f
 #define SMALL_VALUE_ERROR_OFFSET 1e-4f
 #define VALID_CLUSTER_STD_DEV 2.
 #define MIN_CLUSTER_SCORE 1e-3f
 #define FALLBACK_MAX_ERROR 1e-2f
-    
+
 #define MIN(A,B) (A<B?A:B)
 #define MAX(A,B) (A>B?A:B)
     
-#define ALPHA 0.025//0.1
-#define BETA 1//4.
+#define ALPHA 0.5
+#define BETA 4.
     
 #define MAX_LABELS 10
 #define LABEL_MOVING_AVERAGE_MAX_HISTORY 10
@@ -57,20 +56,6 @@ extern "C" {
     
 #define BOUNDARY_START(X)   !!(X<0)
 #define BOUNDARY_END(X)     !!(X>0)
-    
-    
-#define UNCALCULABILTY_BOUND_FOR_SAFE_EXPONENT 30.
-#define SAFE_EXPONENT_MAX_VALUE 2.35385266837019985408e17f
-    
-    static float safe_exp(double x)
-    {
-        if (x < -UNCALCULABILTY_BOUND_FOR_SAFE_EXPONENT)
-            return 0.0f;
-        else if (x > UNCALCULABILTY_BOUND_FOR_SAFE_EXPONENT)
-            return SAFE_EXPONENT_MAX_VALUE;
-        else
-            return exp(x);
-    }
     
     typedef struct
     {
@@ -106,10 +91,10 @@ extern "C" {
         double det = getMat2x2Determinant( mat );
         if( det )
         {
-            res->d = mat->a / det;
-            res->c = -mat->b / det;
-            res->b = -mat->c / det;
-            res->a = mat->d / det;
+            res->a = mat->a / det;
+            res->b = mat->b / det;
+            res->c = mat->c / det;
+            res->d = mat->d / det;
         }
         else
             memset( res, ZDIV_LNUM, sizeof(mat2x2) );
@@ -123,7 +108,7 @@ extern "C" {
     static void mat2x2DotVec2(mat2x2 * mat, vec2 * vec, vec2 * res)
     {
         res->a = mat->a * vec->a + mat->b * vec->b;
-        res->b = mat->c * vec->a + mat->d * vec->b;
+        res->a = mat->c * vec->a + mat->d * vec->b;
     }
     static void mat2x2AddMat2x2(mat2x2 * A, mat2x2 * B, mat2x2 * C)
     {
@@ -161,15 +146,12 @@ extern "C" {
     
     static void GetMat2x2LLT( mat2x2 * mat, mat2x2 * llt )
     {
-        //printf("m_llt: [%.2f %.2f | %.2f %.2f] ", mat->a, mat->b, mat->c, mat->d);
         mat2x2 L = { 0., 0., 0., 0. };
         L.a = sqrt( mat->a );
-        L.b = mat->b;
         L.c = ZDIV( mat->c, L.a );
-        L.d = sqrt( mat->d - L.c * L.c );
-        if( L.d == 0) L.d = 1;
-        //printf("[%.2f %.2f | %.2f %.2f]\n", L.a, L.b, L.c, L.d);
-        *llt = L;
+        L.d = sqrt( mat->d - L.c );
+        mat2x2 LT = { L.a, L.c, L.b, L.d };
+        mat2x2MulMat2x2( &L, &LT, llt );
     }
     
     static double CalculateMahalanobisDistanceSquared(mat2x2 * inv_covariance, vec2 * delta)
@@ -179,6 +161,57 @@ extern "C" {
         double mahalanobis_distance_squared;
         vec2DotVec2(delta, &inv_covariance_delta, &mahalanobis_distance_squared);
         return mahalanobis_distance_squared;
+    }
+
+    typedef enum
+    {
+        LOW = 0,
+        HIGH,
+        NUM_STATES
+//        UNKNOWN_STATE = 0,
+//        STABLE_NONE,
+//        UNSTABLE_NONE,
+//        STABLE_SINGLE,
+//        UNSTABLE_SINGLE,
+//        STABLE_DOUBLE,
+//        UNSTABLE_DOUBLE,
+//        STABLE_MANY,
+//        UNSTABLE_MANY,
+//        NUM_STATES
+    } state_t;
+    
+#define UNKNOWN_STATE LOW
+    
+#define NUM_STATE_GROUPS ((uint8_t)NUM_STATES/2)
+    
+    /* Stability tracking for selec tions */
+    typedef struct
+    {
+        double primary;
+        double secondary;
+        double alternate;
+        double overall;
+    } stability_t;
+    
+    /* FSM state tree with fsm base */
+    typedef struct
+    {
+        double map[NUM_STATES][NUM_STATES];
+        uint8_t length;
+    } fsm_map_t;
+    
+    
+#define UNCALCULABILTY_BOUND_FOR_SAFE_EXPONENT 30.
+#define SAFE_EXPONENT_MAX_VALUE 2.35385266837019985408e17f
+    
+    static float safe_exp(double x)
+    {
+        if (x < -UNCALCULABILTY_BOUND_FOR_SAFE_EXPONENT)
+            return 0.0f;
+        else if (x > UNCALCULABILTY_BOUND_FOR_SAFE_EXPONENT)
+            return SAFE_EXPONENT_MAX_VALUE;
+        else
+            return exp(x);
     }
     
     typedef struct
@@ -240,6 +273,18 @@ extern "C" {
     
     typedef struct
     {
+        double lower_boundary;
+        vec2 true_center;
+    } band_t;
+    
+    typedef struct
+    {
+        uint8_t length;
+        band_t band[NUM_STATE_GROUPS];
+    } band_list_t;
+    
+    typedef struct
+    {
         double average[MAX_LABELS];
         uint8_t count[MAX_LABELS];
         uint8_t num_valid;
@@ -267,18 +312,16 @@ extern "C" {
     }
     
     static void UpdateCovarianceWithWeight( vec2 * A, vec2 * B, gaussian2d_t * gaussian, double weight )
-    {       
+    {
         double delta_mean_a_a = A->a * B->a,
-            delta_mean_a_b = A->a * B->b,
-            delta_mean_b_b = A->b * B->b;
+        delta_mean_a_b = A->a * B->b,
+        delta_mean_b_b = A->b * B->b;
         if( delta_mean_a_a == 0. ) delta_mean_a_a += SMALL_VALUE_ERROR_OFFSET;
         if( delta_mean_b_b == 0. ) delta_mean_b_b += SMALL_VALUE_ERROR_OFFSET;
         mat2x2 covariance_delta_factor, unweighted_covariance_factor =
         { delta_mean_a_a, delta_mean_a_b, delta_mean_a_b, delta_mean_b_b };
         
-        //printf("m_covf: <%.2f %.2f> [%.2f %.2f | %.2f %.2f] | m_weig: %.2f\n", A->a, A->b, unweighted_covariance_factor.a, unweighted_covariance_factor.b, unweighted_covariance_factor.c, unweighted_covariance_factor.d, weight);
-        
-        //printf("m_cvin: [%.2f %.2f | %.2f %.2f]\n", gaussian->covariance.a, gaussian->covariance.b, gaussian->covariance.c, gaussian->covariance.d);
+        printf("m_covf: <%.2f %.2f> [%.2f %.2f | %.2f %.2f]\n", A->a, A->b, unweighted_covariance_factor.a, unweighted_covariance_factor.b, unweighted_covariance_factor.c, unweighted_covariance_factor.d);
         
         mat2x2SubMat2x2( &unweighted_covariance_factor, &gaussian->covariance, &covariance_delta_factor );
         scalarMulMat2x2( weight, &covariance_delta_factor, &covariance_delta_factor );
@@ -332,20 +375,17 @@ extern "C" {
     
     typedef struct
     {
-        uint8_t
-        data[MAX_OBSERVATIONS],
-        next, first;
+        uint8_t curr, prev;
     } observation_buffer_t;
     
-    static uint8_t addToObservationBuffer( observation_buffer_t * buffer, uint8_t v )
+    static void reportObservation( observation_buffer_t * buffer, uint8_t v )
     {
-        uint8_t index = buffer->next;
-        buffer->data[buffer->next++] = v;
-        buffer->next &= MAX_OBSERVATION_MASK;
-        if(buffer->next == buffer->first)
-            buffer->first = ( buffer->next + 1 ) & MAX_OBSERVATION_MASK;
-        return index;
+        buffer->prev = buffer->curr;
+        buffer->curr = v;
     }
+    
+    typedef uint8_t observation_i;
+    typedef uint8_t state_i;
     
 #ifdef __cplusplus
 }

@@ -87,6 +87,9 @@ void GaussianMixture::setValue(const Eigen::VectorXf &input, const Eigen::Vector
         _min_out = _min_out.cwiseMin(value);
         _max_out = _max_out.cwiseMax(value);
     }
+    //printf("o_mini: <%.2f %.2f> | o_maxi: <%.2f %.2f> | o_mino: <%.2f %.2f> | o_maxo: <%.2f %.2f>\n",
+//           _min_in[0], _min_in[1], _max_in[0], _max_in[1],
+//           _min_out[0], _min_out[1], _max_out[0], _max_out[1]);
 
     // Activate all the neurons on the input and output
     float sum_of_in_probas = 0.0f;
@@ -101,8 +104,9 @@ void GaussianMixture::setValue(const Eigen::VectorXf &input, const Eigen::Vector
 
     // Compute the predicted input and output
     Eigen::VectorXf b = Eigen::VectorXf::Zero(_output_dim);
-    float min_squared_mahalanobis_distance = 1000.0f;
+    float min_squared_mahalanobis_distance = MAX_DISTANCE;
 
+    //printf("o_numc: %d | o_totp: %f\n", _neurons.size(), sum_of_in_probas);
     for (unsigned int i=0; i<_neurons.size(); ++i) {
         Neuron *neuron = _neurons[i];
 
@@ -116,16 +120,21 @@ void GaussianMixture::setValue(const Eigen::VectorXf &input, const Eigen::Vector
     // Compute the maximum component-wise error using the input and the output
     float max_error = 0.0f;
     size_t len = _neurons.size();
+    //printf("o_outp: <%.2f %.2f>\n", b[0], b[1]);
+    Eigen::VectorXf min_max_delta = _max_out - _min_out, error_vec = (value - b).cwiseAbs().cwiseQuotient(_max_out - _min_out + Eigen::VectorXf::Constant(value.rows(), FALLBACK_MAX_ERROR));
+    //printf("o_mmdt: <%.2f %.2f> | o_vodt: <%.2f %.2f> | a:%.2f b:%.2f\n",min_max_delta[0], min_max_delta[1], (value - b)[0], (value - b)[1], error_vec[0], error_vec[1]);
 
-    max_error = (value - b).cwiseAbs().cwiseQuotient(_max_out - _min_out + Eigen::VectorXf::Constant(value.rows(), 1e-2f)).maxCoeff();
+    max_error = (value - b).cwiseAbs().cwiseQuotient(_max_out - _min_out + Eigen::VectorXf::Constant(value.rows(), FALLBACK_MAX_ERROR)).maxCoeff();
 
+    printf("o_maxe: %.2f | o_best: %.2f\n", max_error, min_squared_mahalanobis_distance);
+    
     // Create a neuron if needed. Don't create a neuron if the input is already
     // close to the center of an existing neuron, as update will take care of
     // improving the result.
     //
     // min_distance > -2*ln(0.5), with 0.5 the minimum probability for update
     // to be preferred.
-    if (_neurons.size() < 1 || (max_error > _max_error && min_squared_mahalanobis_distance > 1.386f)) {
+    if (_neurons.size() < 1 || (max_error > _max_error && min_squared_mahalanobis_distance > MAX_MAHALANOBIS_SQ)) {
         _neurons.push_back(new Neuron(input, value, _initial_variance));
     }
 
@@ -197,9 +206,9 @@ GaussianMixture::Neuron::Neuron(const Eigen::VectorXf &input,
     _covariance_in = initial_variance * Eigen::MatrixXf::Identity(input.rows(), input.rows());
     _inv_covariance_in = inv_variance * Matrix::Identity(input.rows(), input.rows());
 
-//    printf("o_llt: [%.2f %.2f | %.2f %.2f] ", _covariance_in(0,0),_covariance_in(0,1), _covariance_in(1,0),_covariance_in(1,1));
+    //printf("o_llt: [%.2f %.2f | %.2f %.2f] ", _covariance_in(0,0),_covariance_in(0,1), _covariance_in(1,0),_covariance_in(1,1));
     _in_llt.compute(_covariance_in);
-//    printf("[%.2f %.2f | %.2f %.2f]\n", _in_llt.matrixLLT()(0,0),_in_llt.matrixLLT()(0,1), _in_llt.matrixLLT()(1,0),_in_llt.matrixLLT()(1,1));
+    //printf("[%.2f %.2f | %.2f %.2f]\n", _in_llt.matrixLLT()(0,0),_in_llt.matrixLLT()(0,1), _in_llt.matrixLLT()(1,0),_in_llt.matrixLLT()(1,1));
 
     // Ensure that the gaussian normalizations are ready to be used
     updateInGaussianNorm();
@@ -215,9 +224,9 @@ void GaussianMixture::Neuron::updateInGaussianNorm()
     //
     // log(norm) = -log(prod(sqrt(2*pi*diag(choleski.matrixL))))
     //           = -sum(log(sqrt(2*pi*diag(choleski.matrixL))))
-//    printf("o_norm: [%.2f %.2f | %.2f %.2f]", _in_llt.matrixLLT()(0,0),_in_llt.matrixLLT()(0,1), _in_llt.matrixLLT()(1,0),_in_llt.matrixLLT()(1,1));
+    //printf("o_norm: [%.2f %.2f | %.2f %.2f]", _in_llt.matrixLLT()(0,0),_in_llt.matrixLLT()(0,1), _in_llt.matrixLLT()(1,0),_in_llt.matrixLLT()(1,1));
     _log_input_gaussian_normalization = -1.0f * (TWOPI * _in_llt.matrixLLT().diagonal()).array().cwiseSqrt().log().sum();
-//    printf(" %.2f %.2f\n",
+    //printf(" %.2f %.2f\n",
 //           _in_llt.matrixLLT().diagonal()[0]*_in_llt.matrixLLT().diagonal()[1],
 //           _log_input_gaussian_normalization);
 }
@@ -238,6 +247,10 @@ void GaussianMixture::Neuron::computeProbabilityOfIn(const Eigen::VectorXf &inpu
     _probability_of_in = safe_exp(
         _log_input_gaussian_normalization - 0.5 * _square_mahalanobis_distance
     );
+    //printf("o_prin: %f | o_masq: %.2f | o_lgnf: %.2f | o_icov: [ %.2f %.2f | %.2f %.2f ] | o_indt: < %.2f %.2f>\n",
+//           _probability_of_in, _square_mahalanobis_distance, _log_input_gaussian_normalization,
+//           _inv_covariance_in(0,0), _inv_covariance_in(0,1), _inv_covariance_in(1,0), _inv_covariance_in(1,1),
+//           delta[0], delta[1] );
 }
 
 float GaussianMixture::Neuron::inProba() const
@@ -257,12 +270,14 @@ void GaussianMixture::Neuron::computeProbabilityCond(float sum_of_in_probas)
     } else {
         _probability_cond_in = inProba() / sum_of_in_probas;
     }
+    //printf("o_sipr: %f | o_prci: %f\n", sum_of_in_probas, _probability_cond_in);
 }
 
 void GaussianMixture::Neuron::contributeToOutput(Eigen::VectorXf &output,
                                                  const Eigen::VectorXf &input)
 {
-    if (_probability_cond_in > 1e-3f) {
+    if (_probability_cond_in > SMALL_VALUE_ERROR_OFFSET) {
+        //printf("o_cscr: %f\n", _probability_cond_in);
         TMP(delta, input.rows());
         TMP(cov_times_delta, input.rows());
 
@@ -283,19 +298,20 @@ void GaussianMixture::Neuron::update(const Eigen::VectorXf &input,
     // distance > -2 * log(1e-2), 1e-2 is p(x|c) under which clusters are
     // not updated
     printf("o_maha: %.2f\n", _square_mahalanobis_distance);
-    if (_square_mahalanobis_distance > 9.21f) {
+    if (_square_mahalanobis_distance > MAX_MAHALANOBIS_SQ_FOR_UPDATE) {
+//        printf("o_invm: %.2f\n", _square_mahalanobis_distance);
         return;
     }
 
     // Update the score of the neuron. The weight of the update must already
     // be very small when distance = 1.386 (P(x|c) = 0.50), hence the large
     // multiplication.
-    float score_weight = 0.1f * std::exp(-4.0f * _square_mahalanobis_distance);
+    float score_weight = ALPHA * std::exp(-BETA * _square_mahalanobis_distance);
 
     _score += score_weight * (_probability_cond_in - _score);
 
     // Update the means and variances
-    float weight = 0.1f * _probability_cond_in;
+    float weight = ALPHA * _probability_cond_in;
     TMP(delta_mean_in, input.rows());
     TMP(delta_mean_out, output.rows());
 
@@ -305,16 +321,16 @@ void GaussianMixture::Neuron::update(const Eigen::VectorXf &input,
     _mean_in.noalias() += weight * delta_mean_in;
     _mean_out.noalias() += weight * delta_mean_out;
     
-//    printf("o_mean: [%.2f %.2f]\n", _mean_in[0], _mean_in[1]);
+    //printf("o_mean: [%.2f %.2f] | o_dmin: <%.2f %.2f> | o_dmou: <%.2f %.2f>\n", _mean_in[0], _mean_in[1], delta_mean_in[0], delta_mean_in[1], delta_mean_out[0], delta_mean_out[1]);
     Eigen::MatrixXf covf = delta_mean_in * delta_mean_in.transpose();
-    printf("o_covf: <%.2f %.2f> [%.2f %.2f | %.2f %.2f]\n", delta_mean_in[0], delta_mean_in[1], covf(0,0),covf(0,1),covf(1,0),covf(1,1));
+    //printf("o_covf: <%.2f %.2f> [%.2f %.2f | %.2f %.2f] | o_weig: %.2f\n", delta_mean_in[0], delta_mean_in[1], covf(0,0),covf(0,1),covf(1,0),covf(1,1), weight);
 
     // Prevent the covarance matrices from being too small (having values less than 1e-4)
-    _covariance_in +=
-        weight * (delta_mean_in * delta_mean_in.transpose() + 1e-4f * Eigen::MatrixXf::Identity(input.rows(), input.rows()) - _covariance_in);
-//    printf("o_llt: [%.2f %.2f | %.2f %.2f] ", _covariance_in(0,0),_covariance_in(0,1), _covariance_in(1,0),_covariance_in(1,1));
+    //printf("o_cvin: [%.2f %.2f | %.2f %.2f]\n", _covariance_in(0,0),_covariance_in(0,1), _covariance_in(1,0),_covariance_in(1,1));
+    _covariance_in +=  weight * (delta_mean_in * delta_mean_in.transpose() + 1e-4f * Eigen::MatrixXf::Identity(input.rows(), input.rows()) - _covariance_in);
+    //printf("o_llt: [%.2f %.2f | %.2f %.2f] ", _covariance_in(0,0),_covariance_in(0,1), _covariance_in(1,0),_covariance_in(1,1));
     _in_llt.compute(_covariance_in);
-//    printf("[%.2f %.2f | %.2f %.2f]\n", _in_llt.matrixLLT()(0,0),_in_llt.matrixLLT()(0,1), _in_llt.matrixLLT()(1,0),_in_llt.matrixLLT()(1,1));
+    //printf("[%.2f %.2f | %.2f %.2f]\n", _in_llt.matrixLLT()(0,0),_in_llt.matrixLLT()(0,1), _in_llt.matrixLLT()(1,0),_in_llt.matrixLLT()(1,1));
     _inv_covariance_in = _in_llt.solve(Eigen::MatrixXf::Identity(input.rows(), input.rows()));
 
     // Update the main covariance matrix

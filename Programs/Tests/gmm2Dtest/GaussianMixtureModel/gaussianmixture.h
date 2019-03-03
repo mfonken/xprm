@@ -25,6 +25,7 @@
 
 #include <Eigen/Dense>
 #include <vector>
+#include "control_types.h"
 
 class NetworkSerializer;
 

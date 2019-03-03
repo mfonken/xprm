@@ -21,10 +21,28 @@ int main(int argc, const char * argv[])
     InitTest( &hmm );
     while(1)
     {
-//        for( uint32_t i = 0; i < NUM_UPDATES; i++ )
-//            UpdateFSM( &hmm.A );
-        
-        HMMFunctions.ForwardSolve( &hmm );
+//        addToObservationBuffer(&hmm.O, observations[0]);
+        for( uint8_t i = 1; i < 10; i++ )
+        {
+            
+//            addToObservationBuffer(&hmm.O, observations[i]);
+            hmm.O.data[hmm.O.first] = observations[i];
+            HMMFunctions.BaumWelchSolve( &hmm, 0 );
+        }
+        for( uint8_t i = 0; i < NUM_STATES; i++ )
+        {
+//            double row_sum = 0.;
+//            for( uint8_t j = 0; j < NUM_OBSERVATION_SYMBOLS; j++ )
+//            {
+//                hmm.G[i][j] /= hmm.G[i][NUM_STATES];
+//                row_sum += hmm.G[i][j];
+//            }
+//            for( uint8_t j = 0; j < NUM_OBSERVATION_SYMBOLS; j++ )
+//            {
+//                hmm.G[i][j] /= row_sum;
+//            }
+        }
+        HMMFunctions.BaumWelchSolve( &hmm, hmm.O.last - 1 );
         while(1);
     }
     return 0;

@@ -14,10 +14,10 @@
 using namespace std;
 using namespace cv;
 
-#define NUM_SAMPLES 30
+#define NUM_SAMPLES 10
 #define SAMPLE_POINT_RADIUS 4
 
-#define COV_SCALE 7
+#define COV_SCALE 2
 
 Mat gmmMat(HEIGHT, WIDTH, CV_8UC3, Scalar(245,245,245));
 gaussian_mixture_model_t gmm;
@@ -50,116 +50,64 @@ int main(int argc, const char * argv[])
     
     GMMFunctions.Model.Initialize( &gmm );
     
+    SampleList all_samples[3] = {A_samples, B_samples, C_samples};
+    uint8_t labels[3] = {A_label, B_label, C_label};
+    vec2 centers[3] = { {750,250}, {500,500}, {250,750}};
     
     /******* A *******/
-    int i = 0;
-    for( vec2& sample : A_samples )
+    int i = 0, l = 0;
+    double angle;
+    gaussian2d_t gaus;
+    for( SampleList &sample_set : all_samples )
     {
-        printf("%d:\n", i++);
-        observation_t observation = { sample.a, sample.b, A_label };
-        vec2 value = { sample.a, sample.b };
-        GMMFunctions.Model.AddValue( &gmm, &observation, &value );
+        for( vec2& sample : sample_set )
+        {
+            observation_t observation = { sample.a/SCALE, sample.b/SCALE, labels[l] };
+            vec2 value = { centers[l].a+5, centers[l].b+5 };
+            
+            printf("%d (%.2f, %.2f):\n", i++, value.a, value.b);
+            GMMFunctions.Model.AddValue( &gmm, &observation, &value );
+            
+            VectorXf inputVec(2); inputVec << observation.a, observation.b;
+            VectorXf valueVec(2); valueVec << sample.a/SCALE, sample.b/SCALE;
+            GMM.setValue(inputVec, valueVec);
+        }
         
-//        VectorXf inputVec(2); inputVec << observation.a, observation.b;
-//        VectorXf valueVec(2); valueVec << sample.a, sample.b;
-//        GMM.setValue(inputVec, valueVec);
-//        printf("m_final: %.3f [%.2f %.2f | %.2f %.2f]\no_final: %.3f [%.2f %.2f | %.2f %.2f]\n\n",
-//               gmm.cluster[0].log_gaussian_norm_factor, gmm.cluster[0].llt_in.a, gmm.cluster[0].llt_in.b, gmm.cluster[0].llt_in.c, gmm.cluster[0].llt_in.d,
-//               GMM._neurons[0]->_log_input_gaussian_normalization, GMM._neurons[0]->_in_llt.matrixLLT()(0,0), GMM._neurons[0]->_in_llt.matrixLLT()(0,1), GMM._neurons[0]->_in_llt.matrixLLT()(1,0), GMM._neurons[0]->_in_llt.matrixLLT()(1,1));
+        
+        angle = GetCovarianceAngle( &gaus.covariance );
+        ellipse(gmmMat, Point(gaus.mean.a*SCALE, gaus.mean.b*SCALE),
+                Size(gaus.covariance.a*COV_SCALE*SCALE, gaus.covariance.d*COV_SCALE*SCALE), angle, 0, 360, Vec3b{0,105,0}, 3, 8);
+        
+        l++;
     }
     
-    gaussian2d_t a1 = gmm.cluster[0].gaussian_out;
-    double angle = GetCovarianceAngle( &a1.covariance );
-    ellipse(gmmMat, Point(a1.mean.a, a1.mean.b),
-            Size(a1.covariance.a*COV_SCALE, a1.covariance.d*COV_SCALE), angle, 0, 360, Vec3b{105,0,0}, 3, 8);
-//
-//    gaussian2d_t A1;
-//    A1.mean = (vec2){ GMM._neurons[0]->_mean_out[0], GMM._neurons[0]->_mean_out[1] };
-//    A1.covariance = (mat2x2){
-//        GMM._neurons[0]->_covariance_in_out(0,0),
-//        GMM._neurons[0]->_covariance_in_out(0,1),
-//        GMM._neurons[0]->_covariance_in_out(1,0),
-//        GMM._neurons[0]->_covariance_in_out(1,1)
-//    };
-//    angle = GetCovarianceAngle( &A1.covariance );
-//    ellipse(gmmMat, Point(A1.mean.a, A1.mean.b),
-//            Size(A1.covariance.a*COV_SCALE, A1.covariance.d*COV_SCALE), angle, 0, 360, Vec3b{0,0,105}, 3, 8);
-    
-//    /******* B *******/
-    i = 0;
-    for( vec2& sample : B_samples )
-    {
-        printf("%d:\n", i++);
-        observation_t observation = { sample.a, sample.b, B_label };
-        vec2 value = { sample.a, sample.b };
-        GMMFunctions.Model.AddValue( &gmm, &observation, &value );
-
-//        VectorXf inputVec(2); inputVec << observation.a, observation.b;
-//        VectorXf valueVec(2); valueVec << sample.a, sample.b;
-//        GMM.setValue(inputVec, valueVec);
-//        printf("m_final: %.3f [%.2f %.2f | %.2f %.2f]\no_final: %.3f [%.2f %.2f | %.2f %.2f]\n\n",
-//               gmm.cluster[0].log_gaussian_norm_factor, gmm.cluster[0].llt_in.a, gmm.cluster[0].llt_in.b, gmm.cluster[0].llt_in.c, gmm.cluster[0].llt_in.d,
-//               GMM._neurons[0]->_log_input_gaussian_normalization, GMM._neurons[0]->_in_llt.matrixLLT()(0,0), GMM._neurons[0]->_in_llt.matrixLLT()(0,1), GMM._neurons[0]->_in_llt.matrixLLT()(1,0), GMM._neurons[0]->_in_llt.matrixLLT()(1,1));
-    }
-//
-//    if(/*GMM.numClusters() > 1 && */gmm.num_clusters > 1)
-//    {
-//
-//
-//
-//        A1.mean = (vec2){ GMM._neurons[1]->_mean_out[0], GMM._neurons[1]->_mean_out[1] };
-//        A1.covariance = (mat2x2){
-//            GMM._neurons[1]->_covariance_in_out(0,0),
-//            GMM._neurons[1]->_covariance_in_out(0,1),
-//            GMM._neurons[1]->_covariance_in_out(1,0),
-//            GMM._neurons[1]->_covariance_in_out(1,1)
-//        };
-//        angle = GetCovarianceAngle( &A1.covariance );
-//        ellipse(gmmMat, Point(A1.mean.a, A1.mean.b),
-//                Size(A1.covariance.a*COV_SCALE, A1.covariance.d*COV_SCALE), angle, 0, 360, Vec3b{0,0,105}, 3, 8);
-//    }
-//    /******* C *******/
-    i = 0;
-    for( vec2& sample : C_samples )
-    {
-        printf("%d:\n", i++);
-        observation_t observation = { sample.a, sample.b, C_label };
-        vec2 value = { sample.a, sample.b };
-        GMMFunctions.Model.AddValue( &gmm, &observation, &value );
-//
-//        VectorXf inputVec(2); inputVec << observation.a, observation.b;
-//        VectorXf valueVec(2); valueVec << sample.a, sample.b;
-//        GMM.setValue(inputVec, valueVec);
-//        printf("m_final: %.3f [%.2f %.2f | %.2f %.2f]\no_final: %.3f [%.2f %.2f | %.2f %.2f]\n\n",
-//               gmm.cluster[0].log_gaussian_norm_factor, gmm.cluster[0].llt_in.a, gmm.cluster[0].llt_in.b, gmm.cluster[0].llt_in.c, gmm.cluster[0].llt_in.d,
-//               GMM._neurons[0]->_log_input_gaussian_normalization, GMM._neurons[0]->_in_llt.matrixLLT()(0,0), GMM._neurons[0]->_in_llt.matrixLLT()(0,1), GMM._neurons[0]->_in_llt.matrixLLT()(1,0), GMM._neurons[0]->_in_llt.matrixLLT()(1,1));
-    }
-//    if(GMM.numClusters() > 2 && gmm.num_clusters > 2)
-//    {
-//        A1 = gmm.cluster[2].gaussian_out;
-//        angle = GetCovarianceAngle( &a1.covariance );
-//        ellipse(gmmMat, Point(a1.mean.a, a1.mean.b),
-//                Size(a1.covariance.a*COV_SCALE, a1.covariance.d*COV_SCALE), angle, 0, 360, Vec3b{105,0,0}, 3, 8);
-//
-//        A1.mean = (vec2){ GMM._neurons[2]->_mean_out[0], GMM._neurons[0]->_mean_out[1] };
-//        A1.covariance = (mat2x2){
-//            GMM._neurons[2]->_covariance_in_out(0,0),
-//            GMM._neurons[2]->_covariance_in_out(0,1),
-//            GMM._neurons[2]->_covariance_in_out(1,0),
-//            GMM._neurons[2]->_covariance_in_out(1,1)
-//        };
-//        angle = GetCovarianceAngle( &A1.covariance );
-//        ellipse(gmmMat, Point(A1.mean.a, A1.mean.b),
-//                Size(A1.covariance.a*COV_SCALE, A1.covariance.d*COV_SCALE), angle, 0, 360, Vec3b{0,0,105}, 3, 8);
-//    }
     for( int j = 0; j < gmm.num_clusters; j++)
     {
-        a1 = gmm.cluster[j].gaussian_out;
-        angle = GetCovarianceAngle( &a1.covariance );
+        gaus = gmm.cluster[j].gaussian_out;
+        angle = GetCovarianceAngle( &gaus.covariance );
         int b = 255-j*5, r =j*5;
         if( b<0) b=0; if( r>255) r=255;
-        ellipse(gmmMat, Point(a1.mean.a, a1.mean.b),
-                Size(a1.covariance.a*COV_SCALE, a1.covariance.d*COV_SCALE), angle, 0, 360, Vec3b{(uint8_t)b,0,(uint8_t)r}, 3, 8);
+        ellipse(gmmMat, Point(gaus.mean.a*SCALE, gaus.mean.b*SCALE),
+                Size(gaus.covariance.a*COV_SCALE*SCALE, gaus.covariance.d*COV_SCALE*SCALE), angle, 0, 360, Vec3b{(uint8_t)b,0,(uint8_t)r}, 3, 8);
+        
+        printf("%d m_final: %.3f [%.2f %.2f | %.2f %.2f]\n", j, gmm.cluster[j].log_gaussian_norm_factor, gmm.cluster[j].llt_in.a, gmm.cluster[j].llt_in.b, gmm.cluster[j].llt_in.c, gmm.cluster[j].llt_in.d);
+    }
+    for( int j = 0; j < GMM.numClusters(); j++)
+    {
+        gaus.mean = (vec2){ GMM._neurons[j]->_mean_out[0], GMM._neurons[j]->_mean_out[1] };
+        gaus.covariance = (mat2x2){
+            GMM._neurons[j]->_covariance_in_out(0,0),
+            GMM._neurons[j]->_covariance_in_out(0,1),
+            GMM._neurons[j]->_covariance_in_out(1,0),
+            GMM._neurons[j]->_covariance_in_out(1,1)
+        };
+        angle = GetCovarianceAngle( &gaus.covariance );
+        int b = 255-j*5, r =j*5;
+        if( b<0) b=0; if( r>255) r=255;
+        ellipse(gmmMat, Point(gaus.mean.a*SCALE, gaus.mean.b*SCALE),
+                Size(gaus.covariance.a*COV_SCALE*SCALE, gaus.covariance.d*COV_SCALE*SCALE), angle, 0, 360, Vec3b{0,205,0}, 3, 8);
+        
+        printf("%d o_final: %.3f [%.2f %.2f | %.2f %.2f]\n", j, GMM._neurons[j]->_log_input_gaussian_normalization, GMM._neurons[j]->_in_llt.matrixLLT()(0,0), GMM._neurons[j]->_in_llt.matrixLLT()(0,1), GMM._neurons[j]->_in_llt.matrixLLT()(1,0), GMM._neurons[j]->_in_llt.matrixLLT()(1,1));
     }
     usleep(100000);
     imshow("GMM", gmmMat);

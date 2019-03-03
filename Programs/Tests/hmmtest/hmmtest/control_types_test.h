@@ -377,17 +377,17 @@ extern "C" {
     {
         uint8_t
         data[MAX_OBSERVATIONS],
-        next, first;
+        next, first, last;
     } observation_buffer_t;
     
     static uint8_t addToObservationBuffer( observation_buffer_t * buffer, uint8_t v )
     {
-        uint8_t index = buffer->next;
+        buffer->last = buffer->next;
         buffer->data[buffer->next++] = v;
         buffer->next &= MAX_OBSERVATION_MASK;
         if(buffer->next == buffer->first)
             buffer->first = ( buffer->next + 1 ) & MAX_OBSERVATION_MASK;
-        return index;
+        return buffer->last;
     }
     
 #ifdef __cplusplus
