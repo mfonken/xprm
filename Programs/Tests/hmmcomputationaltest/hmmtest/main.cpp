@@ -7,6 +7,7 @@
 //
 
 #include <iostream>
+#include <string.h>
 #include "fsm_test.h"
 
 using namespace std;
@@ -21,7 +22,7 @@ int main(int argc, const char * argv[])
     InitTest( &hmm );
     while(1)
     {
-        printf("P>C  S0>S0  S0>S1  S1>S0  S1>S1  Max\n");
+        printf("P>C  S0>S0  S0>S1  S1>S0  S1>S1   S0>N   S1>N   N>MAX  S0>E   S1>E   E>MAX\n");
 //        addToObservationBuffer(&hmm.O, observations[0]);
         for( uint8_t i = 0; i < sizeof(observations)/sizeof(observations[0]); i++ )
         {
@@ -52,10 +53,11 @@ int main(int argc, const char * argv[])
             {
                 hmm.Gc[i][j] /= row_sum;
                 printf("|%.4f|", hmm.Gc[i][j]);
+                hmm.B.expected[j][i] = hmm.Gc[i][j];
             }
             printf("\n");
         }
-        searchListCombination(0.2016);
+        searchListCombination(0.154);
         while(1);
     }
     return 0;

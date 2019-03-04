@@ -19,7 +19,7 @@ typedef enum
 
 static OBSERVATAION observations[]
 {
-    I, I, I, I, I,
+    I, I, I, I,// I,
     O, O, I
     , I, I
 };

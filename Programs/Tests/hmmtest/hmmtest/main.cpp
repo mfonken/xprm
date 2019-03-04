@@ -21,16 +21,16 @@ int main(int argc, const char * argv[])
     InitTest( &hmm );
     while(1)
     {
-//        addToObservationBuffer(&hmm.O, observations[0]);
+        addToObservationBuffer(&hmm.O, observations[0]);
         for( uint8_t i = 1; i < 10; i++ )
         {
             
-//            addToObservationBuffer(&hmm.O, observations[i]);
-            hmm.O.data[hmm.O.first] = observations[i];
-            HMMFunctions.BaumWelchSolve( &hmm, 0 );
+            addToObservationBuffer(&hmm.O, observations[i]);
+//            hmm.O.data[hmm.O.first] = observations[i];
+//            HMMFunctions.BaumWelchSolve( &hmm, 0 );
         }
-        for( uint8_t i = 0; i < NUM_STATES; i++ )
-        {
+//        for( uint8_t i = 0; i < NUM_STATES; i++ )
+//        {
 //            double row_sum = 0.;
 //            for( uint8_t j = 0; j < NUM_OBSERVATION_SYMBOLS; j++ )
 //            {
@@ -41,8 +41,11 @@ int main(int argc, const char * argv[])
 //            {
 //                hmm.G[i][j] /= row_sum;
 //            }
+//        }
+        for( uint8_t i = 0; i < 10; i++ )
+        {
+            HMMFunctions.BaumWelchSolve( &hmm, hmm.O.last );
         }
-        HMMFunctions.BaumWelchSolve( &hmm, hmm.O.last - 1 );
         while(1);
     }
     return 0;

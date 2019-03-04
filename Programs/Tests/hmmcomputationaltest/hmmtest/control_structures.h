@@ -72,7 +72,9 @@ typedef double state_expectation_element_t[NUM_STATES][NUM_STATES];
 typedef state_expectation_element_t state_expectation_matrix_t[NUM_OBSERVATION_SYMBOLS][NUM_OBSERVATION_SYMBOLS];
 
 typedef double expectation_element_t[NUM_STATES+1];
-typedef expectation_element_t expectation_matrix_t[NUM_OBSERVATION_SYMBOLS][NUM_OBSERVATION_SYMBOLS];
+typedef expectation_element_t expectation_matrix_t[NUM_OBSERVATION_SYMBOLS];
+    
+typedef double expectation_vector_t[NUM_OBSERVATION_SYMBOLS][NUM_STATES+1];
 
 typedef double gamma_matrix_t[NUM_OBSERVATION_SYMBOLS][NUM_STATES];
     
@@ -84,7 +86,9 @@ typedef struct
     observation_buffer_t    O;                   // Observation sequence
     
     state_expectation_matrix_t  Es;             // State expectation matrix
-    expectation_matrix_t   Em;                  // Maximum expectation matrix
+    expectation_matrix_t    Em;                 // Maximum expectation matrix
+    expectation_vector_t    Ev;
+    double                  Ec[2][NUM_OBSERVATION_SYMBOLS+1];
     gamma_matrix_t          G;                  // Gamma expectation matrix
     gamma_matrix_t          Gc;                 // Gamma expectation cumulator matrix
     gamma_matrix_t          Gm;                 // Gamma expectation cumulator matrix
