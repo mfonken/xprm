@@ -179,6 +179,8 @@ void BaumWelchTransitionSolveHMM( hidden_markov_model_t * model )
                 }
 //                printf("\n");
             }
+            
+//            observation_max = MAX(curr_max,prev_max);
 //            if( observation_index >= 0 )
 //            {
 //                for( uint8_t j = 0; j < NUM_STATES; j++ )
@@ -218,10 +220,10 @@ void BaumWelchTransitionSolveHMM( hidden_markov_model_t * model )
     {
         for( uint8_t j = 0; j < NUM_OBSERVATION_SYMBOLS; j++ )
         {
-            if( k == j || l == j )
+//            if( k == j || l == j )
             {
                 model->G[j][i] = model->Ev[j][i];
-                model->Gc[j][i] += model->G[j][i];
+                model->Gc[j][i] = model->Ec[j][i];
                 model->Gm[j][i] += model->Ev[j][NUM_STATES];
 //                if( j == EXP && i == ST )
 //                    printf(" <%d,%s|%.4f>",i,j?"E":"N",model->G[j][i]);

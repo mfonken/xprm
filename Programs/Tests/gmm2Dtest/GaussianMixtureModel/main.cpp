@@ -14,7 +14,7 @@
 using namespace std;
 using namespace cv;
 
-#define NUM_SAMPLES 10
+#define NUM_SAMPLES 100
 #define SAMPLE_POINT_RADIUS 4
 
 #define COV_SCALE 2

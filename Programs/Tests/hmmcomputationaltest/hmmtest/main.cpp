@@ -51,7 +51,7 @@ int main(int argc, const char * argv[])
             }
             for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
             {
-                hmm.Gc[i][j] /= row_sum;
+//                hmm.Gc[i][j] /= row_sum;
                 printf("|%.4f|", hmm.Gc[i][j]);
                 hmm.B.expected[j][i] = hmm.Gc[i][j];
             }

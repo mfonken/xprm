@@ -24,27 +24,35 @@ int main(int argc, const char * argv[])
         addToObservationBuffer(&hmm.O, observations[0]);
         for( uint8_t i = 1; i < 10; i++ )
         {
-            
             addToObservationBuffer(&hmm.O, observations[i]);
-//            hmm.O.data[hmm.O.first] = observations[i];
-//            HMMFunctions.BaumWelchSolve( &hmm, 0 );
+            HMMFunctions.BaumWelchSolve( &hmm, 0 );
         }
-//        for( uint8_t i = 0; i < NUM_STATES; i++ )
-//        {
-//            double row_sum = 0.;
-//            for( uint8_t j = 0; j < NUM_OBSERVATION_SYMBOLS; j++ )
-//            {
-//                hmm.G[i][j] /= hmm.G[i][NUM_STATES];
-//                row_sum += hmm.G[i][j];
-//            }
-//            for( uint8_t j = 0; j < NUM_OBSERVATION_SYMBOLS; j++ )
-//            {
-//                hmm.G[i][j] /= row_sum;
-//            }
-//        }
-        for( uint8_t i = 0; i < 10; i++ )
+        printf("\t ");
+        for( uint8_t j = 0; j < NUM_STATES; j++ )
         {
-            HMMFunctions.BaumWelchSolve( &hmm, hmm.O.last );
+            for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
+            {
+                printf("%.4f%s", hmm.G.cumulative_value[j][i], i&&j?" ":",");
+                hmm.G.cumulative_value[j][i] /= hmm.G.maximum[j];
+            }
+        }
+        printf("\n\t\t %.4f\t\t  %.4f\n", hmm.G.maximum[0], hmm.G.maximum[1]);
+        printf("\n");
+        printf("|G|:\n");
+        for( uint8_t j = 0; j < NUM_STATES; j++ )
+        {
+            double row_sum = 0.;
+            for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
+            {
+                row_sum += hmm.G.cumulative_value[i][j];
+            }
+            for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
+            {
+//                hmm.G.cumulative_value[i][j] /= row_sum;
+                printf("|%.4f|", hmm.G.cumulative_value[i][j]);
+                hmm.B.expected[j][i] = hmm.G.cumulative_value[i][j];
+            }
+            printf("\n");
         }
         while(1);
     }

@@ -113,7 +113,7 @@ struct normal_random_variable
 static uint8_t A_label = 'A';
 static int A_var = 200;
 static int A_co = 40;
-static Vector2d A_mean(500,500);
+static Vector2d A_mean(770,100);
 static Matrix2d A_cov = [] {
     Matrix2d tmp;
     tmp << A_var,A_co,A_co,A_var;
@@ -123,8 +123,8 @@ static normal_random_variable A_gaus(A_mean, A_cov);
 
 static uint8_t B_label = 'B';
 static int B_var = 700;
-static int B_co = 100;
-static Vector2d B_mean(750,250);
+static int B_co = 400;
+static Vector2d B_mean(850,300);
 static Matrix2d B_cov = [] {
     Matrix2d tmp;
     tmp << B_var,B_co,B_co,B_var;

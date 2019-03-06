@@ -45,6 +45,7 @@ extern "C" {
 
 #define MIN(A,B) (A<B?A:B)
 #define MAX(A,B) (A>B?A:B)
+#define SET_MAX(A,B) (A = MAX(A,B))
     
 #define ALPHA 0.5
 #define BETA 4.
@@ -377,11 +378,13 @@ extern "C" {
     {
         uint8_t
         data[MAX_OBSERVATIONS],
-        next, first, last;
+        next, first, last, curr, prev;
     } observation_buffer_t;
     
     static uint8_t addToObservationBuffer( observation_buffer_t * buffer, uint8_t v )
     {
+        buffer->prev = buffer->curr;
+        buffer->curr = v;
         buffer->last = buffer->next;
         buffer->data[buffer->next++] = v;
         buffer->next &= MAX_OBSERVATION_MASK;
