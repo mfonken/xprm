@@ -63,7 +63,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "138"
             endingLineNumber = "138"
-            landmarkName = "BaumWelchTransitionSolveHMM"
+            landmarkName = "BaumWelchGammaSolveHMM"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -79,7 +79,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "145"
             endingLineNumber = "145"
-            landmarkName = "BaumWelchTransitionSolveHMM"
+            landmarkName = "BaumWelchGammaSolveHMM"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -95,7 +95,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "194"
             endingLineNumber = "194"
-            landmarkName = "BaumWelchObservationSolveHMM"
+            landmarkName = "BaumWelchTransitionSolveHMM"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -142,9 +142,7 @@
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "264"
-            endingLineNumber = "264"
-            landmarkName = "BaumWelchObservationSolveHMM"
-            landmarkType = "9">
+            endingLineNumber = "264">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -159,7 +157,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "198"
             endingLineNumber = "198"
-            landmarkName = "BaumWelchObservationSolveHMM"
+            landmarkName = "BaumWelchTransitionSolveHMM"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
