@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3460BB77223603040010ACF8 /* psm.c in Sources */ = {isa = PBXBuildFile; fileRef = 3460BB75223603030010ACF8 /* psm.c */; };
 		34654BA32184D0B4001B5CAE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34654BA22184D0B4001B5CAE /* main.cpp */; };
 		349D298D221FA1B70032E465 /* gaussianmixture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 349D298C221FA1B70032E465 /* gaussianmixture.cpp */; };
 		34F91E6C220FBDFB00F8CBBE /* gmm.c in Sources */ = {isa = PBXBuildFile; fileRef = 34F91E6B220FBDFB00F8CBBE /* gmm.c */; };
@@ -26,6 +27,9 @@
 
 /* Begin PBXFileReference section */
 		34492743218E35E70027AD3C /* data.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = data.h; sourceTree = "<group>"; };
+		3460BB74223603030010ACF8 /* kumaraswamy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kumaraswamy.h; sourceTree = "<group>"; };
+		3460BB75223603030010ACF8 /* psm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = psm.c; sourceTree = "<group>"; };
+		3460BB76223603030010ACF8 /* psm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = psm.h; sourceTree = "<group>"; };
 		34654B9F2184D0B4001B5CAE /* GaussianMixtureModel */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = GaussianMixtureModel; sourceTree = BUILT_PRODUCTS_DIR; };
 		34654BA22184D0B4001B5CAE /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		349D2989221D02640032E465 /* control_structures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = control_structures.h; sourceTree = "<group>"; };
@@ -69,10 +73,13 @@
 			children = (
 				349D298A221D02640032E465 /* control_types.h */,
 				349D2989221D02640032E465 /* control_structures.h */,
+				3460BB74223603030010ACF8 /* kumaraswamy.h */,
 				349D298B221FA1B60032E465 /* gaussianmixture.h */,
 				349D298C221FA1B70032E465 /* gaussianmixture.cpp */,
 				34F91E6A220FBDFB00F8CBBE /* gmm.h */,
 				34F91E6B220FBDFB00F8CBBE /* gmm.c */,
+				3460BB76223603030010ACF8 /* psm.h */,
+				3460BB75223603030010ACF8 /* psm.c */,
 				34FC20F6218FB489006A2CBD /* image_handler.h */,
 				34492743218E35E70027AD3C /* data.h */,
 				34654BA22184D0B4001B5CAE /* main.cpp */,
@@ -138,6 +145,7 @@
 			files = (
 				34F91E6C220FBDFB00F8CBBE /* gmm.c in Sources */,
 				349D298D221FA1B70032E465 /* gaussianmixture.cpp in Sources */,
+				3460BB77223603040010ACF8 /* psm.c in Sources */,
 				34654BA32184D0B4001B5CAE /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

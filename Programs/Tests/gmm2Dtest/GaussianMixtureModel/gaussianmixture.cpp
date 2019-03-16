@@ -124,9 +124,10 @@ void GaussianMixture::setValue(const Eigen::VectorXf &input, const Eigen::Vector
     Eigen::VectorXf min_max_delta = _max_out - _min_out, error_vec = (value - b).cwiseAbs().cwiseQuotient(_max_out - _min_out + Eigen::VectorXf::Constant(value.rows(), FALLBACK_MAX_ERROR));
     //printf("o_mmdt: <%.2f %.2f> | o_vodt: <%.2f %.2f> | a:%.2f b:%.2f\n",min_max_delta[0], min_max_delta[1], (value - b)[0], (value - b)[1], error_vec[0], error_vec[1]);
 
+//    printf("o_mmdl: <%.3f %.3f> | <%.3f %.3f> | <%.3f %.3f>\n", _max_out[0], _max_out[1], _min_out[0], _min_out[1], min_max_delta[0], min_max_delta[1]);
     max_error = (value - b).cwiseAbs().cwiseQuotient(_max_out - _min_out + Eigen::VectorXf::Constant(value.rows(), FALLBACK_MAX_ERROR)).maxCoeff();
 
-    printf("o_maxe: %.2f | o_best: %.2f\n", max_error, min_squared_mahalanobis_distance);
+//    printf("o_maxe: %.2f | o_best: %.2f\n", max_error, min_squared_mahalanobis_distance);
     
     // Create a neuron if needed. Don't create a neuron if the input is already
     // close to the center of an existing neuron, as update will take care of
@@ -151,7 +152,7 @@ void GaussianMixture::setValue(const Eigen::VectorXf &input, const Eigen::Vector
         Neuron *neuron = _neurons[i];
 
         // Remove the neuron if it is not needed anymore
-        if (neuron->_score < 0.001f) {
+        if (neuron->_score < MIN_CLUSTER_SCORE) {
             delete neuron;
 
             _neurons.erase(_neurons.begin() + i);
@@ -297,7 +298,7 @@ void GaussianMixture::Neuron::update(const Eigen::VectorXf &input,
     // Don't perform updates that are too small to be relevant
     // distance > -2 * log(1e-2), 1e-2 is p(x|c) under which clusters are
     // not updated
-    printf("o_maha: %.2f\n", _square_mahalanobis_distance);
+//    printf("o_maha: %.2f\n", _square_mahalanobis_distance);
     if (_square_mahalanobis_distance > MAX_MAHALANOBIS_SQ_FOR_UPDATE) {
 //        printf("o_invm: %.2f\n", _square_mahalanobis_distance);
         return;

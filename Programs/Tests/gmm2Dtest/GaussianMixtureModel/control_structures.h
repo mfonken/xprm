@@ -36,7 +36,7 @@ typedef struct
 
 typedef struct
 {
-    gaussian_mixture_cluster_t
+    gaussian_mixture_cluster_t *
         cluster[MAX_CLUSTERS];
     uint8_t
         num_clusters,
@@ -46,7 +46,32 @@ typedef struct
         max_in,
         max_out,
         min_out;
+    gaussian_mixture_cluster_t
+        cluster_mem[MAX_CLUSTERS];
 } gaussian_mixture_model_t;
+    
+    
+typedef struct
+{ /* Predictive State Model */
+    gaussian_mixture_model_t gmm;
+//    hidden_markov_model_t hmm;
+//    kumaraswamy_t kumaraswamy;
+    band_list_t state_bands;
+    double
+    previous_thresh,
+    proposed_thresh,
+    proposed_nu,
+    proposed_primary_id,
+    proposed_secondary_id;
+    uint8_t
+    best_state,
+    best_cluster_id,
+    observation_state,
+    current_state;
+    double
+    best_confidence,
+    best_cluster_weight;
+} psm_t;
 
 #ifdef __cplusplus
 }

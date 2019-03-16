@@ -34,6 +34,7 @@ void AddClusterToGaussianMixtureModel(                 gaussian_mixture_model_t 
 void UpdateGaussianMixtureModel(                       gaussian_mixture_model_t *, observation_t *, vec2 * );
 void AddValueToGaussianMixtureModel(                   gaussian_mixture_model_t *, observation_t *, vec2 * );
 void SortClusterBoundariesOfGaussianMixtureModel(      gaussian_mixture_model_t *, cluster_boundary_list_t * );
+void RemovClusterFromGaussianMixtureModel(             gaussian_mixture_model_t *, uint16_t );
 
 typedef struct
 {
@@ -57,6 +58,7 @@ typedef struct
     void   (*Update)(                   gaussian_mixture_model_t *, observation_t *, vec2 * );
     void   (*AddValue)(                 gaussian_mixture_model_t *, observation_t *, vec2 * );
     void   (*SortClusterBoundaries)(    gaussian_mixture_model_t *, cluster_boundary_list_t * );
+    void   (*RemoveCluster)(            gaussian_mixture_model_t *, uint16_t );
 } gaussian_mixture_model_functions;
 
 typedef struct
@@ -84,6 +86,7 @@ static gaussian_mixture_functions GMMFunctions =
     .Model.Update                   = UpdateGaussianMixtureModel,
     .Model.AddValue                 = AddValueToGaussianMixtureModel,
     .Model.SortClusterBoundaries    = SortClusterBoundariesOfGaussianMixtureModel,
+    .Model.RemoveCluster            = RemovClusterFromGaussianMixtureModel
 };
 
 #ifdef __cplusplus

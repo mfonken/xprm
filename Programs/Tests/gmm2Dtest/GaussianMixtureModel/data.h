@@ -10,7 +10,9 @@
 #define data_h
 
 #include <stdio.h>
-#include <stdlib.h>     /* srand, rand */
+#include <stdlib.h>
+#include <fstream>
+#include <sstream>
 #include <Eigen/Dense>
 #include <random>
 #include <vector>
@@ -20,14 +22,30 @@
 
 #include <unistd.h>
 
-#include "gmm.h"
+#include "psm.h"
 
 using namespace cv;
+using namespace std;
+
+//#define SEPARATE_IDS
+#define SHOW_CLUSTERS
+#define SAVE_TO_FILE
+
+#define ROOT_PATH "/Users/matthew/Desktop/gmmtest/data/"
+#define DETECTION_MAP_FILE ROOT_PATH"dm.txt"
 
 #define DATA_LEN 10000
-#define HEIGHT 1000
-#define WIDTH 1000
+#define HEIGHT 700
+#define WIDTH 700
 #define SCALE 1
+#define BORDER 400
+
+static string this_descriptor = "test";
+
+typedef struct
+{
+    int density, thresh, id_;
+} dm_line;
 
 static int N = DATA_LEN;
 static int K = 6;
@@ -40,15 +58,15 @@ using namespace Eigen;
 using namespace cv;
 
 typedef Vec3b Color;
-typedef vector<vec2> SampleList;
+typedef vector<dm_line> SampleList;
 
 static Color colors[6] =
 {
-    {255,0,0},
     {255,255,0},
     {0,255,0},
-    {0,255,255},
     {0,0,255},
+    {255,0,0},
+    {0,255,255},
     {255,0,255}
 };
 
@@ -75,7 +93,7 @@ static void GenerateRandomData(int num, int regions, int space, int min = 0, int
             
             double curr_v = data[index];
             int x = (int)((curr_v / (double)range) * (double)WIDTH);
-            if(x == prev) continue;
+            if( x == prev ) continue;
             line(dataMat, Point(x,0), Point(x,HEIGHT), colors[i]);
             x = prev;
             
@@ -110,7 +128,7 @@ struct normal_random_variable
     }
 };
 
-static uint8_t A_label = 'A';
+static uint8_t A_label = 0;
 static int A_var = 200;
 static int A_co = 40;
 static Vector2d A_mean(770,100);
@@ -121,7 +139,7 @@ static Matrix2d A_cov = [] {
     }();
 static normal_random_variable A_gaus(A_mean, A_cov);
 
-static uint8_t B_label = 'B';
+static uint8_t B_label = 1;
 static int B_var = 700;
 static int B_co = 400;
 static Vector2d B_mean(850,300);
@@ -132,7 +150,7 @@ static Matrix2d B_cov = [] {
 }();
 static normal_random_variable B_gaus(B_mean, B_cov);
 
-static uint8_t C_label = 'C';
+static uint8_t C_label = 2;
 static int C_var = 700;
 static int C_co = -100;
 static Vector2d C_mean(250,750);
@@ -143,23 +161,76 @@ static Matrix2d C_cov = [] {
 }();
 static normal_random_variable C_gaus(C_mean, C_cov);
 
-static SampleList GenerateNGaussian2DSamples( normal_random_variable nvar, int n )
+static bool is_int(const string s){
+    return s.find_first_not_of( "0123456789" ) == string::npos;
+}
+
+bool compareVecB(dm_line v1, dm_line v2)
+{
+    return (v1.thresh > v2.thresh);
+}
+
+static int label = 0;
+static SampleList GenerateNGaussian2DSamples( normal_random_variable nvar, int n, int id_ = 0 )
 {
     SampleList samples;
-    
+#ifdef DETECTION_MAP_FILE
+    ifstream file(DETECTION_MAP_FILE);
+    string line;
+    while ( getline(file,line) )
+    {
+        stringstream ss(line);
+        vector<string> result;
+        while( ss.good() )
+        {
+            string substr;
+            getline( ss, substr, ',' );
+            result.push_back( substr );
+        }
+        if( is_int(result[0])
+#ifdef SEPARATE_IDS
+           && (int)stoi(result[2]) == label
+#endif
+           )
+        {
+            int x = stoi(result[0])*2,
+            y = stoi(result[1])*HEIGHT/256,
+            _id = stoi(result[2]);
+            
+            samples.push_back( (dm_line){ x, y, _id } );
+//            printf("%lu %d %d\n", samples.size(), x, y);
+        }
+        else if(result.size()==1)
+        {
+            this_descriptor = result[0];
+        }
+    }
+
+#else
     for( int i = 0; i < n; i++ )
     {
         Vector2d s = nvar();
-//        printf("%3d>(%.2f, %.2f)\n", i, s[0], s[1]);
-        samples.push_back( (vec2){ s[0], s[1] });
+        samples.push_back( (dm_line){ (int)s[0], (int)s[1], id_ });
     }
+#endif
+    label++;
+//    sort(samples.begin(), samples.end(), compareVecB);
     return samples;
 }
 
 static void PlotSamples( Mat &M, SampleList l, int r, Color &c )
 {
-    for( vec2 sample : l )
-        circle(M, Point(sample.a,sample.b), r, c, FILLED);
+    for( dm_line sample : l )
+        circle(M, Point(sample.density + BORDER,sample.thresh + BORDER), r, colors[sample.id_], FILLED);
+}
+
+template <typename T>
+std::string pto_string(const T a_value, const int n = 6)
+{
+    std::ostringstream out;
+    out.precision(n);
+    out << std::fixed << a_value;
+    return out.str();
 }
 
 #endif /* data_h */

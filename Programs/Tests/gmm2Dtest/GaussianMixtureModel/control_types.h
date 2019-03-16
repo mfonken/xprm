@@ -24,26 +24,30 @@ extern "C" {
 #define ZDIV(X,Y) ((Y==0)?(X==0?0:ZDIV_LNUM):X/Y)
 #endif
     
+#define NUM_STATE_GROUPS 4
+    
 #define MAX_THRESH 255
     
     //#define NUM_STATES              10
-#define NUM_OBSERVATION_SYMBOLS 5 // Should be max number of clusters in GMM
-#define MAX_OBSERVATIONS        (1 << 5) // Length of history
+#define NUM_OBSERVATION_SYMBOLS 5 // Max number of clusters in GMM
+#define MAX_OBSERVATIONS        (1 << 7) // Length of history
 #define MAX_OBSERVATION_MASK    (MAX_OBSERVATIONS-1)
     
-#define MAX_DISTANCE 10000.f
+#define MAX_DISTANCE 50.f
 #define MIN_TOTAL_MIXTURE_PROBABILITY 1e-15f
 #define MAX_CLUSTERS 100
-#define MAX_ERROR 0.8
-#define INITIAL_VARIANCE 14//3//3
+#define MAX_ERROR 0.9
+#define INITIAL_VARIANCE 60.//3//3
 #define INV_INITIAL_VARIANCE (1./INITIAL_VARIANCE)
-#define MAX_MAHALANOBIS_SQ 1.386f
-#define MAX_MAHALANOBIS_SQ_FOR_UPDATE 1000.f
+#define MAX_MAHALANOBIS_SQ 8//.386f
+#define MAX_MAHALANOBIS_SQ_FOR_UPDATE MAX_MAHALANOBIS_SQ//20.f
 #define SMALL_VALUE_ERROR_OFFSET 1e-4f
-#define VALID_CLUSTER_STD_DEV 2.
-#define MIN_CLUSTER_SCORE 1e-3f
+#define VALID_CLUSTER_STD_DEV 1//0.5
+#define MIN_CLUSTER_SCORE 0.5///1e-3f
 #define FALLBACK_MAX_ERROR 1e-2f
     
+    
+#define IN_RANGE(A,X,Y) ( ( A > X ) && ( A < Y ) )
 #define MIN(A,B) (A<B?A:B)
 #define MAX(A,B) (A>B?A:B)
     
@@ -53,7 +57,7 @@ extern "C" {
 #define MAX_LABELS 10
 #define LABEL_MOVING_AVERAGE_MAX_HISTORY 10
 #define NULL_LABEL 0xff
-#define MIN_LABEL_CONTRIBUTION 0.1
+#define MIN_LABEL_CONTRIBUTION 0.2
     
 #define BOUNDARY_START(X)   !!(X<0)
 #define BOUNDARY_END(X)     !!(X>0)
@@ -100,6 +104,12 @@ extern "C" {
     static double getMat2x2Determinant( mat2x2 * mat )
     {
         return ( ( mat->a * mat->d ) - ( mat->c * mat->b ) );
+    }
+    static void transposeMat2x2( mat2x2 * mat )
+    {
+        double temp = mat->b;
+        mat->b = mat->c;
+        mat->c = temp;
     }
     static void getMat2x2Inverse( mat2x2 * mat, mat2x2 * res )
     {
@@ -206,6 +216,46 @@ extern "C" {
         c->mean = a->mean + k * mean_diff;
         c->std_dev = a->std_dev * ( 1 - k );
     }
+    static void mulGaussian2d( gaussian2d_t * a, gaussian2d_t * b, gaussian2d_t * c )
+    { /* See https://math.stackexchange.com/questions/157172/product-of-two-multivariate-gaussians-distributions */
+//        mat2x2 computation_matrix, L_inv;
+//        gaussian2d_t a_computation, b_computation;
+//        /* Calculate LLT of a∑ + b∑ */
+//        mat2x2AddMat2x2( &a->covariance, &b->covariance, &computation_matrix );
+//        GetMat2x2LLT( &computation_matrix, &computation_matrix );
+//        /* Convert to inv(L) matrix */
+//        computation_matrix.b = 0;
+//        getMat2x2Inverse( &computation_matrix, &L_inv );
+//
+//        mat2x2DotVec2( &L_inv, &a->mean, &a_computation.mean );
+//        mat2x2MulMat2x2( &L_inv, &a->covariance, &a_computation.covariance );
+//        transposeMat2x2( &a_computation.covariance );
+//        mat2x2DotVec2( &L_inv, &b->mean, &b_computation.mean );
+//        mat2x2MulMat2x2( &L_inv, &b->covariance, &b_computation.covariance );
+//
+//        mat2x2MulMat2x2( &a_computation.covariance, &b_computation.covariance, &c->covariance );
+//
+//        transposeMat2x2( &b_computation.covariance );
+//
+//        vec2 a_computation_vec, b_computation_vec;
+//        mat2x2DotVec2( &b_computation.covariance, &a_computation.mean, &a_computation_vec );
+//        mat2x2DotVec2( &a_computation.covariance, &b_computation.mean, &b_computation_vec );
+//        vec2AddVec2( &a_computation_vec, &b_computation_vec, &c->mean );
+        
+        mat2x2 a_computation, b_computation, c_computation;
+        
+        getMat2x2Inverse( &a->covariance, &a_computation );
+        getMat2x2Inverse( &b->covariance, &b_computation );
+        mat2x2AddMat2x2( &a_computation, &b_computation, &c_computation );
+        getMat2x2Inverse( &c_computation, &c->covariance );
+        
+        vec2 a_computation_vec, b_computation_vec, c_computation_vec;
+        mat2x2DotVec2( &a_computation, &a->mean, &a_computation_vec );
+        mat2x2DotVec2( &b_computation, &b->mean, &b_computation_vec );
+        vec2AddVec2( &a_computation_vec, &b_computation_vec, &c_computation_vec );
+        mat2x2DotVec2( &c->covariance, &c_computation_vec, &c->mean );
+        c->covariance.d *= 2;
+    }
     static void divGaussian1d( gaussian1d_t * a, gaussian1d_t * b, gaussian1d_t * c )
     {
         double cov_y_a_var = a->std_dev * a->std_dev, cov_y_b_var = b->std_dev * b->std_dev;
@@ -244,6 +294,21 @@ extern "C" {
         uint8_t count[MAX_LABELS];
         uint8_t num_valid;
     } label_manager_t;
+    
+    typedef struct
+    {
+        double
+            lower_boundary,
+            upper_boundary;
+        vec2
+            true_center;
+    } band_t;
+    
+    typedef struct
+    {
+        uint8_t length;
+        band_t band[NUM_STATE_GROUPS];
+    } band_list_t;
     
     static double GetMeanXAtGaussianYOffset( gaussian2d_t * gaussian, double y_offset )
     { /* See - https://courses.cs.washington.edu/courses/cse590b/02wi/eig2x2.cpp
@@ -319,15 +384,23 @@ extern "C" {
         }
     }
     
-    static uint8_t GetNumLabels( label_manager_t * labels )
+    static uint32_t GetValidLabels( label_manager_t * labels )
     {
-        uint8_t num = 0;
+#if MAX_LABELS > 32
+#warning "Valid label mask is max 32 bit wide."
+#endif
+        uint32_t valid_vector = 0;
         for( uint8_t i = 0; i < MAX_LABELS; i++ )
         {
-            if( labels->average[i] > MIN_LABEL_CONTRIBUTION )
-                num++;
+            valid_vector |= ( labels->average[i] > MIN_LABEL_CONTRIBUTION ) << i;
         }
-        return num;
+        return valid_vector;
+    }
+    static uint8_t CountSet( uint32_t v )
+    {
+        uint8_t c = 0;
+        for( uint8_t i = 0, m = 1; i < 32; i++, c += !!(v & m), m <<= 1 );
+        return c;
     }
     
     typedef struct
