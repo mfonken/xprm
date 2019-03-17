@@ -10,7 +10,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/gmm.c"
-            timestampString = "574410159.647543"
+            timestampString = "574461631.591951"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "100"
@@ -26,11 +26,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/control_types.h"
-            timestampString = "574410159.6476361"
+            timestampString = "574461631.59203"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "190"
-            endingLineNumber = "190"
+            startingLineNumber = "201"
+            endingLineNumber = "201"
             landmarkName = "CalculateMahalanobisDistanceSquared(mat2x2 * inv_covariance, vec2 * delta)"
             landmarkType = "9">
          </BreakpointContent>
@@ -42,7 +42,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/gmm.c"
-            timestampString = "574410159.647755"
+            timestampString = "574461631.592135"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "54"
@@ -58,7 +58,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/gmm.c"
-            timestampString = "574410159.647823"
+            timestampString = "574461631.592181"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "65"
@@ -74,7 +74,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/gmm.c"
-            timestampString = "574410159.647889"
+            timestampString = "574461631.592223"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "211"
@@ -90,11 +90,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/main.cpp"
-            timestampString = "574410159.647957"
+            timestampString = "574461631.5922641"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "207"
-            endingLineNumber = "207"
+            startingLineNumber = "212"
+            endingLineNumber = "212"
             landmarkName = "main(int argc, const char * argv[])"
             landmarkType = "9">
          </BreakpointContent>
@@ -106,7 +106,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/data.h"
-            timestampString = "574410159.648518"
+            timestampString = "574457587.0876729"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "196"
@@ -122,7 +122,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/data.h"
-            timestampString = "574410159.648585"
+            timestampString = "574457587.087727"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "180"
@@ -138,7 +138,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/gmm.c"
-            timestampString = "574410159.6486419"
+            timestampString = "574461631.592369"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "260"
@@ -154,7 +154,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/gmm.c"
-            timestampString = "574410159.648706"
+            timestampString = "574461631.592406"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "284"
@@ -170,7 +170,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/data.h"
-            timestampString = "574410159.64877"
+            timestampString = "574457587.0878969"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "212"
@@ -186,7 +186,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/gmm.c"
-            timestampString = "574410159.648824"
+            timestampString = "574461631.592461"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "231"
@@ -202,7 +202,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/gmm.c"
-            timestampString = "574410159.648881"
+            timestampString = "574461631.592499"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "235"
@@ -218,7 +218,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/gmm.c"
-            timestampString = "574410159.648936"
+            timestampString = "574461631.5925519"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "201"
@@ -234,7 +234,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/gaussianmixture.cpp"
-            timestampString = "574410159.648984"
+            timestampString = "574457587.0881"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "78"
@@ -250,11 +250,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/main.cpp"
-            timestampString = "574410159.649029"
+            timestampString = "574461631.592607"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "139"
-            endingLineNumber = "139"
+            startingLineNumber = "143"
+            endingLineNumber = "143"
             landmarkName = "main(int argc, const char * argv[])"
             landmarkType = "9">
          </BreakpointContent>
@@ -266,7 +266,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/gmm.c"
-            timestampString = "574410159.649398"
+            timestampString = "574461631.592657"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "195"
@@ -282,7 +282,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/gmm.c"
-            timestampString = "574410159.649443"
+            timestampString = "574461631.5926909"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "196"
@@ -298,7 +298,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/psm.c"
-            timestampString = "574410159.649488"
+            timestampString = "574461631.592731"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "35"
@@ -314,7 +314,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/psm.c"
-            timestampString = "574410159.6496021"
+            timestampString = "574461631.59308"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "41"
@@ -330,12 +330,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/psm.c"
-            timestampString = "574410159.649707"
+            timestampString = "574461631.593281"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "173"
-            endingLineNumber = "173"
-            landmarkName = "FindLowerBoundariesOfStateBandPSM"
+            startingLineNumber = "174"
+            endingLineNumber = "174"
+            landmarkName = "DiscoverStateBandsPSM"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -346,12 +346,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/psm.c"
-            timestampString = "574410159.649808"
+            timestampString = "574461631.593483"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "156"
-            endingLineNumber = "156"
-            landmarkName = "FindLowerBoundariesOfStateBandPSM"
+            startingLineNumber = "157"
+            endingLineNumber = "157"
+            landmarkName = "DiscoverStateBandsPSM"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -362,7 +362,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/main.cpp"
-            timestampString = "574410159.649907"
+            timestampString = "574461631.59368"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "105"
@@ -378,12 +378,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/psm.c"
-            timestampString = "574410159.650216"
+            timestampString = "574461631.593732"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "115"
-            endingLineNumber = "115"
-            landmarkName = "FindLowerBoundariesOfStateBandPSM"
+            startingLineNumber = "116"
+            endingLineNumber = "116"
+            landmarkName = "DiscoverStateBandsPSM"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -394,12 +394,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/psm.c"
-            timestampString = "574410159.650314"
+            timestampString = "574461631.5939651"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "167"
-            endingLineNumber = "167"
-            landmarkName = "FindLowerBoundariesOfStateBandPSM"
+            startingLineNumber = "168"
+            endingLineNumber = "168"
+            landmarkName = "DiscoverStateBandsPSM"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -410,12 +410,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/psm.c"
-            timestampString = "574410159.650396"
+            timestampString = "574461631.59416"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "146"
-            endingLineNumber = "146"
-            landmarkName = "FindLowerBoundariesOfStateBandPSM"
+            startingLineNumber = "147"
+            endingLineNumber = "147"
+            landmarkName = "DiscoverStateBandsPSM"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -426,12 +426,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/psm.c"
-            timestampString = "574410159.6504461"
+            timestampString = "574461631.594456"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "162"
-            endingLineNumber = "162"
-            landmarkName = "FindLowerBoundariesOfStateBandPSM"
+            startingLineNumber = "163"
+            endingLineNumber = "163"
+            landmarkName = "DiscoverStateBandsPSM"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
@@ -442,12 +442,76 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GaussianMixtureModel/control_types.h"
-            timestampString = "574410159.650498"
+            timestampString = "574461631.594797"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "393"
-            endingLineNumber = "393"
+            startingLineNumber = "404"
+            endingLineNumber = "404"
             landmarkName = "GetValidLabels( label_manager_t * labels )"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "GaussianMixtureModel/main.cpp"
+            timestampString = "574461631.5948581"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "122"
+            endingLineNumber = "122"
+            landmarkName = "main(int argc, const char * argv[])"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "GaussianMixtureModel/main.cpp"
+            timestampString = "574461631.594911"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "167"
+            endingLineNumber = "167"
+            landmarkName = "main(int argc, const char * argv[])"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "GaussianMixtureModel/main.cpp"
+            timestampString = "574461631.594959"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "169"
+            endingLineNumber = "169"
+            landmarkName = "main(int argc, const char * argv[])"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "GaussianMixtureModel/control_types.h"
+            timestampString = "574461631.595005"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "336"
+            endingLineNumber = "336"
+            landmarkName = "LimitCovariance( mat2x2 * covariance )"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>

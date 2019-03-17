@@ -28,6 +28,9 @@ extern "C" {
     
 #define MAX_THRESH 255
     
+#define M_C 1.f
+#define M_1_C (1.0f / M_C)
+    
     //#define NUM_STATES              10
 #define NUM_OBSERVATION_SYMBOLS 5 // Max number of clusters in GMM
 #define MAX_OBSERVATIONS        (1 << 7) // Length of history
@@ -45,7 +48,8 @@ extern "C" {
 #define VALID_CLUSTER_STD_DEV 1//0.5
 #define MIN_CLUSTER_SCORE 0.5///1e-3f
 #define FALLBACK_MAX_ERROR 1e-2f
-    
+
+#define MAX_INPUT_COVARIANCE  300
     
 #define IN_RANGE(A,X,Y) ( ( A > X ) && ( A < Y ) )
 #define MIN(A,B) (A<B?A:B)
@@ -156,6 +160,13 @@ extern "C" {
         C->c = A * B->c;
         C->d = A * B->d;
     }
+    static void powerMulMat2x2( double A, mat2x2 * B, mat2x2 * C )
+    {
+        C->a = pow( B->a, A );
+        C->b = pow( B->b, A );
+        C->c = pow( B->c, A );
+        C->d = pow( B->d, A );
+    }
     static void mat2x2MulMat2x2(mat2x2 * A, mat2x2 * B, mat2x2 * res)
     {
         res->a = A->a * B->a + A->b * B->c;
@@ -202,6 +213,7 @@ extern "C" {
     {
         vec2 mean;
         mat2x2 covariance;
+        uint8_t combinations;
     } gaussian2d_t;
     
     static gaussian1d_t getGaussian1dFrom2dY( gaussian2d_t * a )
@@ -218,30 +230,6 @@ extern "C" {
     }
     static void mulGaussian2d( gaussian2d_t * a, gaussian2d_t * b, gaussian2d_t * c )
     { /* See https://math.stackexchange.com/questions/157172/product-of-two-multivariate-gaussians-distributions */
-//        mat2x2 computation_matrix, L_inv;
-//        gaussian2d_t a_computation, b_computation;
-//        /* Calculate LLT of a∑ + b∑ */
-//        mat2x2AddMat2x2( &a->covariance, &b->covariance, &computation_matrix );
-//        GetMat2x2LLT( &computation_matrix, &computation_matrix );
-//        /* Convert to inv(L) matrix */
-//        computation_matrix.b = 0;
-//        getMat2x2Inverse( &computation_matrix, &L_inv );
-//
-//        mat2x2DotVec2( &L_inv, &a->mean, &a_computation.mean );
-//        mat2x2MulMat2x2( &L_inv, &a->covariance, &a_computation.covariance );
-//        transposeMat2x2( &a_computation.covariance );
-//        mat2x2DotVec2( &L_inv, &b->mean, &b_computation.mean );
-//        mat2x2MulMat2x2( &L_inv, &b->covariance, &b_computation.covariance );
-//
-//        mat2x2MulMat2x2( &a_computation.covariance, &b_computation.covariance, &c->covariance );
-//
-//        transposeMat2x2( &b_computation.covariance );
-//
-//        vec2 a_computation_vec, b_computation_vec;
-//        mat2x2DotVec2( &b_computation.covariance, &a_computation.mean, &a_computation_vec );
-//        mat2x2DotVec2( &a_computation.covariance, &b_computation.mean, &b_computation_vec );
-//        vec2AddVec2( &a_computation_vec, &b_computation_vec, &c->mean );
-        
         mat2x2 a_computation, b_computation, c_computation;
         
         getMat2x2Inverse( &a->covariance, &a_computation );
@@ -254,7 +242,8 @@ extern "C" {
         mat2x2DotVec2( &b_computation, &b->mean, &b_computation_vec );
         vec2AddVec2( &a_computation_vec, &b_computation_vec, &c_computation_vec );
         mat2x2DotVec2( &c->covariance, &c_computation_vec, &c->mean );
-        c->covariance.d *= 2;
+
+        c->combinations = a->combinations + b->combinations + 1;
     }
     static void divGaussian1d( gaussian1d_t * a, gaussian1d_t * b, gaussian1d_t * c )
     {
@@ -331,6 +320,26 @@ extern "C" {
         return delta_mean;
     }
     
+    static bool LimitCovariance( mat2x2 * covariance )
+    {
+        bool limited = false;
+        double max = covariance->a, check;
+        for(uint8_t i = 1; i < 4; i++ )
+        {
+            check = ((double *)covariance)[i];
+            if( check > max )
+                max = check;
+        }
+        if( max > MAX_INPUT_COVARIANCE )
+        {
+            double correction_factor = MAX_INPUT_COVARIANCE / max;
+            for(uint8_t i = 0; i < 4; i++ )
+                ((double *)covariance)[i] *= correction_factor;
+            limited = true;
+        }
+        return limited;
+    }
+    
     static void UpdateCovarianceWithWeight( vec2 * A, vec2 * B, gaussian2d_t * gaussian, double weight )
     {       
         double delta_mean_a_a = A->a * B->a,
@@ -348,6 +357,8 @@ extern "C" {
         mat2x2SubMat2x2( &unweighted_covariance_factor, &gaussian->covariance, &covariance_delta_factor );
         scalarMulMat2x2( weight, &covariance_delta_factor, &covariance_delta_factor );
         mat2x2AddMat2x2( &gaussian->covariance, &covariance_delta_factor, &gaussian->covariance );
+        
+        LimitCovariance( &gaussian->covariance );
     }
     
     static bool ReportLabel( label_manager_t * labels, uint8_t new_label )

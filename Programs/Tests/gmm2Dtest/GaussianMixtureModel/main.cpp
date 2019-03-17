@@ -102,7 +102,7 @@ int main(int argc, const char * argv[])
 #define COV_X 50
 #define COV_XY 0
 #define COV_Y 100
-    psm.gmm.num_clusters = 4;
+    psm.gmm.num_clusters = 12;
     
     uint8_t labels[4][4] =
     {
@@ -113,12 +113,16 @@ int main(int argc, const char * argv[])
     };
     for( uint8_t i = 0; i < psm.gmm.num_clusters; i++ )
     {
-        double x = 100*(i+1), y = HEIGHT-200-x;
+        double x = 100*(i+1)-200, y = HEIGHT-x+100;
         psm.gmm.cluster_mem[i].gaussian_in = { {x,y}, {COV_X,COV_XY,COV_XY,COV_Y} };
         psm.gmm.cluster_mem[i].max_y = x + COV_Y*VALID_CLUSTER_STD_DEV;
         for(uint8_t j = 0; j < 4; j++)
             ReportLabel( &psm.gmm.cluster_mem[i].labels, labels[i][j] );
     }
+    mulGaussian2d( &psm.gmm.cluster_mem[0].gaussian_in, &psm.gmm.cluster_mem[1].gaussian_in, &psm.gmm.cluster_mem[psm.gmm.num_clusters++].gaussian_in );
+    for(uint8_t i = 2; i < 12; i++)
+        mulGaussian2d( &psm.gmm.cluster_mem[psm.gmm.num_clusters-1].gaussian_in, &psm.gmm.cluster_mem[i].gaussian_in, &psm.gmm.cluster_mem[psm.gmm.num_clusters++].gaussian_in );
+    
     /*****************/
 #else
     /******* A *******/
@@ -160,7 +164,8 @@ int main(int argc, const char * argv[])
         int b = 255-j*5, r =j*5;
         if( b<0) b=0; if( r>255) r=255;
         Point center = Point(gaus.mean.a*SCALE+BORDER, gaus.mean.b*SCALE+BORDER);
-        Size size = Size(gaus.covariance.a*COV_SCALE*SCALE, gaus.covariance.d*COV_SCALE*SCALE);
+        double cs = pow(gaus.combinations+1,sqrt(M_PI)); // Combination scale
+        Size size = Size(gaus.covariance.a*COV_SCALE*SCALE*cs, gaus.covariance.d*COV_SCALE*SCALE*cs);
         ellipse(gmmMat, center, size, angle, 0, 360, Vec3b{(uint8_t)b,0,(uint8_t)r}, 1, 5, 0);
         label_manager_t &labels = (*gmm->cluster[j]).labels;
         for(int i = 0, offset = -12; i < NUM_LABELS_TO_SHOW; i++, offset+=12)

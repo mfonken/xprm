@@ -110,8 +110,7 @@ void UpdateObservationMatrixHMM( hidden_markov_model_t * model, uint8_t t )
 //    }
 //}
 
-#define EXP  0
-#define ST   1
+static int count = 0;
 void BaumWelchTransitionSolveHMM( hidden_markov_model_t * model )
 {
     /* Expectation matrix update */
@@ -121,7 +120,13 @@ void BaumWelchTransitionSolveHMM( hidden_markov_model_t * model )
     memset( &model->G, 0, sizeof(model->G));
     /* Update state expectation matrix */
     observation_i k = model->O.prev, l = model->O.curr;
-    printf("%s,%s  ", k?"E":"N", l?"E":"N");
+    printf("%4d: %s,%s  ", ++count,
+#ifdef SPOOF
+           k?"E":"N", l?"E":"N"
+#else
+           observation_strings[k], observation_strings[l]
+#endif
+           );
     for( uint8_t i = 0; i < NUM_STATES; i++ )
     {
         for( uint8_t j = 0; j < NUM_STATES; j++ )
@@ -135,7 +140,7 @@ void BaumWelchTransitionSolveHMM( hidden_markov_model_t * model )
             model->Es[k][l][i][j] = state_expectation;
             printf("%.4f%s", model->Es[k][l][i][j], i&&j?" ":",");
             
-            addToList(model->Es[k][l][i][j]);
+//            addToList(model->Es[k][l][i][j]);
         }
     }
     /* Update maximum expectation matarix */
@@ -202,36 +207,48 @@ void BaumWelchTransitionSolveHMM( hidden_markov_model_t * model )
         model->Ev[k][NUM_STATES] = MAX( observation_max, model->Ev[k][NUM_STATES] );
         model->Ev[l][NUM_STATES] = MAX( observation_max, model->Ev[l][NUM_STATES] );
     }
-    model->Ec[0][0] += model->Ev[0][0];
-    model->Ec[0][1] += model->Ev[0][1];
-    model->Ec[0][2] += model->Ev[0][2];
-    model->Ec[1][0] += model->Ev[1][0];
-    model->Ec[1][1] += model->Ev[1][1];
-    model->Ec[1][2] += model->Ev[1][2];
+    
+    for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
+    {
+        for( uint8_t j = 0; j <= NUM_STATES; j++ )
+        {
+            model->Ec[i][j] += model->Ev[i][j];
+        }
+    }
+#ifdef SPOOF
     printf("[%.4f %.4f %.4f][%.4f %.4f %.4f] | [%.4f %.4f %.4f][%.4f %.4f %.4f]",
            model->Ev[0][0],model->Ev[0][1],model->Ev[0][2],
            model->Ev[1][0],model->Ev[1][1],model->Ev[1][2],
            model->Ec[0][0],model->Ec[0][1],model->Ec[0][2],
            model->Ec[1][0],model->Ec[1][1],model->Ec[1][2]);
-    
+#endif
     /* Update gamma expectation mtarix */
 //    printf("Ev > G:\n");
-    for( uint8_t i = 0; i < NUM_STATES; i++ )
+    for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
     {
-        for( uint8_t j = 0; j < NUM_OBSERVATION_SYMBOLS; j++ )
+        for( uint8_t j = 0; j < NUM_STATES; j++ )
         {
-//            if( k == j || l == j )
-            {
-                model->G[j][i] = model->Ev[j][i];
-                model->Gc[j][i] = model->Ec[j][i];
-                model->Gm[j][i] += model->Ev[j][NUM_STATES];
-//                if( j == EXP && i == ST )
-//                    printf(" <%d,%s|%.4f>",i,j?"E":"N",model->G[j][i]);
-            }
+            model->G[i][j] = model->Ev[i][j];
+            model->Gc[i][j] = model->Ec[i][j];
+            model->Gm[i][j] += model->Ev[i][NUM_STATES];
         }
-
-//        printf(" G%d:%.3f ", i, model->Em[k][l][i]);
     }
+//    for( uint8_t i = 0; i < NUM_STATES; i++ )
+//    {
+//        for( uint8_t j = 0; j < NUM_OBSERVATION_SYMBOLS; j++ )
+//        {
+////            if( k == j || l == j )
+//            {
+//                model->G[j][i] = model->Ev[j][i];
+//                model->Gc[j][i] = model->Ec[j][i];
+//                model->Gm[j][i] += model->Ev[j][NUM_STATES];
+////                if( j == EXP && i == ST )
+////                    printf(" <%d,%s|%.4f>",i,j?"E":"N",model->G[j][i]);
+//            }
+//        }
+//
+////        printf(" G%d:%.3f ", i, model->Em[k][l][i]);
+//    }
 //    printf(" Gm:%.3f\n", model->Em[k][l][NUM_STATES]);
     printf("\n");
 

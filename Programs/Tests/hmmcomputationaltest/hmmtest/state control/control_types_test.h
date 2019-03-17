@@ -18,6 +18,8 @@ extern "C" {
 #include <math.h>
 #include <string.h>
     
+//#define SPOOF
+    
 #ifndef ZDIV
 #define ZDIV_LNUM 1 << 10
 #define ZDIV(X,Y) ((Y==0)?(X==0?0:ZDIV_LNUM):X/Y)
@@ -26,7 +28,12 @@ extern "C" {
 #define MAX_THRESH 255
     
     //#define NUM_STATES              10
-#define NUM_OBSERVATION_SYMBOLS 2//5 // Should be max number of clusters in GMM
+#ifdef SPOOF
+#define NUM_OBSERVATION_SYMBOLS 2    // Should be max number of clusters in GMM
+#else
+#define NUM_OBSERVATION_SYMBOLS 5    // Should be max number of clusters in GMM
+#endif
+    
 #define MAX_OBSERVATIONS        (1 << 5) // Length of history
 #define MAX_OBSERVATION_MASK    (MAX_OBSERVATIONS-1)
     
@@ -56,6 +63,8 @@ extern "C" {
     
 #define BOUNDARY_START(X)   !!(X<0)
 #define BOUNDARY_END(X)     !!(X>0)
+    
+    static const char * observation_strings[] = { "O0", "O1", "O2", "O3", "O4" };
     
     typedef struct
     {
@@ -165,24 +174,24 @@ extern "C" {
 
     typedef enum
     {
+#ifdef SPOOF
         LOW = 0,
         HIGH,
+#define UNKNOWN_STATE LOW
+#define UNSTABLE_NONE LOW
+
+#else
+        UNKNOWN_STATE = -1,
+        UNSTABLE_NONE,
+        UNSTABLE_SINGLE,
+        UNSTABLE_DOUBLE,
+//        UNSTABLE_TRIPLE,
+        UNSTABLE_MANY,
+#endif
         NUM_STATES
-//        UNKNOWN_STATE = 0,
-//        STABLE_NONE,
-//        UNSTABLE_NONE,
-//        STABLE_SINGLE,
-//        UNSTABLE_SINGLE,
-//        STABLE_DOUBLE,
-//        UNSTABLE_DOUBLE,
-//        STABLE_MANY,
-//        UNSTABLE_MANY,
-//        NUM_STATES
     } state_t;
     
-#define UNKNOWN_STATE LOW
-    
-#define NUM_STATE_GROUPS ((uint8_t)NUM_STATES/2)
+#define NUM_STATE_GROUPS NUM_STATES//((uint8_t)NUM_STATES/2)
     
     /* Stability tracking for selec tions */
     typedef struct

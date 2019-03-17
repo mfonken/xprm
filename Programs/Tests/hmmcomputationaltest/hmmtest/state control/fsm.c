@@ -63,7 +63,7 @@ void ResetFSMState( fsm_map_t * bm, uint8_t i )
 
 void InitializeFSMSystem( fsm_system_t * sys )
 {
-    sys->state                = LOW;//STABLE_NONE;
+    sys->state                = UNSTABLE_NONE;
     sys->prev                 = UNKNOWN_STATE;
     sys->next                 = UNKNOWN_STATE;
     sys->selection_index      = 0;

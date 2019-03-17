@@ -63,7 +63,7 @@ typedef struct
 typedef struct
 {
     double expected[NUM_STATES][NUM_OBSERVATION_SYMBOLS];
-    double best[NUM_OBSERVATION_SYMBOLS];
+//    double best[NUM_OBSERVATION_SYMBOLS];
     double gamma[NUM_STATES];
     uint8_t num_observation_symbols;
 } observation_matrix_t;
@@ -88,7 +88,7 @@ typedef struct
     state_expectation_matrix_t  Es;             // State expectation matrix
     expectation_matrix_t    Em;                 // Maximum expectation matrix
     expectation_vector_t    Ev;
-    double                  Ec[2][NUM_OBSERVATION_SYMBOLS+1];
+    expectation_vector_t    Ec;
     gamma_matrix_t          G;                  // Gamma expectation matrix
     gamma_matrix_t          Gc;                 // Gamma expectation cumulator matrix
     gamma_matrix_t          Gm;                 // Gamma expectation cumulator matrix
