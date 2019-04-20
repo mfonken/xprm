@@ -24,31 +24,6 @@ extern "C" {
 #define ZDIV(X,Y) ((Y==0)?(X==0?0:ZDIV_LNUM):X/Y)
 #endif
     
-#define NUM_STATE_GROUPS 4
-    
-#define MAX_THRESH 255
-    
-#define M_C 1.f
-#define M_1_C (1.0f / M_C)
-    
-    //#define NUM_STATES              10
-#define NUM_OBSERVATION_SYMBOLS 5 // Max number of clusters in GMM
-#define MAX_OBSERVATIONS        (1 << 7) // Length of history
-#define MAX_OBSERVATION_MASK    (MAX_OBSERVATIONS-1)
-    
-#define MAX_DISTANCE 50.f
-#define MIN_TOTAL_MIXTURE_PROBABILITY 1e-15f
-#define MAX_CLUSTERS 100
-#define MAX_ERROR 0.9
-#define INITIAL_VARIANCE 60.//3//3
-#define INV_INITIAL_VARIANCE (1./INITIAL_VARIANCE)
-#define MAX_MAHALANOBIS_SQ 8//.386f
-#define MAX_MAHALANOBIS_SQ_FOR_UPDATE MAX_MAHALANOBIS_SQ//20.f
-#define SMALL_VALUE_ERROR_OFFSET 1e-4f
-#define VALID_CLUSTER_STD_DEV 1//0.5
-#define MIN_CLUSTER_SCORE 0.5///1e-3f
-#define FALLBACK_MAX_ERROR 1e-2f
-
 #define MAX_INPUT_COVARIANCE  300
     
 #define IN_RANGE(A,X,Y) ( ( A > X ) && ( A < Y ) )
@@ -66,7 +41,65 @@ extern "C" {
 #define BOUNDARY_START(X)   !!(X<0)
 #define BOUNDARY_END(X)     !!(X>0)
     
+#define NUM_STATE_GROUPS 4
     
+#define MAX_THRESH 255
+    
+#define M_C 1.f
+#define M_1_C (1.0f / M_C)
+    
+    //#define NUM_STATES              10
+#define NUM_OBSERVATION_SYMBOLS 5 // Max number of clusters in GMM
+#define MAX_OBSERVATIONS        (1 << 7) // Length of history
+#define MAX_OBSERVATION_MASK    (MAX_OBSERVATIONS-1)
+    
+#define MAX_DISTANCE 1000.f
+#define MIN_TOTAL_MIXTURE_PROBABILITY 1e-15f
+#define ABSOLUTE_MAX_CLUSTERS 300
+#define MAX_CLUSTERS 100
+#define MAX_ERROR 0.2
+#define INITIAL_VARIANCE 150//3//3
+#define INV_INITIAL_VARIANCE (1./INITIAL_VARIANCE)
+#define MAX_MAHALANOBIS_SQ 9//.386f
+#define MAX_MAHALANOBIS_SQ_FOR_UPDATE MAX_MAHALANOBIS_SQ//20.f
+#define SMALL_VALUE_ERROR_OFFSET 1e-4f
+#define VALID_CLUSTER_STD_DEV 0.25
+#define MIN_CLUSTER_SCORE 0.05///1e-3f
+#define FALLBACK_MAX_ERROR 1e-2f
+    
+typedef struct
+{
+    double
+    max_distance,
+    max_error,
+    initial_variance,
+    max_mahalanobis_sq,
+    small_value_error_offset,
+    min_cluster_score,
+    fallback_max_error,
+    max_clusters,
+    alpha,
+    beta,
+    inv_initial_variance,
+    max_mahalanobis_sq_for_update;
+} gmm_settings_t;
+    
+    #define NUM_SETTINGS_TO_SKIP 2
+    
+    static char gmm_settings_names[sizeof(gmm_settings_t)/sizeof(double)-NUM_SETTINGS_TO_SKIP][50] =
+    {
+        "Max Distance",
+        "Max Error",
+        "Initial Variance",
+        "Max Mah.^2 Distance ",
+        "Small Error Offset",
+        "Min Cluster Score",
+        "Fallback Offset",
+        "Max Clusters",
+        "Alpha",
+        "Beta"
+    };
+
 #define UNCALCULABILTY_BOUND_FOR_SAFE_EXPONENT 30.
 #define SAFE_EXPONENT_MAX_VALUE 2.35385266837019985408e17f
     
@@ -274,7 +307,7 @@ extern "C" {
     typedef struct
     {
         uint8_t length;
-        cluster_boundary_t list[MAX_CLUSTERS*2];
+        cluster_boundary_t list[ABSOLUTE_MAX_CLUSTERS*2];
     } cluster_boundary_list_t;
     
     typedef struct
@@ -291,6 +324,7 @@ extern "C" {
             upper_boundary;
         vec2
             true_center;
+        double variance;
     } band_t;
     
     typedef struct
@@ -340,13 +374,13 @@ extern "C" {
         return limited;
     }
     
-    static void UpdateCovarianceWithWeight( vec2 * A, vec2 * B, gaussian2d_t * gaussian, double weight )
+    static void UpdateCovarianceWithWeight( vec2 * A, vec2 * B, gaussian2d_t * gaussian, double weight, double small_value_error_offset )
     {       
         double delta_mean_a_a = A->a * B->a,
             delta_mean_a_b = A->a * B->b,
             delta_mean_b_b = A->b * B->b;
-        if( delta_mean_a_a == 0. ) delta_mean_a_a += SMALL_VALUE_ERROR_OFFSET;
-        if( delta_mean_b_b == 0. ) delta_mean_b_b += SMALL_VALUE_ERROR_OFFSET;
+        if( delta_mean_a_a == 0. ) delta_mean_a_a += small_value_error_offset;
+        if( delta_mean_b_b == 0. ) delta_mean_b_b += small_value_error_offset;
         mat2x2 covariance_delta_factor, unweighted_covariance_factor =
         { delta_mean_a_a, delta_mean_a_b, delta_mean_a_b, delta_mean_b_b };
         

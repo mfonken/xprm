@@ -53,11 +53,13 @@ static float safe_exp(float x)
 GaussianMixture::GaussianMixture(unsigned int input_dim,
                  unsigned int output_dim,
                  float initial_variance,
-                 float max_error)
+                 float max_error,
+                 gmm_settings_t &settings)
 : _input_dim(input_dim),
   _output_dim(output_dim),
   _initial_variance(initial_variance),
-  _max_error(max_error)
+  _max_error(max_error),
+  _settings(settings)
 {
 }
 
@@ -104,7 +106,7 @@ void GaussianMixture::setValue(const Eigen::VectorXf &input, const Eigen::Vector
 
     // Compute the predicted input and output
     Eigen::VectorXf b = Eigen::VectorXf::Zero(_output_dim);
-    float min_squared_mahalanobis_distance = MAX_DISTANCE;
+    float min_squared_mahalanobis_distance = _settings.max_distance;
 
     //printf("o_numc: %d | o_totp: %f\n", _neurons.size(), sum_of_in_probas);
     for (unsigned int i=0; i<_neurons.size(); ++i) {
@@ -121,11 +123,11 @@ void GaussianMixture::setValue(const Eigen::VectorXf &input, const Eigen::Vector
     float max_error = 0.0f;
     size_t len = _neurons.size();
     //printf("o_outp: <%.2f %.2f>\n", b[0], b[1]);
-    Eigen::VectorXf min_max_delta = _max_out - _min_out, error_vec = (value - b).cwiseAbs().cwiseQuotient(_max_out - _min_out + Eigen::VectorXf::Constant(value.rows(), FALLBACK_MAX_ERROR));
+    Eigen::VectorXf min_max_delta = _max_out - _min_out, error_vec = (value - b).cwiseAbs().cwiseQuotient(_max_out - _min_out + Eigen::VectorXf::Constant(value.rows(), _settings.fallback_max_error));
     //printf("o_mmdt: <%.2f %.2f> | o_vodt: <%.2f %.2f> | a:%.2f b:%.2f\n",min_max_delta[0], min_max_delta[1], (value - b)[0], (value - b)[1], error_vec[0], error_vec[1]);
 
 //    printf("o_mmdl: <%.3f %.3f> | <%.3f %.3f> | <%.3f %.3f>\n", _max_out[0], _max_out[1], _min_out[0], _min_out[1], min_max_delta[0], min_max_delta[1]);
-    max_error = (value - b).cwiseAbs().cwiseQuotient(_max_out - _min_out + Eigen::VectorXf::Constant(value.rows(), FALLBACK_MAX_ERROR)).maxCoeff();
+    max_error = (value - b).cwiseAbs().cwiseQuotient(_max_out - _min_out + Eigen::VectorXf::Constant(value.rows(), _settings.fallback_max_error)).maxCoeff();
 
 //    printf("o_maxe: %.2f | o_best: %.2f\n", max_error, min_squared_mahalanobis_distance);
     
@@ -135,8 +137,8 @@ void GaussianMixture::setValue(const Eigen::VectorXf &input, const Eigen::Vector
     //
     // min_distance > -2*ln(0.5), with 0.5 the minimum probability for update
     // to be preferred.
-    if (_neurons.size() < 1 || (max_error > _max_error && min_squared_mahalanobis_distance > MAX_MAHALANOBIS_SQ)) {
-        _neurons.push_back(new Neuron(input, value, _initial_variance));
+    if (_neurons.size() < 1 || (max_error > _max_error && min_squared_mahalanobis_distance > _settings.max_mahalanobis_sq)) {
+        _neurons.push_back(new Neuron(input, value, _initial_variance, &_settings));
     }
 
     // Update all the neurons (except the last one if it has just been created)
@@ -152,7 +154,7 @@ void GaussianMixture::setValue(const Eigen::VectorXf &input, const Eigen::Vector
         Neuron *neuron = _neurons[i];
 
         // Remove the neuron if it is not needed anymore
-        if (neuron->_score < MIN_CLUSTER_SCORE) {
+        if (neuron->_score < _settings.min_cluster_score) {
             delete neuron;
 
             _neurons.erase(_neurons.begin() + i);
@@ -193,7 +195,10 @@ Eigen::VectorXf GaussianMixture::value(const Eigen::VectorXf &input,
 /* Neuron */
 GaussianMixture::Neuron::Neuron(const Eigen::VectorXf &input,
                         const Eigen::VectorXf &output,
-                        float initial_variance)
+                        float initial_variance,
+                        gmm_settings_t * settings)
+:
+_settings(settings)
 {
     _score = 1.0f;
 
@@ -277,7 +282,7 @@ void GaussianMixture::Neuron::computeProbabilityCond(float sum_of_in_probas)
 void GaussianMixture::Neuron::contributeToOutput(Eigen::VectorXf &output,
                                                  const Eigen::VectorXf &input)
 {
-    if (_probability_cond_in > SMALL_VALUE_ERROR_OFFSET) {
+    if (_probability_cond_in > _settings->small_value_error_offset) {
         //printf("o_cscr: %f\n", _probability_cond_in);
         TMP(delta, input.rows());
         TMP(cov_times_delta, input.rows());
@@ -299,7 +304,7 @@ void GaussianMixture::Neuron::update(const Eigen::VectorXf &input,
     // distance > -2 * log(1e-2), 1e-2 is p(x|c) under which clusters are
     // not updated
 //    printf("o_maha: %.2f\n", _square_mahalanobis_distance);
-    if (_square_mahalanobis_distance > MAX_MAHALANOBIS_SQ_FOR_UPDATE) {
+    if (_square_mahalanobis_distance > _settings->max_mahalanobis_sq_for_update) {
 //        printf("o_invm: %.2f\n", _square_mahalanobis_distance);
         return;
     }
@@ -307,12 +312,12 @@ void GaussianMixture::Neuron::update(const Eigen::VectorXf &input,
     // Update the score of the neuron. The weight of the update must already
     // be very small when distance = 1.386 (P(x|c) = 0.50), hence the large
     // multiplication.
-    float score_weight = ALPHA * std::exp(-BETA * _square_mahalanobis_distance);
+    float score_weight = _settings->alpha * std::exp(-_settings->beta * _square_mahalanobis_distance);
 
     _score += score_weight * (_probability_cond_in - _score);
 
     // Update the means and variances
-    float weight = ALPHA * _probability_cond_in;
+    float weight = _settings->alpha * _probability_cond_in;
     TMP(delta_mean_in, input.rows());
     TMP(delta_mean_out, output.rows());
 

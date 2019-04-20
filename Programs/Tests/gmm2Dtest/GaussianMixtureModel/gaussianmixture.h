@@ -43,7 +43,8 @@ class GaussianMixture
         GaussianMixture(unsigned int input_dim,
                 unsigned int output_dim,
                 float initial_variance,
-                float max_error);
+                float max_error,
+                gmm_settings_t &settings);
         ~GaussianMixture();
 
         /**
@@ -75,13 +76,15 @@ class GaussianMixture
             // Make a new neuron centered at an input/output tuple
             Neuron(const Eigen::VectorXf &input,
                    const Eigen::VectorXf &output,
-                   float initial_variance);
+                   float initial_variance,
+                   gmm_settings_t * settings);
 
             Eigen::MatrixXf _covariance_in_out;
             Eigen::MatrixXf _covariance_in;
             Matrix _inv_covariance_in;
             Eigen::VectorXf _mean_in;
             Eigen::VectorXf _mean_out;
+            gmm_settings_t  * _settings;
 
             Eigen::LLT<Eigen::MatrixXf> _in_llt;
 
@@ -129,6 +132,7 @@ class GaussianMixture
         unsigned int _output_dim;
         float _initial_variance;
         float _max_error;
+    gmm_settings_t _settings;
 };
 
 #endif

@@ -36,8 +36,17 @@ typedef struct
 
 typedef struct
 {
+    uint8_t num;
+    gmm_settings_t value,
+    max,
+    step;
+    int scaled[sizeof(gmm_settings_t)/sizeof(double)];
+} gaussian_mixture_settings_t;
+    
+typedef struct
+{
     gaussian_mixture_cluster_t *
-        cluster[MAX_CLUSTERS];
+        cluster[ABSOLUTE_MAX_CLUSTERS];
     uint8_t
         num_clusters,
         selected_cluster;
@@ -47,7 +56,9 @@ typedef struct
         max_out,
         min_out;
     gaussian_mixture_cluster_t
-        cluster_mem[MAX_CLUSTERS];
+        cluster_mem[ABSOLUTE_MAX_CLUSTERS];
+    gaussian_mixture_settings_t
+        settings;
 } gaussian_mixture_model_t;
     
     

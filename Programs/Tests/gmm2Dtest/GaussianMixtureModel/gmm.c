@@ -8,16 +8,17 @@
 
 #include "gmm.h"
 
-void InitializeGaussianMixtureCluster( gaussian_mixture_cluster_t * cluster, observation_t * observation, vec2 * output )
+void InitializeGaussianMixtureCluster( gaussian_mixture_cluster_t * cluster, observation_t * observation, vec2 * output, gaussian_mixture_settings_t * settings )
 {
+    if(cluster == NULL) return;
     cluster->gaussian_in.mean.a = observation->a;
     cluster->gaussian_in.mean.b = observation->b;
     cluster->gaussian_out.mean.a = output->a;
     cluster->gaussian_out.mean.b = output->b;
     
     memset( &cluster->gaussian_out.covariance, 0, sizeof(mat2x2) );
-    cluster->gaussian_in.covariance = (mat2x2){ INITIAL_VARIANCE, 0, 0, INITIAL_VARIANCE };
-    cluster->inv_covariance_in = (mat2x2){ INV_INITIAL_VARIANCE, 0, 0, INV_INITIAL_VARIANCE };
+    cluster->gaussian_in.covariance = (mat2x2){ settings->value.initial_variance, 0, 0, settings->value.initial_variance };
+    cluster->inv_covariance_in = (mat2x2){ settings->value.inv_initial_variance, 0, 0, settings->value.inv_initial_variance };
     cluster->score = 1.;
     
     memset( &cluster->labels, 0, sizeof(cluster->labels) );
@@ -28,18 +29,18 @@ void InitializeGaussianMixtureCluster( gaussian_mixture_cluster_t * cluster, obs
     
     GMMFunctions.Cluster.UpdateNormal( cluster );
 }
-void UpdateGaussianMixtureCluster( gaussian_mixture_cluster_t * cluster, observation_t * observation, vec2 * output )
+void UpdateGaussianMixtureCluster( gaussian_mixture_cluster_t * cluster, observation_t * observation, vec2 * output, gaussian_mixture_settings_t * settings )
 {
 //    printf("m_maha: %.2f\n", cluster->mahalanobis_sq);
-    if (cluster->mahalanobis_sq > MAX_MAHALANOBIS_SQ_FOR_UPDATE)
+    if (cluster->mahalanobis_sq > settings->value.max_mahalanobis_sq_for_update)
     {
 //        printf("m_invm: %.2f\n", cluster->mahalanobis_sq);
         return;
     }
-    double score_weight = ALPHA * safe_exp( -BETA * cluster->mahalanobis_sq );
+    double score_weight = settings->value.alpha * safe_exp( -settings->value.beta * cluster->mahalanobis_sq );
     cluster->score += score_weight * ( cluster->probability_condition_input - cluster->score );
     
-    double weight = ALPHA * cluster->probability_condition_input;
+    double weight = settings->value.alpha * cluster->probability_condition_input;
     
     vec2 delta_mean_in = WeightedIncreaseMean( (vec2 *)observation, &cluster->gaussian_in, weight );
     vec2 delta_mean_out = WeightedIncreaseMean( output, &cluster->gaussian_out, weight );
@@ -48,8 +49,8 @@ void UpdateGaussianMixtureCluster( gaussian_mixture_cluster_t * cluster, observa
 //           cluster->gaussian_in.mean.a, cluster->gaussian_in.mean.b,
 //           delta_mean_in.a, delta_mean_in.b, delta_mean_out.a, delta_mean_out.b);
     
-    UpdateCovarianceWithWeight( &delta_mean_in, &delta_mean_in,  &cluster->gaussian_in,  weight );
-    UpdateCovarianceWithWeight( &delta_mean_in, &delta_mean_out, &cluster->gaussian_out, weight );
+    UpdateCovarianceWithWeight( &delta_mean_in, &delta_mean_in,  &cluster->gaussian_in,  weight, settings->value.small_value_error_offset );
+    UpdateCovarianceWithWeight( &delta_mean_in, &delta_mean_out, &cluster->gaussian_out, weight, settings->value.small_value_error_offset );
     
     GetMat2x2LLT( &cluster->gaussian_in.covariance, &cluster->llt_in );
     getMat2x2Inverse( &cluster->gaussian_in.covariance, &cluster->inv_covariance_in );
@@ -131,9 +132,55 @@ void WeighGaussianMixtureCluster( gaussian_mixture_cluster_t * cluster )
 void InitializeGaussianMixtureModel( gaussian_mixture_model_t * model )
 {
     memset( model, 0, sizeof(gaussian_mixture_model_t) );
-    for( uint16_t i = 0; i < MAX_CLUSTERS; i++ )
+    for( uint16_t i = 0; i < ABSOLUTE_MAX_CLUSTERS; i++ )
         model->cluster[i] = &(model->cluster_mem[i]);
+    
+    model->settings.num = sizeof(gmm_settings_t)/sizeof(double)-NUM_SETTINGS_TO_SKIP;
+    
+    model->settings.value = (gmm_settings_t)
+    {
+        MAX_DISTANCE,
+        MAX_ERROR,
+        INITIAL_VARIANCE,
+        MAX_MAHALANOBIS_SQ,
+        SMALL_VALUE_ERROR_OFFSET,
+        MIN_CLUSTER_SCORE,
+        FALLBACK_MAX_ERROR,
+        ABSOLUTE_MAX_CLUSTERS,
+        ALPHA,
+        BETA
+    };
+    
+
+    model->settings.max = (gmm_settings_t)
+    {
+        1000,
+        10,
+        250,
+        100,
+        0.01,
+        1,
+        0.01,
+        1000,
+        1,
+        1
+    };
+    
+    model->settings.step = (gmm_settings_t)
+    {
+        10,
+        0.1,
+        3,
+        3,
+        0.0005,
+        0.05,
+        0.0005,
+        25,
+        0.01,
+        0.01
+    };
 }
+
 double GetScoreSumOfClustersInGaussianMixtureModel( gaussian_mixture_model_t * model, vec2 * input )
 {
     double score_sum = 0;
@@ -148,7 +195,7 @@ double GetScoreSumOfClustersInGaussianMixtureModel( gaussian_mixture_model_t * m
 }
 double GetOutputAndBestDistanceOfGaussianMixtureModel( gaussian_mixture_model_t * model, double total_probability, vec2 * input, vec2 * output )
 {
-    double best_match_distance = MAX_DISTANCE;
+    double best_match_distance = model->settings.value.max_distance;
     gaussian_mixture_cluster_t * cluster;
     //printf("m_numc: %d | m_totp: %f\n", model->num_clusters, total_probability);
     for( uint8_t i = 0; i < model->num_clusters; i++)
@@ -156,7 +203,7 @@ double GetOutputAndBestDistanceOfGaussianMixtureModel( gaussian_mixture_model_t 
         cluster = model->cluster[i];
         GMMFunctions.Cluster.UpdateInputProbability( cluster, total_probability );
         //printf("m_cscr: %f\n", cluster->probability_condition_input);
-        if( cluster->probability_condition_input > MIN_CLUSTER_SCORE)
+        if( cluster->probability_condition_input > model->settings.value.min_cluster_score)
         {
             GMMFunctions.Cluster.ContributeToOutput( cluster, input, output );
         }
@@ -179,7 +226,7 @@ void AddClusterToGaussianMixtureModel( gaussian_mixture_model_t * model, observa
     uint16_t i = 0;
     for( ; i < model->num_clusters; i++ )
         if( model->cluster[i] == NULL ) break;
-    GMMFunctions.Cluster.Initialize( model->cluster[i], observation, value );
+    GMMFunctions.Cluster.Initialize( model->cluster[i], observation, value, &model->settings );
     model->num_clusters++;
 }
 void UpdateGaussianMixtureModel( gaussian_mixture_model_t * model, observation_t * observation, vec2 * value )
@@ -188,11 +235,11 @@ void UpdateGaussianMixtureModel( gaussian_mixture_model_t * model, observation_t
     for( uint8_t i = 0; i < model->num_clusters; i++ )
     {
         cluster = model->cluster[i];
-        GMMFunctions.Cluster.Update( cluster, observation, value );
+        GMMFunctions.Cluster.Update( cluster, observation, value, &model->settings );
     }
     for( uint8_t i = 0; i < model->num_clusters; i++ )
     {
-        if( (*model->cluster)[i].score < MIN_CLUSTER_SCORE)
+        if( (*model->cluster)[i].score < model->settings.value.min_cluster_score)
             GMMFunctions.Model.RemoveCluster( model, i );
     }
 }
@@ -228,10 +275,10 @@ void AddValueToGaussianMixtureModel( gaussian_mixture_model_t * model, observati
 //    printf("m_maxe: %.2f | m_best: %.2f\n", max_error, best_distance);
 //    printf("Max error: %.2f\n", max_error);
     /* Add cluster if error or distance is to high for a cluster match */
-    if( model->num_clusters < MAX_CLUSTERS )
+    if( model->num_clusters < model->settings.value.max_clusters )
     {
         if( !model->num_clusters
-           || ( ( max_error > MAX_ERROR ) && ( best_distance > MAX_MAHALANOBIS_SQ ) ) )
+           || ( ( max_error > model->settings.value.max_error ) && ( best_distance > model->settings.value.max_mahalanobis_sq ) ) )
             GMMFunctions.Model.AddCluster( model, observation, value );
     }
     
@@ -246,7 +293,7 @@ void SortClusterBoundariesOfGaussianMixtureModel( gaussian_mixture_model_t * mod
      */
     
     /* Initialize list ascending list of all clusters to sort */
-    uint8_t sorted[MAX_CLUSTERS], left_to_sort = model->num_clusters, num_boundaries = 0;
+    uint8_t sorted[(int)model->settings.value.max_clusters], left_to_sort = model->num_clusters, num_boundaries = 0;
     for( uint8_t i = 0; i < model->num_clusters; i++ )
     {
         GMMFunctions.Cluster.UpdateLimits( model->cluster[i] );

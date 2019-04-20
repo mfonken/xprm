@@ -28,7 +28,7 @@ using namespace cv;
 using namespace std;
 
 //#define SEPARATE_IDS
-#define SHOW_CLUSTERS
+//#define SHOW_CLUSTERS
 #define SAVE_TO_FILE
 
 #define ROOT_PATH "/Users/matthew/Desktop/gmmtest/data/"
@@ -38,7 +38,34 @@ using namespace std;
 #define HEIGHT 700
 #define WIDTH 700
 #define SCALE 1
-#define BORDER 400
+#define BORDER 100
+
+#define NUM_SAMPLES 100
+#define SAMPLE_POINT_RADIUS 4
+#define NUM_LABELS_TO_SHOW 4
+
+typedef struct
+{
+    uint32_t
+//    data_len,
+    height,
+    width,
+    scale,
+    border,
+    num_samples,
+    point_radius;
+} global_settings_t;
+
+static global_settings_t settings =
+{
+    //    DATA_LEN,
+    HEIGHT,
+    WIDTH,
+    SCALE,
+    BORDER,
+    NUM_SAMPLES,
+    SAMPLE_POINT_RADIUS
+};
 
 static string this_descriptor = "test";
 
@@ -92,9 +119,9 @@ static void GenerateRandomData(int num, int regions, int space, int min = 0, int
             data[index] = v + region_center;
             
             double curr_v = data[index];
-            int x = (int)((curr_v / (double)range) * (double)WIDTH);
+            int x = (int)((curr_v / (double)range) * (double)settings.width);
             if( x == prev ) continue;
-            line(dataMat, Point(x,0), Point(x,HEIGHT), colors[i]);
+            line(dataMat, Point(x,0), Point(x,settings.height), colors[i]);
             x = prev;
             
             index++;
@@ -194,7 +221,7 @@ static SampleList GenerateNGaussian2DSamples( normal_random_variable nvar, int n
            )
         {
             int x = stoi(result[0])*2,
-            y = stoi(result[1])*HEIGHT/256,
+            y = stoi(result[1])*settings.height/256,
             _id = stoi(result[2]);
             
             samples.push_back( (dm_line){ x, y, _id } );
@@ -221,7 +248,7 @@ static SampleList GenerateNGaussian2DSamples( normal_random_variable nvar, int n
 static void PlotSamples( Mat &M, SampleList l, int r, Color &c )
 {
     for( dm_line sample : l )
-        circle(M, Point(sample.density + BORDER,sample.thresh + BORDER), r, colors[sample.id_], FILLED);
+        circle(M, Point(sample.density + settings.border,sample.thresh + settings.border), r, colors[sample.id_], FILLED);
 }
 
 template <typename T>

@@ -42,8 +42,8 @@
 #define DENSITY_BIAS    1 - LOCATION_BIAS
 
 /* IMAGE PROCESSING */
-#define IMAGE_ROOT "/Users/matthew/Desktop/PersonalResources/TestImages/"
-#define FRAME_DELAY_MS 10
+#define IMAGE_ROOT "/Users/matthewfonken/Desktop/test images/"
+#define FRAME_DELAY_MS 100
 #define CAM_WIDTH   640
 #define CAM_HEIGHT  320
 
@@ -58,9 +58,9 @@
 #define DRAW_HEIGHT 300
 #define MAP_INSET   80
 #define MAP_SCALE   13
-#define FNL_RESIZE  1000
+#define FNL_RESIZE  800
 
 /* RHO SETUP */
-//#define DEFAULT_SIGMA 3.0 //GAUSSIAN SIGMA
+#define DEFAULT_SIGMA 3.0 //GAUSSIAN SIGMA
 
 #endif /* test_setup_h */

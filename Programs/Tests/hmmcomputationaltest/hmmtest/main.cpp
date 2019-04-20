@@ -12,7 +12,7 @@
 
 using namespace std;
 
-#define REPETITIONS 5000
+#define REPETITIONS 1
 
 hidden_markov_model_t hmm;
 
@@ -81,7 +81,7 @@ int main(int argc, const char * argv[])
             }
             printf("\n");
         }
-//        searchListCombination(0.154);
+        searchListCombination(0.1344);
         while(1);
     }
     return 0;

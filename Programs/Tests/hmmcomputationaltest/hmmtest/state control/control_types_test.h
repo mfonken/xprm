@@ -18,7 +18,7 @@ extern "C" {
 #include <math.h>
 #include <string.h>
     
-//#define SPOOF
+#define SPOOF
     
 #ifndef ZDIV
 #define ZDIV_LNUM 1 << 10

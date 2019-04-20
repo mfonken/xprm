@@ -16,8 +16,8 @@ extern "C" {
 #include "control_structures.h"
 
 /* Cluster functions */
-void InitializeGaussianMixtureCluster(                 gaussian_mixture_cluster_t *, observation_t *, vec2 * );
-void UpdateGaussianMixtureCluster(                     gaussian_mixture_cluster_t *, observation_t *, vec2 * );
+void InitializeGaussianMixtureCluster(                 gaussian_mixture_cluster_t *, observation_t *, vec2 *, gaussian_mixture_settings_t * );
+void UpdateGaussianMixtureCluster(                     gaussian_mixture_cluster_t *, observation_t *, vec2 *, gaussian_mixture_settings_t * );
 void GetScoreOfGaussianMixtureCluster(                 gaussian_mixture_cluster_t *, vec2 *);
 void UpdateNormalOfGaussianMixtureCluster(             gaussian_mixture_cluster_t * );
 void UpdateInputProbabilityOfGaussianMixtureCluster(   gaussian_mixture_cluster_t *, double );
@@ -38,8 +38,8 @@ void RemovClusterFromGaussianMixtureModel(             gaussian_mixture_model_t 
 
 typedef struct
 {
-    void (*Initialize)(                 gaussian_mixture_cluster_t *, observation_t *, vec2 * );
-    void (*Update)(                     gaussian_mixture_cluster_t *, observation_t *, vec2 * );
+    void (*Initialize)(                 gaussian_mixture_cluster_t *, observation_t *, vec2 *, gaussian_mixture_settings_t * );
+    void (*Update)(                     gaussian_mixture_cluster_t *, observation_t *, vec2 *, gaussian_mixture_settings_t * );
     void (*GetScore)(                   gaussian_mixture_cluster_t *, vec2 *);
     void (*UpdateNormal)(               gaussian_mixture_cluster_t * );
     void (*UpdateInputProbability)(     gaussian_mixture_cluster_t *, double );

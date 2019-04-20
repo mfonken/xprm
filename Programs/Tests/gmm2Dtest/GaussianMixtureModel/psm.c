@@ -96,7 +96,7 @@ static void UpdateBand( band_list_t * band_list, uint8_t i, int8_t c, gaussian2d
     }
     else
     { /* Otherwise set using cumulated band gaussian */
-        double radius = band_gaussian->covariance.d * VALID_CLUSTER_STD_DEV;
+        double radius = band_gaussian->covariance.d * VALID_CLUSTER_STD_DEV * 5;
         band_list->band[i].lower_boundary = band_gaussian->mean.b + radius;
         band_list->band[i].upper_boundary = band_gaussian->mean.b - radius;
         band_list->band[i].true_center = band_gaussian->mean;
@@ -105,6 +105,7 @@ static void UpdateBand( band_list_t * band_list, uint8_t i, int8_t c, gaussian2d
             band_list->band[i-1].upper_boundary = band_list->band[i].lower_boundary;
         }
     }
+    band_list->band[i].variance = band_gaussian->covariance.d;
 }
 
 void DiscoverStateBandsPSM( psm_t * model, band_list_t * band_list )
@@ -170,7 +171,7 @@ void DiscoverStateBandsPSM( psm_t * model, band_list_t * band_list )
 
     printf("State bands: \n");
     for( uint8_t i = 0; i < band_list->length; i++ )
-        printf(" %d: (%.3f %.3f)  C<%.3f %.3f>\n", i, band_list->band[i].lower_boundary, band_list->band[i].upper_boundary, band_list->band[i].true_center.a, band_list->band[i].true_center.b);
+        printf(" %d: (%.3f %.3f)  C<%.3f %.3f>[%.3f]\n", i, band_list->band[i].lower_boundary, band_list->band[i].upper_boundary, band_list->band[i].true_center.a, band_list->band[i].true_center.b, band_list->band[i].variance);
     printf("\n");
     
 //
