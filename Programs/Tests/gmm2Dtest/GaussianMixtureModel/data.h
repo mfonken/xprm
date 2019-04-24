@@ -28,7 +28,8 @@ using namespace cv;
 using namespace std;
 
 //#define SEPARATE_IDS
-//#define SHOW_CLUSTERS
+#define SHOW_CLUSTERS
+#define REPORT_LABELS
 #define SAVE_TO_FILE
 
 #define ROOT_PATH "/Users/matthew/Desktop/gmmtest/data/"

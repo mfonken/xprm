@@ -1,3 +1,4 @@
+
 //
 //  hmm.c
 //  hmmtest
@@ -33,26 +34,26 @@ void searchListCombination(double v)
             e = a + b ;
             if( e >= v - ERROR && e <= v + ERROR)
                 printf("%.4f + %.4f = %.4f\n", a,b,e);
-//            for(uint8_t k = j; k < listi; k++)
-//            {
-//                c = list[k];
-////                e = a + b + c;
-////                printf("%.4f + %.4f + %.4f = %.4f", a,b,c,e);
-////                if( e >= v - ERROR && e <= v + ERROR)
-////                    printf(" found");
-////                printf("\n");
-//                for(uint8_t l = k; l < listi; l++)
-//                {
-//                    d = list[l];
-//                    e = a + b + c + d;
-//                    if( e >= v - ERROR && e <= v + ERROR)
-//                    {
-//                        printf("%.4f + %.4f + %.4f + %.4f = %.4f\n", a,b,c,d,e);
-////                        printf(" found");
-//                    }
-////                    printf("\n");
-//                }
-//            }
+            //            for(uint8_t k = j; k < listi; k++)
+            //            {
+            //                c = list[k];
+            ////                e = a + b + c;
+            ////                printf("%.4f + %.4f + %.4f = %.4f", a,b,c,e);
+            ////                if( e >= v - ERROR && e <= v + ERROR)
+            ////                    printf(" found");
+            ////                printf("\n");
+            //                for(uint8_t l = k; l < listi; l++)
+            //                {
+            //                    d = list[l];
+            //                    e = a + b + c + d;
+            //                    if( e >= v - ERROR && e <= v + ERROR)
+            //                    {
+            //                        printf("%.4f + %.4f + %.4f + %.4f = %.4f\n", a,b,c,d,e);
+            ////                        printf(" found");
+            //                    }
+            ////                    printf("\n");
+            //                }
+            //            }
         }
     }
 }
@@ -66,49 +67,7 @@ void InitializeHMM( hidden_markov_model_t * model )
 
 void UpdateObservationMatrixHMM( hidden_markov_model_t * model, uint8_t t )
 {
-//    /* Observation matrix update */
-//    uint8_t o = model->O.data[t];
-//    double current_gamma;
-//    for( uint8_t i = 0; i < NUM_STATES; i++ )
-//    {
-//        current_gamma = model->G[i];
-//        model->B.observed[i][o] += current_gamma;
-//        model->B.gamma[i] += current_gamma;
-//    }
-//    for( uint8_t i = 0; i < NUM_STATES; i++ )
-//    {
-//        current_gamma = model->B.gamma[i];
-//        double row_sum = 0.;
-//        for( uint8_t j = 0; j < NUM_OBSERVATION_SYMBOLS; j++ )
-//        {
-//            model->B.expected[i][j] = ZDIV( model->B.observed[i][j], current_gamma );
-//            row_sum += model->B.expected[i][j];
-//        }
-//        for( uint8_t j = 0; j < NUM_OBSERVATION_SYMBOLS; j++ )
-//        {
-//            model->B.expected[i][j] /= row_sum;
-//        }
-//    }
 }
-
-//void UpdateExpectationMatrixMaximums( hidden_markov_model_t * model )
-//{
-//    for( uint8_t k = 0; k < NUM_OBSERVATION_SYMBOLS; k++ )
-//    {
-//        for( uint8_t l = 0; l < NUM_OBSERVATION_SYMBOLS; l++ )
-//        {
-//            double element_max = model->Em[k][l][0];
-//            for( uint8_t ii = 1; ii < NUM_STATES; ii++ )
-//            {
-//                if( model->Em[k][l][ii] > element_max)
-//                {
-//                    element_max = model->Em[k][l][ii];
-//                }
-//            }
-//            model->Em[k][l][NUM_STATES] = element_max;
-//        }
-//    }
-//}
 
 static double ForwardBackward( hidden_markov_model_t * model, uint8_t k, uint8_t l, uint8_t i, uint8_t j )
 {
@@ -120,13 +79,101 @@ static double ForwardBackward( hidden_markov_model_t * model, uint8_t k, uint8_t
 }
 
 static int count = 0;
-void BaumWelchTransitionSolveHMM( hidden_markov_model_t * model )
+
+#ifdef _USE_UPDATED_
+void BaumWelchGammaSolveHMM( hidden_markov_model_t * model )
+{
+    /* Update state expectation matrix */
+    uint8_t k = model->O.prev, l = model->O.curr;
+    LOG_HMM(DEBUG_1, "%4d: %s,%s  ", ++count, observation_strings[k], observation_strings[l] );
+    for( uint8_t i = 0; i < NUM_STATES; i++ )
+    {
+        for( uint8_t j = 0; j < NUM_STATES; j++ )
+        {
+            model->Es[k][l][i][j] = ForwardBackward(model, k, l, i, j);
+            LOG_HMM_BARE(DEBUG_1, "%.4f%s", model->Es[k][l][i][j], i&&j?" ":",");
+        }
+    }
+    /* Update maximum expectation matarix */
+    bool diff = ( k != l );
+    double observation_max = 0.;
+    for( uint8_t i = 0; i < NUM_STATES; i++ )
+    {
+        double curr_max = 0., prev_max = 0., curr = 0., diag = ForwardBackward( model, k, l, i, i );
+        if( !diff )
+            curr_max = diag;
+        else
+        {
+            // Assume l comes from i
+            for( uint8_t j = 0; j < NUM_STATES; j++ )
+            {
+                curr = ForwardBackward( model, k, l, j, i );// model->Es[k][l][j][i];
+                if( curr > curr_max )
+                    curr_max = curr;
+            }
+            
+            // Assume k comes from i
+            for( uint8_t j = 0; j < NUM_STATES; j++ )
+            {
+                curr = ForwardBackward( model, k, l, i, j );// model->Es[k][l][i][j];
+                if( curr > prev_max )
+                    prev_max = curr;
+            }
+        }
+        if( diff )
+        {
+            model->G.value[k][i] = prev_max;
+            model->G.cumulative_value[k][i] += prev_max;
+        }
+        model->G.value[l][i] = curr_max;
+        model->G.cumulative_value[l][i] += curr_max;
+        
+        SET_MAX(observation_max, curr_max);
+    }
+    
+    /* Update gamma expectation maximums */
+    if( diff )
+        model->G.maximum[k] += observation_max;
+    model->G.maximum[l] += observation_max;
+    
+    LOG_HMM_BARE(DEBUG_1, "\n");
+    
+    
+    /* Observation matrix update */
+    LOG_HMM(DEBUG_1, "Observation matrix update:\n");
+    for( uint8_t j = 0; j < NUM_STATES; j++ )
+    {
+        double row_sum = 0., row_s = 0.;
+        for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
+        {
+            row_sum += model->G.cumulative_value[j][i];
+        }
+        
+        for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
+        {
+            if( row_sum == 0. && i == j)
+            {
+                model->B.expected[j][i] = 1.;
+            }
+            else
+            {
+                model->B.expected[j][i] = ZDIV( model->G.cumulative_value[j][i], row_sum );
+            }
+            LOG_HMM_BARE(DEBUG_1, "|%.4f|", model->B.expected[j][i]);
+            row_s += model->B.expected[j][i];
+        }
+        LOG_HMM_BARE(DEBUG_1, " = %.3f\n", row_s);
+    }
+}
+#else
+void BaumWelchGammaSolveHMM( hidden_markov_model_t * model )
 {
     /* Expectation matrix update */
     memset( model->beta, 0., sizeof(model->beta) );
     memset( model->Ev, 0, sizeof(model->Ev) );
     double state_expectation = 0.;
     memset( &model->G, 0, sizeof(model->G));
+    
     /* Update state expectation matrix */
     observation_i k = model->O.prev, l = model->O.curr;
     printf("%4d: %s,%s  ", ++count,
@@ -140,56 +187,41 @@ void BaumWelchTransitionSolveHMM( hidden_markov_model_t * model )
     {
         for( uint8_t j = 0; j < NUM_STATES; j++ )
         {
-//            double a = model->A.probabilities.map[i][j],
-//            b = model->B.expected[j][l],
-//            c = model->p[i],
-//            d = model->B.expected[i][k];
-            state_expectation = ForwardBackward(model, k, l, i, j);//a * b * c * d;
-//            printf("[%d][%d] a:%.3f b:%.3f c:%.3f d:%.3f e:%.3f\n", i, j, a, b, c, d, state_expectation);
+            state_expectation = ForwardBackward(model, k, l, i, j);
             model->Es[k][l][i][j] = state_expectation;
             printf("%.4f%s", model->Es[k][l][i][j], i&&j?" ":",");
-            
-//            addToList(model->Es[k][l][i][j]);
         }
     }
     /* Update maximum expectation matarix */
-//    printf("\nEs > Em:\n");
     bool diff = ( k != l );
     for( uint8_t i = 0; i < NUM_STATES; i++ )
     {
         double curr_max = 0., prev_max = 0., curr = 0.;
-        double diag = model->Es[k][l][i][i];//ForwardBackward(model,k,l,i,i);
         
         if( !diff )
         {
-            curr_max = diag;
+            curr_max = model->Es[k][l][i][i];
         }
         else
         {
             // assume l comes from i
             for( uint8_t j = 0; j < NUM_STATES; j++ )
             {
-                curr = model->Es[k][l][j][i];//ForwardBackward(model,k,l,j,i);
-//                printf("k check: %.4f", curr);
+                curr = model->Es[k][l][j][i];
                 if( curr > curr_max )
                 {
                     curr_max = curr;
-//                    printf(" max");
                 }
-//                printf("\n");
             }
-
+            
             // assume k comes from i
             for( uint8_t j = 0; j < NUM_STATES; j++ )
             {
-                curr = model->Es[k][l][i][j];//ForwardBackward(model,k,l,i,j);
-//                printf("l check: %.4f", curr);
+                curr = model->Es[k][l][i][j];
                 if( curr > prev_max )
                 {
                     prev_max = curr;
-//                    printf(" max");
                 }
-//                printf("\n");
             }
         }
         model->G[k][i] = prev_max;
@@ -198,17 +230,8 @@ void BaumWelchTransitionSolveHMM( hidden_markov_model_t * model )
         model->Gc[l][i] += curr_max;
         model->Ev[k][NUM_STATES] = MAX( prev_max, model->Ev[k][NUM_STATES] );
         model->Ev[l][NUM_STATES] = MAX( curr_max, model->Ev[l][NUM_STATES] );
-//        model->Ec[k][NUM_STATES] += model->Ev[k][NUM_STATES];
     }
     
-//    for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
-//    {
-//        for( uint8_t j = 0; j < NUM_STATES; j++ )
-//        {
-////            model->Gc[i][j] += model->G[i][j];
-//        }
-////        model->Ec[k][NUM_STATES] += model->Ev[k][NUM_STATES];
-//    }
 #ifdef SPOOF
     printf("[%.4f %.4f %.4f][%.4f %.4f %.4f] | [%.4f %.4f %.4f][%.4f %.4f %.4f]",
            model->G[0][0],model->G[0][1],model->Ev[0][2],
@@ -217,146 +240,19 @@ void BaumWelchTransitionSolveHMM( hidden_markov_model_t * model )
            model->Gc[1][0],model->Gc[1][1],model->Ec[1][2]);
 #endif
     /* Update gamma expectation mtarix */
-//    printf("Ev > G:\n");
     for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
     {
         for( uint8_t j = 0; j < NUM_STATES; j++ )
         {
-//            model->G[i][j] = model->Ev[i][j];
-//            model->Gc[i][j] = model->Ec[i][j];
             model->Gm[i][j] += model->Ev[i][NUM_STATES];
         }
     }
-//    for( uint8_t i = 0; i < NUM_STATES; i++ )
-//    {
-//        for( uint8_t j = 0; j < NUM_OBSERVATION_SYMBOLS; j++ )
-//        {
-////            if( k == j || l == j )
-//            {
-//                model->G[j][i] = model->Ev[j][i];
-//                model->Gc[j][i] = model->Ec[j][i];
-//                model->Gm[j][i] += model->Ev[j][NUM_STATES];
-////                if( j == EXP && i == ST )
-////                    printf(" <%d,%s|%.4f>",i,j?"E":"N",model->G[j][i]);
-//            }
-//        }
-//
-////        printf(" G%d:%.3f ", i, model->Em[k][l][i]);
-//    }
-//    printf(" Gm:%.3f\n", model->Em[k][l][NUM_STATES]);
     printf("\n");
-
-//
-//    /* Update total maximum across state maximums in maximum expectation matrix */
-//    for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
-//    {
-//        for( uint8_t j = 0; j < NUM_OBSERVATION_SYMBOLS; j++ )
-//        {
-//            double element_max = 0.;
-//            if( j == l )
-//            {
-//                element_max = model->Em[i][j][0];
-//                for( uint8_t ii = 1; ii < NUM_STATES; ii++ )
-//                {
-//                    if( model->Em[i][j][ii] > element_max)
-//                    {
-//                        element_max = model->Em[i][j][ii];
-//                    }
-//                }
-//                model->Em[i][j][NUM_STATES] = element_max;
-//            }
-//            else
-//            {
-//                for( uint8_t ii = 0; ii < NUM_STATES; ii++ )
-//                {
-//                    for( uint8_t jj = 0; jj < NUM_STATES; jj++ )
-//                    {
-//                        if( model->Es[k][l][ii][jj] > element_max)
-//                        {
-//                            element_max = model->Es[k][l][ii][jj];
-//                        }
-//                    }
-//                }
-//                model->Em[k][l][NUM_STATES] = element_max;
-//            }
-//        }
-//    }
-
-//    for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
-//    {
-//        for( uint8_t j = 0; j < NUM_OBSERVATION_SYMBOLS; j++ )
-//        {
-//            double element_max = model->Em[i][j][0];
-//            for( uint8_t ii = 1; ii < NUM_STATES; ii++ )
-//            {
-//                if( model->Em[i][j][ii] > element_max)
-//                {
-//                    element_max = model->Em[i][j][ii];
-//                }
-//            }
-//            model->Em[i][j][NUM_STATES] = element_max;
-//        }
-//    }
-//    for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
-//    {
-//        for( uint8_t j = 0; j < NUM_OBSERVATION_SYMBOLS; j++ )
-//        {
-//            for( uint8_t ii = 0; ii < NUM_STATES; ii++ )
-//            {
-//                for( uint8_t jj = 0; jj < NUM_STATES; jj++ )
-//                {
-//                    double element_max = 0.;
-//                    for( uint8_t ii = 0; ii < NUM_STATES; ii++ )
-//                    {
-//                        if( model->Es[i][j][ii][jj] > element_max)
-//                        {
-//                            element_max = model->Es[i][j][ii][jj];
-//                        }
-//                    }
-//                    model->Em[i][j][NUM_STATES] = element_max;
-//                }
-//            }
-//        }
-//    }
-    
-//        for( uint8_t j = 0; j < NUM_OBSERVATION_SYMBOLS; j++ )
-//        {
-//            double max = 0.;
-//            // Cycle Em row j
-//            for( uint8_t ii = 0; ii < NUM_OBSERVATION_SYMBOLS; ii++ )
-//            {
-//                if( model->Em[j][ii][i] > max )
-//                    max = model->Em[j][ii][i];
-//            }
-//            // Cycle Em col j
-//            for( uint8_t ii = 0; ii < NUM_OBSERVATION_SYMBOLS; ii++ )
-//            {
-//                if( model->Em[ii][j][i] > max )
-//                    max = model->Em[ii][j][i];
-//            }
-//            model->G[j][i] = max;
-//            model->Gc[j][i] += max;
-//        }
-    
-    
 }
+#endif
 
 void BaumWelchObservationSolveHMM( hidden_markov_model_t * model, uint8_t t )
 {
-//    /* Gamma expectation vector update */
-//    memset( model->alpha, 0., sizeof(model->alpha) );
-//    double state_probability = 0., cumulated_probability = 0.;
-//    for( uint8_t j = 0; j < NUM_STATES; j++ )
-//    {
-//        state_probability = HMMFunctions.ForwardRecursion( model, j, t ) * HMMFunctions.BackwardRecursion( model, j, t );
-//        model->G[j] = state_probability;
-//        cumulated_probability += state_probability;
-//    }
-//    if( cumulated_probability > 0 )
-//        for( uint8_t j = 0; j < NUM_STATES; j++ )
-//            model->G[j] /= cumulated_probability;
-//
-//    HMMFunctions.UpdateObservationMatrix( model, t );
 }
 
 void BaumWelchTransitionStepHMM( hidden_markov_model_t * model, uint8_t t )
@@ -366,6 +262,6 @@ void BaumWelchTransitionStepHMM( hidden_markov_model_t * model, uint8_t t )
 
 void BaumWelchSolveHMM( hidden_markov_model_t * model, uint8_t t )
 {
-    HMMFunctions.BaumWelchTransitionSolve( model );
-//    HMMFunctions.BaumWelchObservationSolve( model, t );
+    HMMFunctions.BaumWelchGammaSolve( model );
+    //    HMMFunctions.BaumWelchObservationSolve( model, t );
 }

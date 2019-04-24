@@ -25,6 +25,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		348CAA69226EC1D700EC89A4 /* kumaraswamy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = kumaraswamy.h; path = hmmtest/kumaraswamy.h; sourceTree = SOURCE_ROOT; };
 		34944C6A222106D800570110 /* fsm_test.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fsm_test.h; sourceTree = "<group>"; };
 		34944C6B2221132600570110 /* control_types_test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = control_types_test.h; sourceTree = "<group>"; };
 		34944C6C2221132600570110 /* fsm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fsm.c; sourceTree = "<group>"; };
@@ -53,6 +54,7 @@
 			children = (
 				34944C6B2221132600570110 /* control_types_test.h */,
 				34AFF3D6222B1EFD00D3923A /* control_structures.h */,
+				348CAA69226EC1D700EC89A4 /* kumaraswamy.h */,
 				34944C6E2221132600570110 /* fsm_support.h */,
 				34944C6D2221132600570110 /* fsm.h */,
 				34944C6C2221132600570110 /* fsm.c */,

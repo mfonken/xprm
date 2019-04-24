@@ -16,7 +16,7 @@ static inline void reset_loop_variables( state_global_t * _, uint8_t l )
 
 void InitializeFSMMap( fsm_map_t * bm )
 {
-    LOG_STATEM(DEBUG_2, "Initializeializing State Machine.\n");
+    LOG_FSM(DEBUG_1, "Initializeializing State Machine.\n");
     reset_loop_variables( &_, NUM_STATES );
     bm->length = NUM_STATES;
     for( ; _.i < _.l; _.i++ )
@@ -63,7 +63,7 @@ void ResetFSMState( fsm_map_t * bm, uint8_t i )
 
 void InitializeFSMSystem( fsm_system_t * sys )
 {
-    sys->state                = UNSTABLE_NONE;
+    sys->state                = UNDER_POPULATED;
     sys->prev                 = UNKNOWN_STATE;
     sys->next                 = UNKNOWN_STATE;
     sys->selection_index      = 0;
@@ -78,7 +78,7 @@ void InitializeFSMSystem( fsm_system_t * sys )
 void DecayInactiveFSMSystem( fsm_system_t * sys )
 {
     reset_loop_variables( &_, NUM_STATES );
-    uint8_t c = sys->state;
+    int8_t c = sys->state;
     if( c == UNKNOWN_STATE ) return;
     for( _.i = 0; _.i < NUM_STATES; _.i++ )
     {
@@ -123,62 +123,25 @@ void UpdateFSMSystem( fsm_system_t * sys, double p[4] )
 void UpdateFSMProbabilities( fsm_system_t * sys, double p[4] )
 {
     state_t           c = sys->state;
-    uint8_t x = stateNumber(c);
-    int8_t            k = -1;
-    bool              stable = isStable(c);
-
-#ifdef STATEM_DEBUG
-    for( _.i = 0; _.i < NUM_STATE_GROUPS; _.i++)
-        if( p[_.i] > 10 )
-            printf("!\n");
-    printf("Probabilies are [0]%.2f [1]%.2f [2]%.2f [3]%.2f.\n", p[0], p[1], p[2], p[3]);
-    printf("State %s is ", stateString(c));
-    if(!isStable(c)) printf("not ");
-        printf("stable.\n");
+    
+#ifdef FSM_DEBUG
+    LOG_FSM( DEBUG_1, "Probabilies: [%.2f][%.2f][%.2f][%.2f]\n", p[0], p[1], p[2], p[3]);
 #endif
     
-    _.u = 0.;
-    
-    for( _.i = 0; _.i < NUM_STATE_GROUPS; _.i++ )
+    for( _.i = 0; _.i < NUM_STATES; _.i++ )
     {
-        _.j = x - _.i;
-        if(!isStable(c))
-        {
-            if( !_.j ) k = c - 1;
-            else k = c - ( _.j << 1 );
-        }
-        else if( x == _.i ) k = c;
-        else k = ( c + 1 ) - ( _.j << 1);
-        
-        LOG_STATEM(DEBUG_2, "Updating %s by %.2f.\n", stateString(k), p[_.i]);
-        if( stable )
-        { // Stable states must return to unstable before dropping
-            if( _.i < c )
-                _.u += p[_.i];
-            else if ( _.i == c + 1)
-            { // Put all drop suggestions into instability for current stable state
-                sys->probabilities.map[c][k] += _.u;
-                _.u = 0.;
-            }
-        }
-        sys->probabilities.map[c][k] += p[_.i];
-        sys->probabilities.map[c][k] /= 2.;
-        
-        if( !stable && k == c - 1 )
-        {
-            double transfer = sys->probabilities.map[c][c] * STATE_DECAY;
-            sys->probabilities.map[c][k] += transfer;
-            sys->probabilities.map[c][c] -= transfer;
-        }
+        LOG_FSM(DEBUG_1, "Updating %s by %.2f.\n", stateString(_.i), p[_.i]);
+        sys->probabilities.map[c][_.i] += p[_.i];
+        sys->probabilities.map[c][_.i] /= 2.;
     }
 }
 
 void UpdateFSMState( fsm_system_t * sys )
 {
-//    if(sys->next != UNKNOWN_STATE )
+    if(sys->next != UNKNOWN_STATE )
     {
-        LOG_STATEM(DEBUG_2, "Updating state from %s to %s\n", stateString((int)sys->state), stateString((int)sys->next));
-        if(sys->next != sys->state) {LOG_STATEM(DEBUG_2, "~~~ State is %s ~~~\n", stateString(sys->next));}
+        LOG_FSM(DEBUG_1, "Updating state from %s to %s\n", stateString((int)sys->state), stateString((int)sys->next));
+        if(sys->next != sys->state) {LOG_FSM(DEBUG_1, "~~~ State is %s ~~~\n", stateString(sys->next));}
         sys->prev   = sys->state;
         sys->state  = sys->next;
 //        sys->next   = UNKNOWN_STATE;
@@ -188,19 +151,21 @@ void UpdateFSMState( fsm_system_t * sys )
 
 void PrintFSMMap( fsm_map_t * bm, state_t s )
 {
-#ifdef STATEM_DEBUG
+#ifdef LOG_FSM
     reset_loop_variables( &_, bm->length );
-    for( _.i = 0; _.i < _.l; _.i++ ) printf("\t\t %s-[%d]", stateString((uint8_t)_.i), _.i);
+    LOG_FSM(DEBUG_1, "\t\t\t ");
+    for( _.i = 0; _.i < _.l; _.i++ ) LOG_FSM_BARE(DEBUG_1, "%s-[%d]\t\t ", stateString((uint8_t)_.i), _.i);
     for( _.i = 0; _.i < _.l; _.i++ )
     {
-        printf("\n%s-[%d]", stateString((uint8_t)_.i), _.i);
+        LOG_FSM_BARE(DEBUG_1, "\n");
+        LOG_FSM(DEBUG_1, "%s-[%d]", stateString((uint8_t)_.i), _.i);
         for( _.j = 0; _.j < _.l; _.j++ )
         {
             char c = ' ';
             if(_.j == (uint8_t)s) c = '|';
-            printf("\t%c[%.5f]%c",c, bm->map[_.j][_.i],c);
+            LOG_FSM_BARE(DEBUG_1, "\t%c[%.5f]%c",c, bm->map[_.j][_.i],c);
         }
     }
-    printf("\n");
+    LOG_FSM_BARE(DEBUG_1, "\n");
 #endif
 }

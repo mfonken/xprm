@@ -9,6 +9,8 @@
 #ifndef control_structures_h
 #define control_structures_h
 
+#define _USE_UPDATED_
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -76,7 +78,22 @@ typedef expectation_element_t expectation_matrix_t[NUM_OBSERVATION_SYMBOLS];
     
 typedef double expectation_vector_t[NUM_OBSERVATION_SYMBOLS][NUM_STATES+1];
 
+#ifdef _USE_UPDATED_
+#define GAMMA_VALUE_INDEX 1
+#define GAMMA
+    typedef double gamma_element_t[NUM_OBSERVATION_SYMBOLS][NUM_STATES];
+    typedef struct
+    {
+        gamma_element_t
+        value,
+        cumulative_value,
+        cumulative_maximum;
+        double maximum[NUM_OBSERVATION_SYMBOLS];
+    } gamma_matrix_t;
+    
+#else
 typedef double gamma_matrix_t[NUM_OBSERVATION_SYMBOLS][NUM_STATES];
+#endif
     
 typedef struct
 {

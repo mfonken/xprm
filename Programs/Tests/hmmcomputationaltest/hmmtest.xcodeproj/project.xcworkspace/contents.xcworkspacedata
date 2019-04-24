@@ -1,46 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Workspace
    version = "1.0">
-   <Group
-      location = "group:statecontrol"
-      name = "statecontrol">
-      <FileRef
-         location = "group:gmm.c">
-      </FileRef>
-      <FileRef
-         location = "group:control_types.h">
-      </FileRef>
-      <FileRef
-         location = "group:fsm.h">
-      </FileRef>
-      <FileRef
-         location = "group:psm.h">
-      </FileRef>
-      <FileRef
-         location = "group:hmm.h">
-      </FileRef>
-      <FileRef
-         location = "group:gmm.h">
-      </FileRef>
-      <FileRef
-         location = "group:kumaraswamy.h">
-      </FileRef>
-      <FileRef
-         location = "group:psm.c">
-      </FileRef>
-      <FileRef
-         location = "group:fsm_support.h">
-      </FileRef>
-      <FileRef
-         location = "group:control_structures.h">
-      </FileRef>
-      <FileRef
-         location = "group:fsm.c">
-      </FileRef>
-      <FileRef
-         location = "group:hmm.c">
-      </FileRef>
-   </Group>
    <FileRef
       location = "self:hmmtest.xcodeproj">
    </FileRef>

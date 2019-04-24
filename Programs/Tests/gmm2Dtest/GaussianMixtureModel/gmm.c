@@ -56,6 +56,7 @@ void UpdateGaussianMixtureCluster( gaussian_mixture_cluster_t * cluster, observa
     getMat2x2Inverse( &cluster->gaussian_in.covariance, &cluster->inv_covariance_in );
     
     GMMFunctions.Cluster.UpdateNormal( cluster );
+    GMMFunctions.Cluster.UpdateLimits( cluster );
     
     ReportLabel( &cluster->labels, observation->label );
 }

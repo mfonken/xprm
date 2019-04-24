@@ -18,12 +18,54 @@ extern "C" {
 #include <math.h>
 #include <string.h>
     
-#define SPOOF
+//#define SPOOF
+    
+#define HMM_DEBUG
+#define FSM_DEBUG
+    
+#ifndef LOG_LEVEL
+#define LOG_LEVEL
+    enum LogLevel
+    {
+        TEST = 0,
+        DEBUG_0,
+        DEBUG_1,
+        DEBUG_2,
+        ALWAYS
+    };
+#endif
+    
+#define TEST_LOG_LEVEL DEBUG_1
+    
+#ifndef LOG
+#define LOG(L,...) if(L >= TEST_LOG_LEVEL) \
+{  for(uint8_t i=L;i<ALWAYS;i++) printf("\t"); printf(__VA_ARGS__); }
+#define LOG_BARE(L,...) if(L >= TEST_LOG_LEVEL) \
+{ printf(__VA_ARGS__); }
+#endif
+    
+#ifdef HMM_DEBUG
+#define LOG_HMM(L,...) LOG(L,"<HMM> " __VA_ARGS__)
+#define LOG_HMM_BARE(L,...) LOG_BARE(L,"" __VA_ARGS__)
+#else
+#define LOG_HMM(...)
+#define LOG_HMM_BARE(...)
+#endif
+    
+#ifdef FSM_DEBUG
+#define LOG_FSM(L,...) LOG(L,"<FSM> " __VA_ARGS__)
+#define LOG_FSM_BARE(L,...) LOG_BARE(L,"" __VA_ARGS__)
+#else
+#define LOG_FSM(...)
+#define LOG_FSM_BARE(L,...)
+#endif
     
 #ifndef ZDIV
 #define ZDIV_LNUM 1 << 10
 #define ZDIV(X,Y) ((Y==0)?(X==0?0:ZDIV_LNUM):X/Y)
 #endif
+    
+#define SET_MAX(A,B)    ( A = MAX ( A, B ) )
     
 #define MAX_THRESH 255
     
@@ -182,11 +224,10 @@ extern "C" {
 
 #else
         UNKNOWN_STATE = -1,
-        UNSTABLE_NONE,
-        UNSTABLE_SINGLE,
-        UNSTABLE_DOUBLE,
-//        UNSTABLE_TRIPLE,
-        UNSTABLE_MANY,
+        UNDER_POPULATED,
+        TARGET_POPULATION,
+        OVER_POPULATION,
+        CHAOTIC,
 #endif
         NUM_STATES
     } state_t;

@@ -23,7 +23,7 @@ void searchListCombination(double v);
 void   InitializeHMM(                hidden_markov_model_t * );
 void   UpdateObservationMatrixHMM(   hidden_markov_model_t *, uint8_t );
 void   BaumWelchObservationSolveHMM( hidden_markov_model_t *, uint8_t );
-void   BaumWelchTransitionSolveHMM( hidden_markov_model_t * );
+void   BaumWelchGammaSolveHMM( hidden_markov_model_t * );
 void   BaumWelchSolveHMM( hidden_markov_model_t *, uint8_t );
 
 typedef struct
@@ -31,7 +31,7 @@ typedef struct
     void   (*Initialize)(                hidden_markov_model_t * );
     void   (*UpdateObservationMatrix)(   hidden_markov_model_t *, uint8_t );
     void   (*BaumWelchObservationSolve)( hidden_markov_model_t *, uint8_t );
-    void   (*BaumWelchTransitionSolve)( hidden_markov_model_t * );
+    void   (*BaumWelchGammaSolve)( hidden_markov_model_t * );
     void   (*BaumWelchSolve)( hidden_markov_model_t *, uint8_t );
 } hidden_markov_model_function_t;
 
@@ -40,7 +40,7 @@ static const hidden_markov_model_function_t HMMFunctions =
     .Initialize = InitializeHMM,
     .UpdateObservationMatrix = UpdateObservationMatrixHMM,
     .BaumWelchObservationSolve = BaumWelchObservationSolveHMM,
-    .BaumWelchTransitionSolve = BaumWelchTransitionSolveHMM,
+    .BaumWelchGammaSolve = BaumWelchGammaSolveHMM,
     .BaumWelchSolve = BaumWelchSolveHMM
 };
     

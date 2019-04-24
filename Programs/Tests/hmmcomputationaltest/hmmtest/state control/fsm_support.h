@@ -9,7 +9,7 @@
 #ifndef fsm_support_h
 #define fsm_support_h
 
-#include "control_structures.h"
+#include "kumaraswamy.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,25 +27,11 @@ extern "C" {
     };
 #endif
     
-#ifndef TEST_LOG_LEVEL
-#define TEST_LOG_LEVEL ALWAYS
-#endif
-    
-#ifndef LOG
-#define LOG(L,...) if(L >= TEST_LOG_LEVEL) \
-{  for(uint8_t i=L;i<ALWAYS;i++) printf("\t"); printf(__VA_ARGS__); }
-#endif
-    
-#ifdef STATEM_DEBUG
-#define LOG_STATEM(L,...) LOG(L,"<State> " __VA_ARGS__)
-#else
-#define LOG_STATEM(...)
-#endif
-    
 static inline uint8_t stateToSelection(uint8_t s) {return ((uint8_t)((s+1)/2) - 1);};
-static inline const char *stateString(uint8_t s)
+static inline const char *stateString(int8_t s)
 {
-    static const char *strings[] = { "UN", "S0", "U0", "S1", "U1", "S2", "U2", "SM", "UM" };
+    s++;
+    static const char *strings[] = { "UN", "UP", "TP", "OP", "CH" };
     return strings[(uint8_t)s];
 }
     

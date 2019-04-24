@@ -76,15 +76,11 @@ static void UpdateBand( band_list_t * band_list, uint8_t i, int8_t c, gaussian2d
     { /* If no gaussian for band, zero state info */
         if( !i )
         {
-            band_list->band[i].lower_boundary = 700.;
-            band_list->band[i].upper_boundary = 700.;
-            band_list->band[i].true_center = (vec2){ 0., 0. };
+            band_list->band[i] = (band_t){ 700, 700, (vec2){ 0., 0. }, 0. };
         }
         else
         {
-            band_list->band[i].lower_boundary = band_list->band[i-1].lower_boundary;
-            band_list->band[i].upper_boundary = band_list->band[i-1].upper_boundary;
-            band_list->band[i].true_center = band_list->band[i-1].true_center;
+            memcpy( &band_list->band[i], &band_list->band[i-1], sizeof(band_t) );
         }
     }
     else if( c == -1 )
@@ -93,6 +89,7 @@ static void UpdateBand( band_list_t * band_list, uint8_t i, int8_t c, gaussian2d
         band_list->band[i].lower_boundary = boundary;
         band_list->band[i].upper_boundary = boundary;
         band_list->band[i].true_center = (vec2){ band_list->band[i-1].true_center.a, boundary };
+        band_list->band[i].variance = band_list->band[i-1].variance;
     }
     else
     { /* Otherwise set using cumulated band gaussian */
@@ -100,12 +97,12 @@ static void UpdateBand( band_list_t * band_list, uint8_t i, int8_t c, gaussian2d
         band_list->band[i].lower_boundary = band_gaussian->mean.b + radius;
         band_list->band[i].upper_boundary = band_gaussian->mean.b - radius;
         band_list->band[i].true_center = band_gaussian->mean;
+        band_list->band[i].variance = band_gaussian->covariance.d;
         if(i)
         {
             band_list->band[i-1].upper_boundary = band_list->band[i].lower_boundary;
         }
     }
-    band_list->band[i].variance = band_gaussian->covariance.d;
 }
 
 void DiscoverStateBandsPSM( psm_t * model, band_list_t * band_list )
