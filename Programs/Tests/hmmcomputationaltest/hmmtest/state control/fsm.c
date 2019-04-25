@@ -144,7 +144,7 @@ void UpdateFSMState( fsm_system_t * sys )
         if(sys->next != sys->state) {LOG_FSM(DEBUG_1, "~~~ State is %s ~~~\n", stateString(sys->next));}
         sys->prev   = sys->state;
         sys->state  = sys->next;
-//        sys->next   = UNKNOWN_STATE;
+        sys->next   = UNKNOWN_STATE;
 //        FSMFunctions.Map.ResetState( &sys->probabilities, sys->prev );
     }
 }

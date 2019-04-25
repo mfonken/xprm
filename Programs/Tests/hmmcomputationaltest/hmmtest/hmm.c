@@ -65,8 +65,33 @@ void InitializeHMM( hidden_markov_model_t * model )
 }
 
 
-void UpdateObservationMatrixHMM( hidden_markov_model_t * model, uint8_t t )
+void UpdateObservationMatrixHMM( hidden_markov_model_t * model )
 {
+    /* Observation matrix update */
+    LOG_HMM(DEBUG_1, "Observation matrix update:\n");
+    for( uint8_t j = 0; j < NUM_STATES; j++ )
+    {
+        double row_sum = 0., row_s = 0.;
+        for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
+        {
+            row_sum += model->G.cumulative_value[j][i];
+        }
+        
+        for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
+        {
+            if( row_sum == 0. && i == j)
+            {
+                model->B.expected[j][i] = 1.;
+            }
+            else
+            {
+                model->B.expected[j][i] = ZDIV( model->G.cumulative_value[j][i], row_sum );
+            }
+            LOG_HMM_BARE(DEBUG_1, "|%.4f|", model->B.expected[j][i]);
+            row_s += model->B.expected[j][i];
+        }
+        LOG_HMM_BARE(DEBUG_1, " = %.3f\n", row_s);
+    }
 }
 
 static double ForwardBackward( hidden_markov_model_t * model, uint8_t k, uint8_t l, uint8_t i, uint8_t j )
@@ -138,32 +163,7 @@ void BaumWelchGammaSolveHMM( hidden_markov_model_t * model )
     
     LOG_HMM_BARE(DEBUG_1, "\n");
     
-    
-    /* Observation matrix update */
-    LOG_HMM(DEBUG_1, "Observation matrix update:\n");
-    for( uint8_t j = 0; j < NUM_STATES; j++ )
-    {
-        double row_sum = 0., row_s = 0.;
-        for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
-        {
-            row_sum += model->G.cumulative_value[j][i];
-        }
-        
-        for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
-        {
-            if( row_sum == 0. && i == j)
-            {
-                model->B.expected[j][i] = 1.;
-            }
-            else
-            {
-                model->B.expected[j][i] = ZDIV( model->G.cumulative_value[j][i], row_sum );
-            }
-            LOG_HMM_BARE(DEBUG_1, "|%.4f|", model->B.expected[j][i]);
-            row_s += model->B.expected[j][i];
-        }
-        LOG_HMM_BARE(DEBUG_1, " = %.3f\n", row_s);
-    }
+    UpdateObservationMatrixHMM(model);
 }
 #else
 void BaumWelchGammaSolveHMM( hidden_markov_model_t * model )
@@ -250,18 +250,3 @@ void BaumWelchGammaSolveHMM( hidden_markov_model_t * model )
     printf("\n");
 }
 #endif
-
-void BaumWelchObservationSolveHMM( hidden_markov_model_t * model, uint8_t t )
-{
-}
-
-void BaumWelchTransitionStepHMM( hidden_markov_model_t * model, uint8_t t )
-{
-    
-}
-
-void BaumWelchSolveHMM( hidden_markov_model_t * model, uint8_t t )
-{
-    HMMFunctions.BaumWelchGammaSolve( model );
-    //    HMMFunctions.BaumWelchObservationSolve( model, t );
-}
