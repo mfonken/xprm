@@ -37,7 +37,7 @@ static fsm_map_t spoof_map =
 {
     {
         { 0.5, 0.5 },
-        { 0.3, 0.7 }
+        { 0.4, 0.6 }
     },
     NUM_STATES
 };
@@ -45,8 +45,8 @@ static fsm_map_t spoof_map =
 static observation_matrix_t spoof_omap =
 {
     {
-        { 0.3, 0.7 },
-        { 0.8, 0.2 }
+        { 0.2, 0.8 },
+        { 0.9, 0.1 }
     },
     0,
     NUM_OBSERVATION_SYMBOLS
@@ -54,7 +54,7 @@ static observation_matrix_t spoof_omap =
 
 static double initial[NUM_STATES] =
 {
-    0.2, 0.8
+    0.3, 0.7
 };
 #else
 typedef enum
@@ -68,9 +68,9 @@ typedef enum
 
 static OBSERVATAION observations[]
 {
-    ONE, ONE, ONE, ONE, TWO, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE
+//    ONE, ONE, ONE, ONE, TWO, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE
 //    ONE, ZERO, THREE, TWO, FOUR, ONE, ZERO, THREE, TWO, FOUR, ONE, ZERO, THREE, TWO, FOUR, ONE, ZERO, THREE, TWO, FOUR
-//    ZERO, ZERO, ZERO, ONE, ONE, ONE, TWO, TWO, TWO, THREE, THREE, THREE, FOUR, FOUR, FOUR, THREE, THREE, TWO, TWO, ONE, ONE, ZERO, ZERO
+//    ZERO, ZERO, ZERO, ONE, ONE, ONE, TWO, TWO, TxWO, THREE, THREE, THREE, FOUR, FOUR, FOUR, THREE, THREE, TWO, TWO, ONE, ONE, ZERO, ZERO
 };
 
 static observation_buffer_t spoof_observataions;

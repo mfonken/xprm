@@ -67,10 +67,10 @@ void InitializeFSMSystem( fsm_system_t * sys )
     sys->prev                 = UNKNOWN_STATE;
     sys->next                 = UNKNOWN_STATE;
     sys->selection_index      = 0;
-    sys->stability.primary    = 0.;
-    sys->stability.secondary  = 0.;
-    sys->stability.alternate  = 0.;
-    sys->stability.overall    = 0.;
+//    sys->stability.primary    = 0.;
+//    sys->stability.secondary  = 0.;
+//    sys->stability.alternate  = 0.;
+//    sys->stability.overall    = 0.;
     
     FSMFunctions.Map.InitializeMap( &sys->probabilities );
 }

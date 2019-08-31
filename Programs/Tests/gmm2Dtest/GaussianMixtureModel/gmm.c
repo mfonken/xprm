@@ -264,8 +264,12 @@ void AddValueToGaussianMixtureModel( gaussian_mixture_model_t * model, observati
 //           model->min_in.a, model->min_in.b, model->max_in.a, model->max_in.b,
 //           model->min_out.a, model->min_out.b, model->max_out.a, model->max_out.b);
     vec2 output = { 0., 0. };
-    double total_probability = GMMFunctions.Model.GetScoreSumOfClusters( model, (vec2 *)observation );
-    double best_distance = GMMFunctions.Model.GetOutputAndBestDistance( model, total_probability, (vec2 *)observation, &output);
+    
+    vec2 observation_vec = (vec2){ (double)observation->a, (double)observation->b };
+    double total_probability = GMMFunctions.Model.GetScoreSumOfClusters( model, &observation_vec );
+    double best_distance = GMMFunctions.Model.GetOutputAndBestDistance( model, total_probability, &observation_vec, &output);
+//    double total_probability = GMMFunctions.Model.GetScoreSumOfClusters( model, (vec2 *)observation );
+//    double best_distance = GMMFunctions.Model.GetOutputAndBestDistance( model, total_probability, (vec2 *)observation, &output);
     
     //printf("m_outp: <%.2f %.2f>\n", output.a, output.b);
     
@@ -278,8 +282,9 @@ void AddValueToGaussianMixtureModel( gaussian_mixture_model_t * model, observati
     /* Add cluster if error or distance is to high for a cluster match */
     if( model->num_clusters < model->settings.value.max_clusters )
     {
-        if( !model->num_clusters
-           || ( ( max_error > model->settings.value.max_error ) && ( best_distance > model->settings.value.max_mahalanobis_sq ) ) )
+        if( ( model->num_clusters == 0 )
+           || ( ( max_error > model->settings.value.max_error ) 
+               && ( best_distance > model->settings.value.max_mahalanobis_sq ) ) )
             GMMFunctions.Model.AddCluster( model, observation, value );
     }
     

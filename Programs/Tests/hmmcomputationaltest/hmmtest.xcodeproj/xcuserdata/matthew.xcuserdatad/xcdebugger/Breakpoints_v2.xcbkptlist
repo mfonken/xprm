@@ -42,11 +42,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../../combine/experimental/statecontrol/hmm.c"
-            timestampString = "577849244.589645"
+            timestampString = "578093047.993009"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "326"
-            endingLineNumber = "326"
+            startingLineNumber = "220"
+            endingLineNumber = "220"
             landmarkName = "ForwardRecursionHMM"
             landmarkType = "9">
          </BreakpointContent>
@@ -58,11 +58,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../../combine/experimental/statecontrol/hmm.c"
-            timestampString = "577849244.589715"
+            timestampString = "578093047.993104"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "326"
-            endingLineNumber = "326"
+            startingLineNumber = "220"
+            endingLineNumber = "220"
             landmarkName = "BaumWelchTransitionSolveHMM"
             landmarkType = "9">
          </BreakpointContent>
@@ -74,11 +74,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../../combine/experimental/statecontrol/hmm.c"
-            timestampString = "577849244.589756"
+            timestampString = "578093047.99316"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "326"
-            endingLineNumber = "326"
+            startingLineNumber = "220"
+            endingLineNumber = "220"
             landmarkName = "BaumWelchTransitionSolveHMM"
             landmarkType = "9">
          </BreakpointContent>
@@ -90,11 +90,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../../combine/experimental/statecontrol/hmm.c"
-            timestampString = "577849244.5897911"
+            timestampString = "578093047.993211"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "326"
-            endingLineNumber = "326"
+            startingLineNumber = "220"
+            endingLineNumber = "220"
             landmarkName = "BaumWelchTransitionSolveHMM"
             landmarkType = "9">
          </BreakpointContent>
@@ -106,11 +106,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../../combine/experimental/statecontrol/hmm.c"
-            timestampString = "577849244.589823"
+            timestampString = "578093047.993261"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "326"
-            endingLineNumber = "326"
+            startingLineNumber = "220"
+            endingLineNumber = "220"
             landmarkName = "BaumWelchTransitionSolveHMM"
             landmarkType = "9">
          </BreakpointContent>
@@ -122,11 +122,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../../combine/experimental/statecontrol/hmm.c"
-            timestampString = "577849244.589854"
+            timestampString = "578093047.9933079"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "326"
-            endingLineNumber = "326"
+            startingLineNumber = "220"
+            endingLineNumber = "220"
             landmarkName = "BaumWelchTransitionSolveHMM"
             landmarkType = "9">
          </BreakpointContent>
@@ -138,11 +138,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../../combine/experimental/statecontrol/hmm.c"
-            timestampString = "577849244.589886"
+            timestampString = "578093047.9933569"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "326"
-            endingLineNumber = "326"
+            startingLineNumber = "220"
+            endingLineNumber = "220"
             landmarkName = "BaumWelchTransitionSolveHMM"
             landmarkType = "9">
          </BreakpointContent>
@@ -154,11 +154,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../../combine/experimental/statecontrol/hmm.c"
-            timestampString = "577849244.5899169"
+            timestampString = "578093047.9934061"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "326"
-            endingLineNumber = "326"
+            startingLineNumber = "220"
+            endingLineNumber = "220"
             landmarkName = "BaumWelchTransitionSolveHMM"
             landmarkType = "9">
          </BreakpointContent>
@@ -170,11 +170,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../../combine/experimental/statecontrol/hmm.c"
-            timestampString = "577849244.589949"
+            timestampString = "578093047.993453"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "326"
-            endingLineNumber = "326"
+            startingLineNumber = "220"
+            endingLineNumber = "220"
             landmarkName = "BaumWelchTransitionSolveHMM"
             landmarkType = "9">
          </BreakpointContent>
@@ -186,11 +186,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../../combine/experimental/statecontrol/hmm.c"
-            timestampString = "577849244.58998"
+            timestampString = "578093047.993503"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "326"
-            endingLineNumber = "326"
+            startingLineNumber = "220"
+            endingLineNumber = "220"
             landmarkName = "BaumWelchTransitionSolveHMM"
             landmarkType = "9">
          </BreakpointContent>
@@ -202,61 +202,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../../combine/experimental/statecontrol/hmm.c"
-            timestampString = "577849244.590012"
+            timestampString = "578093047.9935499"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "326"
-            endingLineNumber = "326"
+            startingLineNumber = "220"
+            endingLineNumber = "220"
             landmarkName = "BaumWelchTransitionSolveHMM"
             landmarkType = "9">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "hmmtest/state control/fsm.c"
-            timestampString = "577849244.590045"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "169"
-            endingLineNumber = "169"
-            landmarkName = "PrintFSMMap()"
-            landmarkType = "9">
-            <Locations>
-               <Location
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "PrintFSMMap"
-                  moduleName = "hmmtest"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/matthew/Desktop/marbl/Techincal/xprm/Programs/Tests/hmmcomputationaltest/hmmtest/state%20control/fsm.c"
-                  timestampString = "577769202.130088"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "169"
-                  endingLineNumber = "169"
-                  offsetFromSymbolStart = "485">
-               </Location>
-               <Location
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "PrintFSMMap"
-                  moduleName = "hmmtest"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/matthew/Desktop/marbl/Techincal/xprm/Programs/Tests/hmmcomputationaltest/hmmtest/state%20control/fsm.c"
-                  timestampString = "577769202.132643"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "169"
-                  endingLineNumber = "169"
-                  offsetFromSymbolStart = "532">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

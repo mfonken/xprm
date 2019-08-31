@@ -27,18 +27,19 @@ private:
     int width;
     int height;
     int iteration;
-    int counter;
     int args;
     bool live;
     bool no_file;
-    int num_frames;
     
     std::string subdir;
     
     cv::Size size;
 
 public:
-    image_test( int argc, const char * argv[] );
+    int counter;
+    int num_frames;
+    
+    image_test( int argc, const char * argv[], int dimension = 0);
     void loop(char c);
     cv::Mat getNextFrame();
     int getWidth();

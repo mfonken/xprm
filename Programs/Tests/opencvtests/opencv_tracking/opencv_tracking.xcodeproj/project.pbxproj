@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3492B90022F90C1000BD287A /* centroid.c in Sources */ = {isa = PBXBuildFile; fileRef = 3492B8FE22F90C1000BD287A /* centroid.c */; };
 		34A9BE09225AAB6000F0C21F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34A9BE07225AAB6000F0C21F /* main.cpp */; };
 		34A9BE1B225B015200F0C21F /* image_utility.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34A9BE1A225B015200F0C21F /* image_utility.cpp */; };
 /* End PBXBuildFile section */
@@ -24,6 +25,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3492B8FE22F90C1000BD287A /* centroid.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = centroid.c; sourceTree = "<group>"; };
+		3492B8FF22F90C1000BD287A /* centroid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = centroid.h; sourceTree = "<group>"; };
 		34A9BDFB225AAB4000F0C21F /* opencv_tracking */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = opencv_tracking; sourceTree = BUILT_PRODUCTS_DIR; };
 		34A9BE05225AAB6000F0C21F /* test_setup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = test_setup.h; sourceTree = "<group>"; };
 		34A9BE07225AAB6000F0C21F /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
@@ -61,6 +64,8 @@
 		34A9BDFD225AAB4000F0C21F /* opencv_tracking */ = {
 			isa = PBXGroup;
 			children = (
+				3492B8FF22F90C1000BD287A /* centroid.h */,
+				3492B8FE22F90C1000BD287A /* centroid.c */,
 				34A9BE19225B015200F0C21F /* image_utility.hpp */,
 				34A9BE1A225B015200F0C21F /* image_utility.cpp */,
 				34A9BE05225AAB6000F0C21F /* test_setup.h */,
@@ -126,6 +131,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				34A9BE1B225B015200F0C21F /* image_utility.cpp in Sources */,
+				3492B90022F90C1000BD287A /* centroid.c in Sources */,
 				34A9BE09225AAB6000F0C21F /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

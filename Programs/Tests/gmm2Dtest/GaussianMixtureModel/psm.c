@@ -71,12 +71,12 @@ void UpdateStateBandsPSM( psm_t * model, double nu, double * bands, uint8_t num_
 
 static void UpdateBand( band_list_t * band_list, uint8_t i, int8_t c, gaussian2d_t * band_gaussian )
 {
-    if( i > band_list->length ) return;
+    if( i > band_list->length ) i = band_list->length - 1;
     if( c == 0 )
     { /* If no gaussian for band, zero state info */
         if( !i )
         {
-            band_list->band[i] = (band_t){ 700, 700, (vec2){ 0., 0. }, 0. };
+            band_list->band[i] = (band_t){ 700, 700, (vec2){ 0., 700 }, 0. };
         }
         else
         {
@@ -124,6 +124,7 @@ void DiscoverStateBandsPSM( psm_t * model, band_list_t * band_list )
         for(uint32_t i = 0, m = 1; i < model->gmm.num_clusters; i++, m <<= 1 )
         {
             if( processed_clusters & m ) continue;
+            if( model->gmm.cluster[i]->gaussian_in.mean.a > 700 ) continue;
             check_boundary = model->gmm.cluster[i]->max_y;
             if( check_boundary > min_boundary )
             {
@@ -152,12 +153,22 @@ void DiscoverStateBandsPSM( psm_t * model, band_list_t * band_list )
         }
         else
         { /* Otherwise cumulate current gaussian into band gaussian */
-            mulGaussian2d( &band_gaussian, &model->gmm.cluster[min_id]->gaussian_in, &band_gaussian );
-            num_clusters_in_band++;
+            double stddevs = NumStdDevsFromYMean( &band_gaussian, model->gmm.cluster[min_id]->gaussian_in.mean.b );
+            printf( "bcy: %.4f vs min: %d | stddevs: %.4f\n", band_gaussian.covariance.d, MIN_VARIANCE_SPAN_TO_REJECT_FOR_BAND_CALC, stddevs);
+            if( band_gaussian.covariance.d < MIN_VARIANCE_SPAN_TO_REJECT_FOR_BAND_CALC
+               || NumStdDevsFromYMean( &band_gaussian, model->gmm.cluster[min_id]->gaussian_in.mean.b )
+                  < MAX_STD_DEVS_TO_BE_INCLUDED_IN_BAND_CALC )
+            {
+                printf("Combining cluster %d\n", min_id);
+                mulGaussian2d( &band_gaussian, &model->gmm.cluster[min_id]->gaussian_in, &band_gaussian );
+                
+                printf("Band %d gaussian is <%.4f %.4f> [%.4f %.4f %.4f %.4f]\n", current_band_id, band_gaussian.mean.a, band_gaussian.mean.b, band_gaussian.covariance.a, band_gaussian.covariance.b, band_gaussian.covariance.c, band_gaussian.covariance.d );
+                num_clusters_in_band++;
+            }
         }
         
         if( !num_to_process )
-        {
+        { /* Always update last */
             UpdateBand( band_list, current_band_id, num_clusters_in_band, &band_gaussian );
         }
         processed_clusters |= 1 << min_id;

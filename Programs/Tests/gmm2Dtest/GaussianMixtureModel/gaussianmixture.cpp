@@ -291,9 +291,14 @@ void GaussianMixture::Neuron::contributeToOutput(Eigen::VectorXf &output,
         cov_times_delta.setZero();
         cov_times_delta.noalias() += _inv_covariance_in * delta;
 
+        std::cout << "Cov x ∆: " << cov_times_delta << std::endl;
+        std::cout << "Cov in/out: " << _covariance_in_out << std::endl;
+        std::cout << "Mean out: " << _mean_out << std::endl;
+        
         output.noalias() += _probability_cond_in * (
             _mean_out + _covariance_in_out.transpose() * cov_times_delta
         );
+        std::cout << "Output: " << output << std::endl;
     }
 }
 

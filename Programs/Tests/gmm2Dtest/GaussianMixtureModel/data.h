@@ -39,7 +39,7 @@ using namespace std;
 #define HEIGHT 700
 #define WIDTH 700
 #define SCALE 1
-#define BORDER 100
+#define BORDER 50//100
 
 #define NUM_SAMPLES 100
 #define SAMPLE_POINT_RADIUS 4

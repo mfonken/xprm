@@ -63,7 +63,11 @@ void ResetFSMState( fsm_map_t * bm, uint8_t i )
 
 void InitializeFSMSystem( fsm_system_t * sys )
 {
+#ifdef SPOOF
+    sys->state                = LOW;
+#else
     sys->state                = UNDER_POPULATED;
+#endif
     sys->prev                 = UNKNOWN_STATE;
     sys->next                 = UNKNOWN_STATE;
     sys->selection_index      = 0;

@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		346602552220FF8E009FE87B /* hmm.c in Sources */ = {isa = PBXBuildFile; fileRef = 346602512220FF8E009FE87B /* hmm.c */; };
 		34944C702221132600570110 /* fsm.c in Sources */ = {isa = PBXBuildFile; fileRef = 34944C6C2221132600570110 /* fsm.c */; };
 		34F91E7B2210EDBB00F8CBBE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34F91E7A2210EDBB00F8CBBE /* main.cpp */; };
+		34FB9DE82318D3C2003F30A4 /* hmm.c in Sources */ = {isa = PBXBuildFile; fileRef = 34FB9DE42318D3C2003F30A4 /* hmm.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,17 +25,17 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		3466024A2220FF8E009FE87B /* hmm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hmm.h; sourceTree = "<group>"; };
-		3466024C2220FF8E009FE87B /* kumaraswamy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kumaraswamy.h; sourceTree = "<group>"; };
-		3466024F2220FF8E009FE87B /* control_structures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = control_structures.h; sourceTree = "<group>"; };
-		346602512220FF8E009FE87B /* hmm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hmm.c; sourceTree = "<group>"; };
 		34944C6A222106D800570110 /* fsm_test.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fsm_test.h; sourceTree = "<group>"; };
-		34944C6B2221132600570110 /* control_types_test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = control_types_test.h; sourceTree = "<group>"; };
+		34944C6B2221132600570110 /* control_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = control_types.h; sourceTree = "<group>"; };
 		34944C6C2221132600570110 /* fsm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fsm.c; sourceTree = "<group>"; };
 		34944C6D2221132600570110 /* fsm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fsm.h; sourceTree = "<group>"; };
 		34944C6E2221132600570110 /* fsm_support.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fsm_support.h; sourceTree = "<group>"; };
 		34F91E772210EDBB00F8CBBE /* hmmtest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = hmmtest; sourceTree = BUILT_PRODUCTS_DIR; };
 		34F91E7A2210EDBB00F8CBBE /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		34FB9DE42318D3C2003F30A4 /* hmm.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = hmm.c; path = ../../../../../combine/experimental/rho/psm/hmm.c; sourceTree = "<group>"; };
+		34FB9DE52318D3C2003F30A4 /* control_structures.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = control_structures.h; path = ../../../../../combine/experimental/rho/psm/control_structures.h; sourceTree = "<group>"; };
+		34FB9DE62318D3C2003F30A4 /* hmm.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = hmm.h; path = ../../../../../combine/experimental/rho/psm/hmm.h; sourceTree = "<group>"; };
+		34FB9DE72318D3C2003F30A4 /* kumaraswamy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = kumaraswamy.h; path = ../../../../../combine/experimental/rho/psm/kumaraswamy.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -49,23 +49,10 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		346602452220FF8E009FE87B /* statecontrol */ = {
-			isa = PBXGroup;
-			children = (
-				3466024C2220FF8E009FE87B /* kumaraswamy.h */,
-				3466024F2220FF8E009FE87B /* control_structures.h */,
-				3466024A2220FF8E009FE87B /* hmm.h */,
-				346602512220FF8E009FE87B /* hmm.c */,
-			);
-			name = statecontrol;
-			path = /Users/matthew/Desktop/marbl/Techincal/combine/experimental/statecontrol;
-			sourceTree = "<absolute>";
-		};
 		34F91E6E2210EDBB00F8CBBE = {
 			isa = PBXGroup;
 			children = (
 				34F91E792210EDBB00F8CBBE /* hmmtest */,
-				346602452220FF8E009FE87B /* statecontrol */,
 				34F91E782210EDBB00F8CBBE /* Products */,
 			);
 			sourceTree = "<group>";
@@ -82,8 +69,12 @@
 			isa = PBXGroup;
 			children = (
 				34944C6A222106D800570110 /* fsm_test.h */,
-				34944C6B2221132600570110 /* control_types_test.h */,
+				34944C6B2221132600570110 /* control_types.h */,
 				34944C6E2221132600570110 /* fsm_support.h */,
+				34FB9DE72318D3C2003F30A4 /* kumaraswamy.h */,
+				34FB9DE52318D3C2003F30A4 /* control_structures.h */,
+				34FB9DE62318D3C2003F30A4 /* hmm.h */,
+				34FB9DE42318D3C2003F30A4 /* hmm.c */,
 				34944C6D2221132600570110 /* fsm.h */,
 				34944C6C2221132600570110 /* fsm.c */,
 				34F91E7A2210EDBB00F8CBBE /* main.cpp */,
@@ -147,9 +138,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				34FB9DE82318D3C2003F30A4 /* hmm.c in Sources */,
 				34944C702221132600570110 /* fsm.c in Sources */,
 				34F91E7B2210EDBB00F8CBBE /* main.cpp in Sources */,
-				346602552220FF8E009FE87B /* hmm.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -271,6 +262,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+					__PSM__,
+				);
 				HEADER_SEARCH_PATHS = (
 					"/usr/local/Cellar/opencv/**",
 					/usr/local/include/eigen3/,

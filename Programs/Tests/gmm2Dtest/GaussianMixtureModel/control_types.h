@@ -27,8 +27,12 @@ extern "C" {
 #define MAX_INPUT_COVARIANCE  300
     
 #define IN_RANGE(A,X,Y) ( ( A > X ) && ( A < Y ) )
+#ifndef MIN
 #define MIN(A,B) (A<B?A:B)
+#endif
+#ifndef MAX
 #define MAX(A,B) (A>B?A:B)
+#endif  
     
 #define ALPHA 0.025//0.1
 #define BETA 1//4.
@@ -53,12 +57,16 @@ extern "C" {
 #define MAX_OBSERVATIONS        (1 << 7) // Length of history
 #define MAX_OBSERVATION_MASK    (MAX_OBSERVATIONS-1)
     
+#define MAX_STD_DEVS_TO_BE_INCLUDED_IN_BAND_CALC 3
+#define MIN_STD_DEV_SPAN_TO_REJECT_FOR_BAND_CALC 10
+#define MIN_VARIANCE_SPAN_TO_REJECT_FOR_BAND_CALC ( MIN_STD_DEV_SPAN_TO_REJECT_FOR_BAND_CALC * MIN_STD_DEV_SPAN_TO_REJECT_FOR_BAND_CALC )
+    
 #define MAX_DISTANCE 1000.f
 #define MIN_TOTAL_MIXTURE_PROBABILITY 1e-15f
 #define ABSOLUTE_MAX_CLUSTERS 300
 #define MAX_CLUSTERS 100
 #define MAX_ERROR 0.2
-#define INITIAL_VARIANCE 150//3//3
+#define INITIAL_VARIANCE 57//100//150//3//3
 #define INV_INITIAL_VARIANCE (1./INITIAL_VARIANCE)
 #define MAX_MAHALANOBIS_SQ 9//.386f
 #define MAX_MAHALANOBIS_SQ_FOR_UPDATE MAX_MAHALANOBIS_SQ//20.f
@@ -463,6 +471,13 @@ typedef struct
         if(buffer->next == buffer->first)
             buffer->first = ( buffer->next + 1 ) & MAX_OBSERVATION_MASK;
         return index;
+    }
+    
+    static double NumStdDevsFromYMean( gaussian2d_t * gaussian, double check_value )
+    {
+        double diff = fabs( gaussian->mean.b - check_value );
+        double num_std_devs = ZDIV( diff, sqrt( gaussian->covariance.d ) );
+        return num_std_devs;
     }
     
 #ifdef __cplusplus

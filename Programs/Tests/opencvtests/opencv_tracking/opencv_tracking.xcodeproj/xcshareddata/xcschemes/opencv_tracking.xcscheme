@@ -67,7 +67,7 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "small"
+            argument = "noise"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

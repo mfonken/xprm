@@ -17,7 +17,7 @@ VideoCapture cam(0);
 
 #define ROTATE_IMAGE
 
-image_test::image_test(int argc, const char * argv[])
+image_test::image_test(int argc, const char * argv[], int dimension)
 {
     no_file = true;
     Mat image,frame;
@@ -44,25 +44,39 @@ image_test::image_test(int argc, const char * argv[])
         no_file = false;
         num_frames = atoi(argv[1]);
         subdir = argv[2];
-        printf("Using gif with %d frames.\n",num_frames);
+        //printf("Using gif with %d frames.\n",num_frames);
         counter = num_frames;
+#ifdef IMAGE_PATH
+        std::string file(IMAGE_PATH);
+#else
         std::string file(IMAGE_ROOT);
         file.append("frames/");
         file.append(subdir);
         file.append("/1.png");
-        printf("opening file: %s\n", file.c_str());
+#endif
+        //printf("opening file: %s\n", file.c_str());
         image = imread(file, IMREAD_COLOR );
         if( image.empty() )                      // Check for invalid input
         {
-            cout <<  "Could not open or find the image" << std::endl ;
+            cout <<  "Could not open or find: " << file << std::endl ;
             return;
         }
     }
     
-    width = CAM_WIDTH;
-    height = CAM_HEIGHT;
-    size.width = FNL_RESIZE;
-    size.height = FNL_RESIZE;
+    if(dimension == 0)
+    {
+        width = CAM_WIDTH;
+        height = CAM_HEIGHT;
+        size.width = FNL_RESIZE;
+        size.height = FNL_RESIZE;
+    }
+    else
+    {
+        width = dimension;
+        height = dimension;
+        size.width = dimension;
+        size.height = dimension;
+    }
     
     if(!no_file)
     {
@@ -82,12 +96,12 @@ image_test::image_test(int argc, const char * argv[])
     width  = frame.cols;
     height = frame.rows;
     
-    printf("Using frame size %dx%d.\n", width, height);
+//    printf("Using frame size %dx%d.\n", width, height);
 
     live = false;
     
-    if(no_file)printf("Using webcam.\n");
-    else printf("Using file.\n");
+//    if(no_file)printf("Using webcam.\n");
+//    else printf("Using file.\n");
 }
 
 void image_test::loop(char c)
@@ -117,6 +131,9 @@ Mat image_test::getNextFrame()
             counter %= num_frames;
             counter++;
             
+#ifdef IMAGE_PATH
+            std::string file(IMAGE_PATH);
+#else            
             std::string file(IMAGE_ROOT);
             file.append("frames/");
             file.append(subdir);
@@ -127,6 +144,7 @@ Mat image_test::getNextFrame()
             file.append(to_string( counter ));
 #endif
             file.append(".png");
+#endif
             image = imread(file, IMREAD_COLOR );
             if( image.empty() )
             {
@@ -140,13 +158,13 @@ Mat image_test::getNextFrame()
             cv::Point2f center((image.cols-1)/2.0, (image.rows-1)/2.0);
             cv::Mat rot = cv::getRotationMatrix2D(center, angle, 1.0);
             // determine bounding rectangle, center not relevant
-            cv::Rect2f bbox = cv::RotatedRect(cv::Point2f(), image.size(), angle).boundingRect2f();
-            // adjust transformation matrix
-            rot.at<double>(0,2) += bbox.width/2.0 - image.cols/2.0;
-            rot.at<double>(1,2) += bbox.height/2.0 - image.rows/2.0;
+//            cv::Rect2f bbox = cv::RotatedRect(cv::Point2f(), image.size(), angle).boundingRect2f();
+//            // adjust transformation matrix
+//            rot.at<double>(0,2) += bbox.width/2.0 - image.cols/2.0;
+//            rot.at<double>(1,2) += bbox.height/2.0 - image.rows/2.0;
             
             cv::Mat dst;
-            cv::warpAffine(image, image, rot, bbox.size());
+            cv::warpAffine(image, image, rot, image.size());
 #endif
         }
         else
@@ -155,6 +173,7 @@ Mat image_test::getNextFrame()
             cam.read(image);
 #endif
         }
+        cv::threshold(image, image, 150, 255, 1);
         resize(image,frame,size);
     }
     return frame;

@@ -18,10 +18,10 @@ extern "C" {
 #include <math.h>
 #include <string.h>
     
-//#define SPOOF
+#define SPOOF
     
-#define HMM_DEBUG
-#define FSM_DEBUG
+#define HMM_DEBUG DEBUG_1
+//#define FSM_DEBUG
     
 #ifndef LOG_LEVEL
 #define LOG_LEVEL

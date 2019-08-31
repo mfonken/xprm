@@ -50,6 +50,7 @@ const global_settings_t settings_step =
 
 const char * mainMatTitle = "GMM";
 
+Vec3b black(0,0,0);
 
 global_settings_t settings_scaled;
 
@@ -248,6 +249,8 @@ void run()
         ellipse(gmmMat, center, size, angle, 0, 360, Vec3b{(uint8_t)b,0,(uint8_t)r}, 1, 5, 0);
         label_manager_t &labels = (*gmm->cluster[j]).labels;
 #ifdef REPORT_LABELS
+        putText(gmmMat,to_string(j), Point(center.x-size.width/2, center.y-size.height/2), FONT_HERSHEY_PLAIN, 1, black, 2);
+
         for(int i = 0, offset = -12; i < NUM_LABELS_TO_SHOW; i++, offset+=12)
         {
             Scalar c(colors[i][0]*0.7,colors[i][1]*0.7,colors[i][2]*0.7);
@@ -258,8 +261,11 @@ void run()
     }
     
 #ifdef USE_CPP_VERSION
+    cout << "Min out:" << GMM._min_out << endl;
+    cout << "Max out:" << GMM._max_out << endl;
     for( int j = 0; j < GMM._neurons.size(); j++)
     {
+        cout << "Cluster " << j << " cov in_out: " << GMM._neurons[j]->_covariance_in_out << endl;
 //        printf("%d m_final: %.3f [%.2f %.2f | %.2f %.2f]\n", j, (*gmm->cluster[j]).log_gaussian_norm_factor, gmm->cluster[j]->llt_in.a, gmm->cluster[j]->llt_in.b, gmm->cluster[j]->llt_in.c, gmm->cluster[j]->llt_in.d);
 #ifdef SHOW_CLUSTERS
         gaus =

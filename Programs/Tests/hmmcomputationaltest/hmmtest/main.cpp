@@ -13,7 +13,7 @@
 using namespace std;
 
 #define REPETITIONS 1
-#define DEFAULT_NU 2.75
+#define DEFAULT_NU 0.75
 #define VARIATION 0.75
 
 hidden_markov_model_t hmm;
@@ -74,26 +74,30 @@ int main(int argc, const char * argv[])
                 double B_list[NUM_STATES] = { 1 };
                 for( uint8_t i = 0; i < NUM_STATES; i++ )
                 {
+#ifdef SPOOF
+                    B_list[i] = hmm.B.expected[i][I];
+#else
                     B_list[i] = hmm.B.expected[i][ONE];
+#endif
                 }
                 KumaraswamyFunctions.GetVector( &kumaraswamy, nu, band_list, B_list, NUM_STATE_GROUPS );
                 FSMFunctions.Sys.Update( &hmm.A, band_list );
             }
         }
-#ifdef SPOOF
-        LOG_HMM(DEBUG_1, "\t ");
-        for( uint8_t j = 0; j < NUM_STATES; j++ )
-        {
-            for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
-            {
-                LOG_HMM_BARE(DEBUG_1, "%.4f%s", hmm.Gc[j][i], i&&j?" ":",");
-                if( hmm.Gm[j][i] != 0)
-                    hmm.Gc[j][i] /= hmm.Gm[j][i];
-            }
-        }
-        LOG_HMM_BARE(DEBUG_1, "\n\t\t %.4f\t\t  %.4f\n", hmm.Gm[0][0],hmm.Gm[1][1]);
-#endif
-        LOG_HMM(DEBUG_1, "\n");
+//#ifdef SPOOF
+//        LOG_HMM(DEBUG_1, "\t ");
+//        for( uint8_t j = 0; j < NUM_STATES; j++ )
+//        {
+//            for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
+//            {
+//                LOG_HMM_BARE(DEBUG_1, "%.4f%s", hmm.Gc[j][i], i&&j?" ":",");
+//                if( hmm.Gm[j][i] != 0)
+//                    hmm.Gc[j][i] /= hmm.Gm[j][i];
+//            }
+//        }
+//        LOG_HMM_BARE(DEBUG_1, "\n\t\t %.4f\t\t  %.4f\n", hmm.Gm[0][0],hmm.Gm[1][1]);
+//        LOG_HMM(DEBUG_1, "\n");
+//#endif
 #ifdef _USE_UPDATED_
          LOG_HMM(DEBUG_1, "Gamma:\n");
         /* Observation matrix update */

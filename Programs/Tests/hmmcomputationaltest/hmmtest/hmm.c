@@ -65,33 +65,74 @@ void InitializeHMM( hidden_markov_model_t * model )
 }
 
 
-void UpdateObservationMatrixHMM( hidden_markov_model_t * model )
+void UpdateObservationMatrixHMM(  hidden_markov_model_t * model )
 {
     /* Observation matrix update */
-    LOG_HMM(DEBUG_1, "Observation matrix update:\n");
+    LOG_HMM(HMM_DEBUG, "Observation matrix update:\n");
+    LOG_HMM(HMM_DEBUG, "    ");
+    for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
+        LOG_HMM_BARE(HMM_DEBUG, "  %s    ", observation_strings[i]);
+    LOG_HMM_BARE(HMM_DEBUG, "\n");
+#ifdef NORMALIZE_BY_STATE
+    /* Normalize by state */
     for( uint8_t j = 0; j < NUM_STATES; j++ )
     {
+        LOG_HMM(HMM_DEBUG, "%s ", stateString(j));
         double row_sum = 0., row_s = 0.;
         for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
         {
-            row_sum += model->G.cumulative_value[j][i];
+            row_sum += model->G.cumulative_value[i][j];
         }
         
         for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
         {
-            if( row_sum == 0. && i == j)
+            if( row_sum != 0. )
             {
-                model->B.expected[j][i] = 1.;
+                model->B.expected[i][j] = ZDIV( model->G.cumulative_value[i][j], row_sum );
             }
-            else
+            LOG_HMM_BARE(HMM_DEBUG, "|%.4f|", model->B.expected[i][j]);
+            row_s += model->B.expected[i][j];
+        }
+        LOG_HMM_BARE(HMM_DEBUG, " = %.3f\n", row_s);
+    }
+#else
+    double observation_sums[NUM_OBSERVATION_SYMBOLS] = { 0. };
+    /* Normalize by symbol */
+    for( uint8_t j = 0; j < NUM_OBSERVATION_SYMBOLS; j++ )
+    {
+        double row_sum = 0.;
+        for( uint8_t i = 0; i < NUM_STATES; i++ )
+        {
+            row_sum += model->G.cumulative_value[j][i];
+        }
+        
+        if( row_sum != 0. )
+        {
+            for( uint8_t i = 0; i < NUM_STATES; i++ )
             {
                 model->B.expected[j][i] = ZDIV( model->G.cumulative_value[j][i], row_sum );
+                //                observation_sums[j] += model->B.expected[j][i];
             }
-            LOG_HMM_BARE(DEBUG_1, "|%.4f|", model->B.expected[j][i]);
-            row_s += model->B.expected[j][i];
         }
-        LOG_HMM_BARE(DEBUG_1, " = %.3f\n", row_s);
     }
+    
+    for( uint8_t j = 0; j < NUM_STATES; j++ )
+    {
+        LOG_HMM(HMM_DEBUG, "%s ", stateString(j));
+        for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
+        {
+            LOG_HMM_BARE(HMM_DEBUG, "|%.4f|", model->B.expected[i][j]);
+            observation_sums[i] += model->B.expected[i][j];
+        }
+        LOG_HMM_BARE(HMM_DEBUG, "\n");
+    }
+    LOG_HMM(HMM_DEBUG, "    ");
+    for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
+    {
+        LOG_HMM_BARE(HMM_DEBUG, " %.3f  ", observation_sums[i]);
+    }
+    LOG_HMM_BARE(HMM_DEBUG, "\n");
+#endif
 }
 
 static double ForwardBackward( hidden_markov_model_t * model, uint8_t k, uint8_t l, uint8_t i, uint8_t j )
@@ -110,13 +151,13 @@ void BaumWelchGammaSolveHMM( hidden_markov_model_t * model )
 {
     /* Update state expectation matrix */
     uint8_t k = model->O.prev, l = model->O.curr;
-    LOG_HMM(DEBUG_1, "%4d: %s,%s  ", ++count, observation_strings[k], observation_strings[l] );
+    LOG_HMM(HMM_DEBUG, "%4d: %s,%s  ", ++count, observation_strings[k], observation_strings[l] );
     for( uint8_t i = 0; i < NUM_STATES; i++ )
     {
         for( uint8_t j = 0; j < NUM_STATES; j++ )
         {
             model->Es[k][l][i][j] = ForwardBackward(model, k, l, i, j);
-            LOG_HMM_BARE(DEBUG_1, "%.4f%s", model->Es[k][l][i][j], i&&j?" ":",");
+            LOG_HMM_BARE(HMM_DEBUG, "%.4f%s", model->Es[k][l][i][j], i&&j?" ":",");
         }
     }
     /* Update maximum expectation matarix */
@@ -161,7 +202,7 @@ void BaumWelchGammaSolveHMM( hidden_markov_model_t * model )
         model->G.maximum[k] += observation_max;
     model->G.maximum[l] += observation_max;
     
-    LOG_HMM_BARE(DEBUG_1, "\n");
+    LOG_HMM_BARE(HMM_DEBUG, "\n");
     
     UpdateObservationMatrixHMM(model);
 }
