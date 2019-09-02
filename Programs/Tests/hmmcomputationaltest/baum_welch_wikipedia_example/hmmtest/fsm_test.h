@@ -20,7 +20,7 @@ typedef enum
 
 static OBSERVATAION observations[]
 {
-    I, I, I, I, I,
+    I, I, I, I,// I,
     O, O, I
     , I, I
 };
@@ -33,16 +33,23 @@ static band_list_t spoof_bands =
     {0}
 };
 
-static transition_matrix_t spoof_map =
+static fsm_map_t spoof_map =
 {
-    { 0.5, 0.5 },
-    { 0.3, 0.7 }
+    {
+        { 0.5, 0.5 },
+        { 0.3, 0.7 }
+    },
+    NUM_STATES
 };
 
 static observation_matrix_t spoof_omap =
 {
-    { 0.3, 0.7 },
-    { 0.8, 0.2 }
+    {
+        { 0.3, 0.7 },
+        { 0.8, 0.2 }
+    },
+    0,
+    NUM_OBSERVATION_SYMBOLS
 };
 
 static double initial[NUM_STATES] =
@@ -93,12 +100,14 @@ static double initial[NUM_STATES] =
 
 static void InitTest( hidden_markov_model_t * hmm )
 {
+    hmm->T = 0;
+    hmm->N = NUM_STATE_GROUPS;
+    hmm->M = NUM_OBSERVATION_SYMBOLS;
 #ifdef SPOOF    
-    
-    memcpy(&hmm->A, &spoof_map, sizeof(transition_matrix_t));
-    memcpy(&hmm->B, &spoof_omap, sizeof(observation_matrix_t));
-    hmm->pi[0] = initial[0];
-    hmm->pi[1] = initial[1];
+    hmm->A.probabilities = spoof_map;
+    hmm->B = spoof_omap;
+    hmm->p[0] = initial[0];
+    hmm->p[1] = initial[1];
 #else
     double beta = NUM_STATE_GROUPS + 1;
     double half_beta_step = 1 / ( beta );
@@ -111,13 +120,13 @@ static void InitTest( hidden_markov_model_t * hmm )
         for( uint8_t j = 0; j < NUM_STATE_GROUPS; j++, x += 1 / beta )
         {
             double Kij = alpha * beta * pow( x, (alpha - 1) ) * pow( 1 - pow( x, alpha ), beta - 1 );
-            hmm->A[i][j] = Kij;
+            hmm->A.probabilities.map[i][j] = Kij;
             row_sum1[i] += Kij;
         }
     }
     for( uint8_t i = 0; i < NUM_STATE_GROUPS; i++ )
         for( uint8_t j = 0; j < NUM_STATE_GROUPS; j++ )
-            hmm->A[i][j] /= row_sum1[i];
+            hmm->A.probabilities.map[i][j] /= row_sum1[i];
     
     beta = NUM_OBSERVATION_SYMBOLS + 1;
     half_beta_step = 1 / ( 2 * beta );
@@ -131,17 +140,17 @@ static void InitTest( hidden_markov_model_t * hmm )
         for( uint8_t j = 0; j < NUM_OBSERVATION_SYMBOLS; j++, x += 1 / beta )
         {
             double Kij = alpha * beta * pow( x, (alpha - 1) ) * pow( 1 - pow( x, alpha ), beta - 1 );
-            hmm->B[i][j] = Kij;
+            hmm->B.expected[i][j] = Kij;
             row_sum2[i] += Kij;
         }
     }
     for( uint8_t i = 0; i < NUM_STATE_GROUPS; i++ )
         for( uint8_t j = 0; j < NUM_OBSERVATION_SYMBOLS; j++ )
-            hmm->B[i][j] /= row_sum2[i];
+            hmm->B.expected[i][j] /= row_sum2[i];
 
     double v = 1./(double)NUM_STATE_GROUPS;
     for(uint8_t i = 0; i < NUM_STATE_GROUPS; i++)
-        hmm->pi[i] = v;
+        hmm->p[i] = v;
 #endif
 }
 

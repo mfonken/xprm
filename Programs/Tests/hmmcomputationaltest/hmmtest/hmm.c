@@ -1,4 +1,3 @@
-
 //
 //  hmm.c
 //  hmmtest
@@ -9,285 +8,200 @@
 
 #include "hmm.h"
 
-uint8_t listi = 0;
-double list[1 << 8] = { 0 };
-
-void addToList(double v)
-{
-    bool has = false;
-    for(uint8_t i = 0; i < listi; i++)
-        if(v == list[i])
-            has = true;
-    if(!has)
-        list[listi++] = v;
-}
-#define ERROR 0.0001
-void searchListCombination(double v)
-{
-    double a = 0., b = 0., c = 0., d = 0., e = 0.;
-    for(uint8_t i = 0; i < listi; i++)
-    {
-        a = list[i];
-        for(uint8_t j = i; j < listi; j++)
-        {
-            b = list[j];
-            e = a + b ;
-            if( e >= v - ERROR && e <= v + ERROR)
-                printf("%.4f + %.4f = %.4f\n", a,b,e);
-            //            for(uint8_t k = j; k < listi; k++)
-            //            {
-            //                c = list[k];
-            ////                e = a + b + c;
-            ////                printf("%.4f + %.4f + %.4f = %.4f", a,b,c,e);
-            ////                if( e >= v - ERROR && e <= v + ERROR)
-            ////                    printf(" found");
-            ////                printf("\n");
-            //                for(uint8_t l = k; l < listi; l++)
-            //                {
-            //                    d = list[l];
-            //                    e = a + b + c + d;
-            //                    if( e >= v - ERROR && e <= v + ERROR)
-            //                    {
-            //                        printf("%.4f + %.4f + %.4f + %.4f = %.4f\n", a,b,c,d,e);
-            ////                        printf(" found");
-            //                    }
-            ////                    printf("\n");
-            //                }
-            //            }
-        }
-    }
-}
+#define ERROR_PADDING 0.01
+#define SOFTEN(X) (X==1?(1-ERROR_PADDING):(X==0?ERROR_PADDING:X))
 
 void InitializeHMM( hidden_markov_model_t * model )
 {
-    FSMFunctions.Sys.Initialize( &model->A );
-    memset( &model->B, 0, sizeof(observation_matrix_t) );
+    memset( model, 0, sizeof(hidden_markov_model_t) );
 }
 
-
-void UpdateObservationMatrixHMM(  hidden_markov_model_t * model )
+double UpdateAllHMM( hidden_markov_model_t * model )
 {
-    /* Observation matrix update */
-    LOG_HMM(HMM_DEBUG, "Observation matrix update:\n");
-    LOG_HMM(HMM_DEBUG, "    ");
-    for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
-        LOG_HMM_BARE(HMM_DEBUG, "  %s    ", observation_strings[i]);
-    LOG_HMM_BARE(HMM_DEBUG, "\n");
-#ifdef NORMALIZE_BY_STATE
-    /* Normalize by state */
-    for( uint8_t j = 0; j < NUM_STATES; j++ )
-    {
-        LOG_HMM(HMM_DEBUG, "%s ", stateString(j));
-        double row_sum = 0., row_s = 0.;
-        for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
-        {
-            row_sum += model->G.cumulative_value[i][j];
-        }
-        
-        for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
-        {
-            if( row_sum != 0. )
-            {
-                model->B.expected[i][j] = ZDIV( model->G.cumulative_value[i][j], row_sum );
-            }
-            LOG_HMM_BARE(HMM_DEBUG, "|%.4f|", model->B.expected[i][j]);
-            row_s += model->B.expected[i][j];
-        }
-        LOG_HMM_BARE(HMM_DEBUG, " = %.3f\n", row_s);
-    }
-#else
-    double observation_sums[NUM_OBSERVATION_SYMBOLS] = { 0. };
-    /* Normalize by symbol */
-    for( uint8_t j = 0; j < NUM_OBSERVATION_SYMBOLS; j++ )
-    {
-        double row_sum = 0.;
-        for( uint8_t i = 0; i < NUM_STATES; i++ )
-        {
-            row_sum += model->G.cumulative_value[j][i];
-        }
-        
-        if( row_sum != 0. )
-        {
-            for( uint8_t i = 0; i < NUM_STATES; i++ )
-            {
-                model->B.expected[j][i] = ZDIV( model->G.cumulative_value[j][i], row_sum );
-                //                observation_sums[j] += model->B.expected[j][i];
-            }
-        }
-    }
-    
-    for( uint8_t j = 0; j < NUM_STATES; j++ )
-    {
-        LOG_HMM(HMM_DEBUG, "%s ", stateString(j));
-        for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
-        {
-            LOG_HMM_BARE(HMM_DEBUG, "|%.4f|", model->B.expected[i][j]);
-            observation_sums[i] += model->B.expected[i][j];
-        }
-        LOG_HMM_BARE(HMM_DEBUG, "\n");
-    }
-    LOG_HMM(HMM_DEBUG, "    ");
-    for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
-    {
-        LOG_HMM_BARE(HMM_DEBUG, " %.3f  ", observation_sums[i]);
-    }
-    LOG_HMM_BARE(HMM_DEBUG, "\n");
-#endif
+    HMMFunctions.Update.Alpha( model );
+    HMMFunctions.Update.Beta( model );
+    HMMFunctions.Update.Gamma( model );
+    HMMFunctions.Update.Xi( model );
+    return HMMFunctions.Update.Probability( model );
 }
 
-static double ForwardBackward( hidden_markov_model_t * model, uint8_t k, uint8_t l, uint8_t i, uint8_t j )
+void UpdateAlphaHMM( hidden_markov_model_t * model )
 {
-    double a = model->A.probabilities.map[i][j],
-    b = model->B.expected[j][l],
-    c = model->p[i],
-    d = model->B.expected[i][k];
-    return a * b * c * d;
-}
-
-static int count = 0;
-
-#ifdef _USE_UPDATED_
-void BaumWelchGammaSolveHMM( hidden_markov_model_t * model )
-{
-    /* Update state expectation matrix */
-    uint8_t k = model->O.prev, l = model->O.curr;
-    LOG_HMM(HMM_DEBUG, "%4d: %s,%s  ", ++count, observation_strings[k], observation_strings[l] );
-    for( uint8_t i = 0; i < NUM_STATES; i++ )
+    memset( model->alpha, 0., sizeof(model->alpha) );
+    uint8_t T = model->O.length, o = GetIndexObservationBuffer( &model->O, 0 );
+    
+    /* 1. α_i(0) = π_i x B_i(y_0) */
+    for (uint8_t i = 0; i < NUM_STATES; ++i)
     {
-        for( uint8_t j = 0; j < NUM_STATES; j++ )
-        {
-            model->Es[k][l][i][j] = ForwardBackward(model, k, l, i, j);
-            LOG_HMM_BARE(HMM_DEBUG, "%.4f%s", model->Es[k][l][i][j], i&&j?" ":",");
-        }
-    }
-    /* Update maximum expectation matarix */
-    bool diff = ( k != l );
-    double observation_max = 0.;
-    for( uint8_t i = 0; i < NUM_STATES; i++ )
-    {
-        double curr_max = 0., prev_max = 0., curr = 0., diag = ForwardBackward( model, k, l, i, i );
-        if( !diff )
-            curr_max = diag;
-        else
-        {
-            // Assume l comes from i
-            for( uint8_t j = 0; j < NUM_STATES; j++ )
-            {
-                curr = ForwardBackward( model, k, l, j, i );// model->Es[k][l][j][i];
-                if( curr > curr_max )
-                    curr_max = curr;
-            }
-            
-            // Assume k comes from i
-            for( uint8_t j = 0; j < NUM_STATES; j++ )
-            {
-                curr = ForwardBackward( model, k, l, i, j );// model->Es[k][l][i][j];
-                if( curr > prev_max )
-                    prev_max = curr;
-            }
-        }
-        if( diff )
-        {
-            model->G.value[k][i] = prev_max;
-            model->G.cumulative_value[k][i] += prev_max;
-        }
-        model->G.value[l][i] = curr_max;
-        model->G.cumulative_value[l][i] += curr_max;
-        
-        SET_MAX(observation_max, curr_max);
+        model->alpha[0][i] = model->pi[i] * model->B[i][o];
     }
     
-    /* Update gamma expectation maximums */
-    if( diff )
-        model->G.maximum[k] += observation_max;
-    model->G.maximum[l] += observation_max;
-    
-    LOG_HMM_BARE(HMM_DEBUG, "\n");
-    
-    UpdateObservationMatrixHMM(model);
+    /*  2. α_i(t) = B_i(y_(t)) x ∑_(j=0)^N ( α_j(t-1) x A_{ji} ) */
+    for (uint8_t t = 1; t < T; ++t)
+    {
+        for (uint8_t i = 0; i < NUM_STATES; ++i)
+        {
+            double sum = 0;
+            for (uint8_t j = 0; j < NUM_STATES; ++j)
+            {
+                sum += model->alpha[t - 1][j] * model->A[j][i];
+            }
+            o = GetIndexObservationBuffer( &model->O, t );
+            model->alpha[t][i] = sum * model->B[i][o];
+        }
+    }
 }
-#else
-void BaumWelchGammaSolveHMM( hidden_markov_model_t * model )
+
+void UpdateBetaHMM(hidden_markov_model_t * model )
 {
-    /* Expectation matrix update */
     memset( model->beta, 0., sizeof(model->beta) );
-    memset( model->Ev, 0, sizeof(model->Ev) );
-    double state_expectation = 0.;
-    memset( &model->G, 0, sizeof(model->G));
+    uint8_t T = model->O.length, o;
     
-    /* Update state expectation matrix */
-    observation_i k = model->O.prev, l = model->O.curr;
-    printf("%4d: %s,%s  ", ++count,
-#ifdef SPOOF
-           k?"E":"N", l?"E":"N"
-#else
-           observation_strings[k], observation_strings[l]
-#endif
-           );
-    for( uint8_t i = 0; i < NUM_STATES; i++ )
+    /* 1. β_i(T-1) = 1 */
+    for (uint8_t i = 0; i < NUM_STATES; ++i)
     {
-        for( uint8_t j = 0; j < NUM_STATES; j++ )
-        {
-            state_expectation = ForwardBackward(model, k, l, i, j);
-            model->Es[k][l][i][j] = state_expectation;
-            printf("%.4f%s", model->Es[k][l][i][j], i&&j?" ":",");
-        }
-    }
-    /* Update maximum expectation matarix */
-    bool diff = ( k != l );
-    for( uint8_t i = 0; i < NUM_STATES; i++ )
-    {
-        double curr_max = 0., prev_max = 0., curr = 0.;
-        
-        if( !diff )
-        {
-            curr_max = model->Es[k][l][i][i];
-        }
-        else
-        {
-            // assume l comes from i
-            for( uint8_t j = 0; j < NUM_STATES; j++ )
-            {
-                curr = model->Es[k][l][j][i];
-                if( curr > curr_max )
-                {
-                    curr_max = curr;
-                }
-            }
-            
-            // assume k comes from i
-            for( uint8_t j = 0; j < NUM_STATES; j++ )
-            {
-                curr = model->Es[k][l][i][j];
-                if( curr > prev_max )
-                {
-                    prev_max = curr;
-                }
-            }
-        }
-        model->G[k][i] = prev_max;
-        model->G[l][i] = curr_max;
-        model->Gc[k][i] += prev_max;
-        model->Gc[l][i] += curr_max;
-        model->Ev[k][NUM_STATES] = MAX( prev_max, model->Ev[k][NUM_STATES] );
-        model->Ev[l][NUM_STATES] = MAX( curr_max, model->Ev[l][NUM_STATES] );
+        model->beta[T - 1][i] = 1.;
     }
     
-#ifdef SPOOF
-    printf("[%.4f %.4f %.4f][%.4f %.4f %.4f] | [%.4f %.4f %.4f][%.4f %.4f %.4f]",
-           model->G[0][0],model->G[0][1],model->Ev[0][2],
-           model->G[1][0],model->G[1][1],model->Ev[1][2],
-           model->Gc[0][0],model->Gc[0][1],model->Ec[0][2],
-           model->Gc[1][0],model->Gc[1][1],model->Ec[1][2]);
-#endif
-    /* Update gamma expectation mtarix */
-    for( uint8_t i = 0; i < NUM_OBSERVATION_SYMBOLS; i++ )
+    /* 2. β_i(t) = ∑_(j=0)^N ( β_j(t+1) x A_{ij} x B_j(y_{t+1}) ) */
+    for (int8_t t = T - 2; t >= 0; --t)
     {
-        for( uint8_t j = 0; j < NUM_STATES; j++ )
+        for (uint8_t i = 0; i < NUM_STATES; ++i)
         {
-            model->Gm[i][j] += model->Ev[i][NUM_STATES];
+            double sum = 0;
+            for (uint8_t j = 0; j < NUM_STATES; ++j)
+            {
+                o = GetIndexObservationBuffer( &model->O, t + 1 );
+                sum += model->beta[t + 1][j] * model->A[i][j] * model->B[j][o];
+            }
+            model->beta[t][i] = sum;
         }
     }
-    printf("\n");
 }
-#endif
+
+void UpdateGammaHMM(hidden_markov_model_t * model )
+{
+    memset( model->gamma, 0., sizeof(model->gamma) );
+    uint8_t T = model->O.length;
+    
+    /* γ_i(t) = ( α_i(t) x β_i(t) ) / ( ∑_{j=0)^N ( α_j(t) x β_j(t) ) ) */
+    for (uint8_t t = 0; t < T; ++t)
+    {
+        double sum = 0;
+        for (uint8_t i = 0; i < NUM_STATES; ++i)
+        {
+            model->gamma[t][i] = model->alpha[t][i] * model->beta[t][i];
+            sum += model->gamma[t][i];
+        }
+        for (uint8_t i = 0; i < NUM_STATES; ++i)
+        {
+            model->gamma[t][i] /= sum;
+        }
+    }
+}
+
+void UpdateXiHMM( hidden_markov_model_t * model )
+{
+    memset( model->xi, 0., sizeof(model->xi) );
+    uint8_t T = model->O.length, o;
+    
+    /* ξ_{ij}(t) = ( α_i(t) x A_{ij} x β_j(t+1) x B_j(y_{t+1}) ) / ( ∑_{i=0)^N ∑_{j=0)^N ( α_i(t) x A_{ij} x β_j(t+1) x B_j(y_{t+1}) ) ) */
+    for (uint8_t t = 0; t < T; ++t)
+    {
+        double sum = 0;
+        for (uint8_t i = 0; i < NUM_STATES; ++i)
+        {
+            for (uint8_t j = 0; j < NUM_STATES; ++j)
+            {
+                o = GetIndexObservationBuffer( &model->O, t + 1 );
+                model->xi[i][t][j] = model->alpha[t][i] * model->A[i][j] * model->beta[t + 1][j] * model->B[j][o];
+                sum += model->xi[i][t][j];
+            }
+        }
+        for (uint8_t i = 0; i < NUM_STATES; ++i)
+        {
+            for (uint8_t j = 0; j < NUM_STATES; ++j)
+            {
+                model->xi[i][t][j] /= sum;
+            }
+        }
+    }
+}
+
+double UpdateProbabilityHMM( hidden_markov_model_t * model )
+{
+    /* P(T) = ∑_{i=0}^N α_i(T) */
+    double sum = 0;
+    uint8_t T = model->O.length;
+    for (uint8_t i = 0; i < NUM_STATES; ++i)
+    {
+        sum += model->alpha[T - 1][i];
+    }
+    return sum;
+}
+
+void BaumWelchSolveHMM( hidden_markov_model_t * model, double DELTA )
+{
+    double prob_start = HMMFunctions.Update.All( model );
+    double prob_end = 0;
+    double prob_delta = 0;
+
+    uint8_t T = model->O.length, o;
+    
+    do
+    {
+        /* Update initial state probability
+         * π_i^* = γ_i(0)
+         */
+        for (uint8_t i = 0; i < NUM_STATES; ++i)
+        {
+            model->pi[i] = SOFTEN( model->gamma[0][i] );
+        }
+        
+        /* Update transition matrix
+         * A_{ij}^* = ( ∑_{t=1}^{T-1} ξ_{ij}(t) ) / ( ∑_{t=1}^{T-1} γ_i(t) )
+         */
+        for (uint8_t i = 0; i < NUM_STATES; ++i)
+        {
+            for (uint8_t j = 0; j < NUM_STATES; ++j)
+            {
+                double numerator = 0;
+                double denominator = 0;
+                for (uint8_t t = 0; t < T - 1; ++t)
+                {
+                    numerator += model->xi[i][t][j];
+                    denominator += model->gamma[t][i];
+                }
+                model->A[i][j] = SOFTEN( numerator / denominator );
+            }
+        }
+        
+        /* Update observation matrix
+         * B_i^*(v_k) = ( ∑_{t=1}^{T-1} ( 1_{y_t=v_k} x γ_i(t) ) ) / ( ∑_{t=1}^{T-1} γ_i(t) )
+         */
+        for (uint8_t j = 0; j < NUM_STATES; ++j)
+        {
+            for (uint8_t k = 0; k < NUM_OBSERVATION_SYMBOLS; ++k)
+            {
+                double numerator = 0;
+                double denominator = 0;
+                for (uint8_t t = 0; t < T; ++t )
+                {
+                    o = GetIndexObservationBuffer( &model->O, t );
+                    if( o == k )
+                    {
+                        numerator += model->gamma[t][j];
+                    }
+                    denominator += model->gamma[t][j];
+                }
+                model->B[j][k] = SOFTEN( numerator / denominator );
+            }
+        }
+
+        prob_end = HMMFunctions.Update.All( model );
+        prob_delta = prob_end - prob_start;
+        prob_start = prob_end;
+
+    } while (prob_delta > DELTA);
+}
+

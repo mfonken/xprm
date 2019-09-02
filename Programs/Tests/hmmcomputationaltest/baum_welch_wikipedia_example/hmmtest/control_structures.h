@@ -59,21 +59,52 @@ typedef struct
         max_out,
         min_out;
 } gaussian_mixture_model_t;
+
+typedef struct
+{
+    double expected[NUM_STATES][NUM_OBSERVATION_SYMBOLS];
+//    double best[NUM_OBSERVATION_SYMBOLS];
+    double gamma[NUM_STATES];
+    uint8_t num_observation_symbols;
+} observation_matrix_t;
  
-typedef double transition_matrix_t[NUM_STATES][NUM_STATES];
-typedef double observation_matrix_t[NUM_STATES][NUM_OBSERVATION_SYMBOLS];
-typedef double state_sequence_matrix[MAX_OBSERVATIONS][NUM_STATES];
+typedef double state_expectation_element_t[NUM_STATES][NUM_STATES];
+typedef state_expectation_element_t state_expectation_matrix_t[NUM_OBSERVATION_SYMBOLS][NUM_OBSERVATION_SYMBOLS];
+
+typedef double expectation_element_t[NUM_STATES+1];
+typedef expectation_element_t expectation_matrix_t[NUM_OBSERVATION_SYMBOLS];
+    
+typedef double expectation_vector_t[NUM_OBSERVATION_SYMBOLS][NUM_STATES+1];
+
+typedef double gamma_matrix_t[NUM_OBSERVATION_SYMBOLS][NUM_STATES];
     
 typedef struct
 {
-    transition_matrix_t     A;                   // Transition matrix
+    double                  p[NUM_STATES];       // Initial probabilities
+    fsm_system_t            A;                   // Transition matrix
     observation_matrix_t    B;                   // Observation matrix
     observation_buffer_t    O;                   // Observation sequence
-    double                  pi[NUM_STATES];      // Initial state probabilities
-    state_sequence_matrix   alpha;               // Forward solve vector
-    state_sequence_matrix   beta;                // Backward solve vector
-    state_sequence_matrix   gamma;               // Gamma solve vector
-    state_sequence_matrix   xi[NUM_STATES];      // Xi solve matrix
+    
+    state_expectation_matrix_t  Es;             // State expectation matrix
+    expectation_matrix_t    Em;                 // Maximum expectation matrix
+    expectation_vector_t    Ev;
+    expectation_vector_t    Ec;
+    gamma_matrix_t          G;                  // Gamma expectation matrix
+    gamma_matrix_t          Gc;                 // Gamma expectation cumulator matrix
+    gamma_matrix_t          Gm;                 // Gamma expectation cumulator matrix
+    
+    double                  K[NUM_STATES];       // Kumaraswamy boundaries
+    double                  alpha[NUM_STATES];       // Forward solve vector
+    double                  beta[NUM_STATES];       // Backward solve vector
+    
+    uint8_t
+        T, // Number of observations
+        N, // Number of states
+        M; // Number of observation symbols
+    uint8_t
+        best_state;
+    double
+        best_confidence;
 } hidden_markov_model_t;
 
 //typedef struct

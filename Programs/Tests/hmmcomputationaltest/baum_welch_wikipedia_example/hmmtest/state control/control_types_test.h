@@ -34,7 +34,7 @@ extern "C" {
 #define NUM_OBSERVATION_SYMBOLS 5    // Should be max number of clusters in GMM
 #endif
     
-#define MAX_OBSERVATIONS        (1 << 4) // Length of history
+#define MAX_OBSERVATIONS        (1 << 5) // Length of history
 #define MAX_OBSERVATION_MASK    (MAX_OBSERVATIONS-1)
     
 #define MAX_DISTANCE 10000.f
@@ -382,55 +382,17 @@ extern "C" {
         return num;
     }
     
-    
     typedef struct
     {
-        uint8_t
-        data[MAX_OBSERVATIONS], length;
-        struct { uint8_t next, first, last; } index;
-        struct { uint8_t curr, prev; } value;
+        uint8_t curr, prev;
     } observation_buffer_t;
     
-    static uint8_t PushToObservationBuffer( observation_buffer_t * buffer, uint8_t v )
+    static void reportObservation( observation_buffer_t * buffer, uint8_t v )
     {
-        buffer->value.prev = buffer->value.curr;
-        buffer->value.curr = v;
-        
-        buffer->data[buffer->index.next] = buffer->value.curr;
-        buffer->index.next = ( ( buffer->index.next + 1 ) & MAX_OBSERVATION_MASK );
-        
-        if( buffer->index.next == buffer->index.first )
-        { // Update first if looped (filled)
-            buffer->index.last = buffer->index.next;
-            buffer->index.first = ( ( buffer->index.next + 1 ) & MAX_OBSERVATION_MASK );
-        }
-        else
-        {
-            buffer->length++;
-        }
-        return buffer->index.last;
+        buffer->prev = buffer->curr;
+        buffer->curr = v;
     }
-    static uint8_t PullFromObservationBuffer( observation_buffer_t * buffer )
-    {
-        if( buffer->index.next == buffer->index.first ) return -1;
-        buffer->index.first = ( ( buffer->index.first + 1 ) & MAX_OBSERVATION_MASK );
-        buffer->length--;
-        return buffer->data[buffer->index.first];
-    }
-    static uint8_t GetLengthObservationBuffer( observation_buffer_t * buffer )
-    {
-        uint8_t l = buffer->index.next - buffer->index.first;
-        if( !l ) l = MAX_OBSERVATIONS;
-        buffer->length = l;
-        return l;
-    }
-    static uint8_t GetIndexObservationBuffer( observation_buffer_t * buffer, uint8_t i )
-    {
-        uint8_t l = buffer->length;// GetLengthObservationBuffer( buffer );
-        if( i > l ) return -1;
-        uint8_t io = ( ( buffer->index.first + i ) & MAX_OBSERVATION_MASK );
-        return buffer->data[io];
-    }
+    
     typedef uint8_t observation_i;
     typedef uint8_t state_i;
     
