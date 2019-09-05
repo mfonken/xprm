@@ -236,6 +236,15 @@ extern "C" {
         mat2x2 covariance;
     } gaussian2d_t;
     
+    static double getProbabilityFromGaussian( gaussian1d_t * a, double v )
+    {
+        double two_std_dev = 2. * a->std_dev,
+            diff = ( v - a->mean ),
+            e = safe_exp( - ( diff * diff ) / two_std_dev ),
+            f = sqrt( M_PI * two_std_dev );
+        return ( e / f );
+    }
+    
     static gaussian1d_t getGaussian1dFrom2dY( gaussian2d_t * a )
     {
         return (gaussian1d_t){ a->mean.b, a->covariance.d };
@@ -385,8 +394,9 @@ extern "C" {
     
     typedef struct
     {
-        uint8_t
-        data[MAX_OBSERVATIONS], length;
+        double
+        data[MAX_OBSERVATIONS];
+        uint8_t length;
         struct { uint8_t next, first, last; } index;
         struct { uint8_t curr, prev; } value;
     } observation_buffer_t;

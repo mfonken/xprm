@@ -25,19 +25,16 @@ int main(int argc, const char * argv[])
     while(1)
     {
         int n = sizeof(observations)/sizeof(observations[0]);
-        PushToObservationBuffer(&hmm.O, observations[0]);
         for( int r = 0; r < REPETITIONS; r++ )
         {
-            for( uint8_t i = 1; i < n; i++ )
+            for( uint8_t i = 0; i < n; i++ )
             {
                 PushToObservationBuffer(&hmm.O, observations[i]);
-//                HMMFunctions.BaumWelchSolve( &hmm, DELTA );
-//                PullFromObservationBuffer(&hmm.O);
             }
-            
             HMMFunctions.BaumWelchSolve( &hmm, DELTA );
         }
-        while(1);
+        HMMFunctions.Print( &hmm );
+         while(1);
     }
     return 0;
 }

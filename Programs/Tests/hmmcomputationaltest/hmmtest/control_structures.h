@@ -25,43 +25,11 @@ typedef struct
     stability_t     stability;
     fsm_map_t       probabilities;
 } fsm_system_t;
-    
-typedef struct
-{
-    gaussian2d_t
-        gaussian_in,
-        gaussian_out;
-    double
-        mahalanobis_sq,
-        log_gaussian_norm_factor,
-        probability_condition_input,
-        score, weight;
-    mat2x2
-        inv_covariance_in,
-        llt_in;
-    label_manager_t labels;
-    double max_y, min_y;
-    uint8_t primary_id, secondary_id;
-} gaussian_mixture_cluster_t;
-
-typedef struct
-{
-    gaussian_mixture_cluster_t
-        cluster[MAX_CLUSTERS];
-    uint8_t
-        num_clusters,
-        selected_cluster;
-    double
-        initial_variance;
-    vec2
-        min_in,
-        max_in,
-        max_out,
-        min_out;
-} gaussian_mixture_model_t;
  
+    
+typedef gaussian1d_t emission_t;
 typedef double transition_matrix_t[NUM_STATES][NUM_STATES];
-typedef double observation_matrix_t[NUM_STATES][NUM_OBSERVATION_SYMBOLS];
+typedef emission_t observation_matrix_t[NUM_STATES];
 typedef double state_sequence_matrix[MAX_OBSERVATIONS][NUM_STATES];
     
 typedef struct
@@ -75,6 +43,11 @@ typedef struct
     state_sequence_matrix   gamma;               // Gamma solve vector
     state_sequence_matrix   xi[NUM_STATES];      // Xi solve matrix
 } hidden_markov_model_t;
+
+static double GetProbabilityFromEmission( emission_t * e, double v )
+{
+    return getProbabilityFromGaussian( (gaussian1d_t *)e, v );
+}
 
 //typedef struct
 //{ /* Predictive State Model */

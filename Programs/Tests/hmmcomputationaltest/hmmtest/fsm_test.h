@@ -12,17 +12,25 @@
 #include "hmm.h"
 
 #ifdef SPOOF
-typedef enum
-{
-    I = 0,
-    O
-} OBSERVATAION;
+//typedef enum
+//{
+//    I = 0,
+//    O
+//} OBSERVATAION;
+//
+//static OBSERVATAION observations[]
+//{
+//    I, I, I, I, I,
+//    O, O, I
+//    , I, I
+//};
 
-static OBSERVATAION observations[]
+static double observations[]
 {
-    I, I, I, I, I,
-    O, O, I
-    , I, I
+    0.1, 0.1, 0, 2, 1, 1.1, 0.9, 0, 0, 0
+//    I, I, I, I, I,
+//    O, O, I
+//    , I, I
 };
 
 static observation_buffer_t spoof_observataions;
@@ -41,9 +49,15 @@ static transition_matrix_t spoof_map =
 
 static observation_matrix_t spoof_omap =
 {
-    { 0.3, 0.7 },
-    { 0.8, 0.2 }
+    { 0.7, 0.1 },
+    { 0.2, 0.1 }
 };
+
+//static observation_matrix_t spoof_omap =
+//{
+//    { 0.3, 0.7 },
+//    { 0.8, 0.2 }
+//};
 
 static double initial[NUM_STATES] =
 {
