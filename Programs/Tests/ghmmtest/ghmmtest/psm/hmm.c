@@ -13,9 +13,13 @@
 #define HMM_ERROR_PADDING 0.01
 #define SOFTEN(X) (X==1?(1-HMM_ERROR_PADDING):(X==0?HMM_ERROR_PADDING:X))
 
-void InitializeHMM( hidden_markov_model_t * model )
+void InitializeHMM( hidden_markov_model_t * model, transition_matrix_t * A, observation_matrix_t * B, state_vector_t * pi )
 {
     memset( model, 0, sizeof(hidden_markov_model_t) );
+    memcpy( &model->A, A, sizeof(transition_matrix_t) );
+    memcpy( &model->B, B, sizeof(observation_matrix_t) );
+    memcpy( &model->pi, pi, sizeof(state_vector_t) );
+    
 }
 
 uint8_t ReportObservationToHMM( hidden_markov_model_t * model, hmm_observation_t o )
@@ -133,6 +137,7 @@ void UpdateXiHMM( hidden_markov_model_t * model )
                 sum += model->xi[i][t][j];
             }
         }
+        if( sum == 0 ) continue;
         for( uint8_t i = 0; i < NUM_STATES; i++ )
             for( uint8_t j = 0; j < NUM_STATES; j++ )
                 model->xi[i][t][j] /= sum;
@@ -176,7 +181,7 @@ void UpdateTransitionProbabilitiesHMM( hidden_markov_model_t * model )
                 n += model->xi[i][t][j];
                 d += model->gamma[t][i];
             }
-            model->A[i][j] = SOFTEN( n / d );
+            model->A[i][j] = SOFTEN( ZDIV( n, d ) );
         }
     }
 }
@@ -189,11 +194,12 @@ void UpdateEmissionProbabilitiesHMM( hidden_markov_model_t * model )
     
     uint8_t T = model->O.length;
     double gamma_sum = 0., inv_gamma_sum;
+    hmm_observation_t o;
 #ifdef HMM_2D_EMISSIONS
-    vec2 mean_diff = { 0. }, mean_sum = { 0. }, working_vec, o;
+    vec2 mean_diff = { 0. }, mean_sum = { 0. }, working_vec;
     mat2x2 cov_est = { 0. }, cov_sum = { 0. }, working_mat;
 #else
-    double mean_diff = 0., sum = 0., o;
+    double mean_diff = 0., sum = 0.;
 #endif
 
     for( uint8_t i = 0; i < NUM_STATES; i++ )
@@ -217,10 +223,10 @@ void UpdateEmissionProbabilitiesHMM( hidden_markov_model_t * model )
             gamma_sum += model->gamma[t][i];
         }
 #ifdef HMM_2D_EMISSIONS
-        inv_gamma_sum = 1 / gamma_sum;
+        inv_gamma_sum = ZDIV( 1, gamma_sum );
         MatVec.Vec2.ScalarMultiply( inv_gamma_sum, &mean_sum, &model->B[i].mean );
 #else
-        model->B[i].mean = SOFTEN( sum / gamma_sum );
+        model->B[i].mean = SOFTEN( ZDIV( sum, gamma_sum ) );
 #endif
         
         /* ∑_i = ( ∑_{t=1}^T γ_i(t) x [y(t) - µ_i][y(t) - µ_i]^T ) / ( ∑_{t=1}^T γ_i(t) ) */
@@ -245,7 +251,7 @@ void UpdateEmissionProbabilitiesHMM( hidden_markov_model_t * model )
 #ifdef HMM_2D_EMISSIONS
         MatVec.Mat2x2.ScalarMultiply( gamma_sum, &cov_sum, &model->B[i].covariance );
 #else
-        model->B[i].std_dev = SOFTEN( sum / gamma_sum );
+        model->B[i].std_dev = SOFTEN( ZDIV( sum, gamma_sum ) );
 #endif
     }
 #else
@@ -299,7 +305,10 @@ void PrintHMM( hidden_markov_model_t * model )
 #else
         LOG_HMM_BARE(HMM_DEBUG, "%.4f,%.4f", model->B[i].mean, model->B[i].std_dev);
 #endif
-        LOG_HMM_BARE(HMM_DEBUG, "]\n");
+        LOG_HMM_BARE(HMM_DEBUG, "]");
+        if( !i ) { LOG_HMM_BARE(HMM_DEBUG, " \tP: "); }
+        else { LOG_HMM_BARE(HMM_DEBUG, " \t   "); }
+        LOG_HMM_BARE(HMM_DEBUG, "[%.4f]\n", model->pi[i]);
     }
     LOG_HMM_BARE(HMM_DEBUG, "\n");
 }

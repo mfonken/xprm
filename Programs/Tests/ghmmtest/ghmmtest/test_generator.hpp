@@ -26,12 +26,14 @@ class Set
     default_random_engine generator;
     
 public:
+    void Generate( int, gaussian1d_t );
     void Generate( int, gaussian1d_t, gaussian1d_t );
     void Generate( gaussian1d_t, gaussian1d_t );
     void Push( double, double );
     pair<double, double> Pull( void );
     pair<double, double> Pop( void );
     void Reset( void );
+    int Length( void );
 };
 
 #endif /* test_generator_hpp */
