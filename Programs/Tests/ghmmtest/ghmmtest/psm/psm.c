@@ -10,12 +10,11 @@
 
 #include "psm.h"
 
-void InitializePSM( psm_t * model, transition_matrix_t * A, observation_matrix_t * B, state_vector_t * pi )
+void InitializePSM( psm_t * model )
 {
     GMMFunctions.Model.Initialize( &model->gmm );
-    HMMFunctions.Initialize( &model->hmm, A, B, pi );
+    HMMFunctions.Initialize( &model->hmm );
     model->fsm.P = &model->hmm.A;
-    KumaraswamyFunctions.Initialize( &model->kumaraswamy, NUM_STATES + 1 );
     model->state_bands.length = NUM_STATE_GROUPS;
     
 #ifdef __PSM__
@@ -69,8 +68,8 @@ void UpdateStateIntervalsPSM( psm_t * model, floating_t nu )
         observation_set[i] = cumulative;
         LOG_PSM_BARE(PSM_DEBUG, "[%.4f]", current);
     }
-    LOG_PSM_BARE(PSM_DEBUG, "\n");
-    KumaraswamyFunctions.GetVector( &model->kumaraswamy, nu, model->state_intervals, observation_set, NUM_STATE_GROUPS );
+//    LOG_PSM_BARE(PSM_DEBUG, "\n");
+//    KumaraswamyFunctions.GetVector( &model->kumaraswamy, nu, model->state_intervals, observation_set, NUM_STATE_GROUPS );
     
     LOG_PSM(PSM_DEBUG, "Update:");
     for( uint8_t i = 0; i < NUM_STATE_GROUPS; i++ )
@@ -214,7 +213,7 @@ void DiscoverStateBandsPSM( psm_t * model, band_list_t * band_list )
         { /* Always update band on last cluster */
             PSMFunctions.UpdateStateBand( band_list, current_band_id, num_clusters_in_band, &band_gaussian );
         }
-
+        
         processed_clusters |= 1 << min_id;
     }
     for( uint8_t i = current_band_id+1; i < band_list->length; i++ )
@@ -247,10 +246,10 @@ uint8_t FindMostLikelyHiddenStatePSM( psm_t * model, uint8_t observation_state, 
 void UpdateBestClusterPSM( psm_t * model, band_list_t * band_list )
 {
     floating_t
-        lower_bound = band_list->band[model->best_state].lower_boundary,
-        upper_bound = ( model->best_state + 1 >= NUM_STATE_GROUPS ) ?
-            MAX_THRESH : band_list->band[model->best_state + 1].lower_boundary,
-        best_cluster_weight = 0.;
+    lower_bound = band_list->band[model->best_state].lower_boundary,
+    upper_bound = ( model->best_state + 1 >= NUM_STATE_GROUPS ) ?
+    MAX_THRESH : band_list->band[model->best_state + 1].lower_boundary,
+    best_cluster_weight = 0.;
     int8_t best_cluster_id = -1;
     for( uint8_t i = 0; i < model->gmm.num_clusters; i++ )
     {

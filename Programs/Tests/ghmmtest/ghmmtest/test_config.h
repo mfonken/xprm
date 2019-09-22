@@ -80,4 +80,8 @@ printf("\t"); printf(__VA_ARGS__); }
 #define BOUND(X,MIN,MAX)        ( ( X < MIN ) ? MIN : BOUNDU( X, MAX ) ) // Bound in upper and lower range
 #endif
 
+#define DEFAULT_KUMARASWAMY_BANDS   { 0.25, 0.5, 0.65, 1.0 }
+#define DEFAULT_OBSERVATION_LIST    { { 25., 10. }, { 50., 10. }, { 75., 10.}, { 100., 10. } }
+#define DEFAULT_STATE_VECTOR        { 0.5, 0.25, 0.2, 0.05 }
+
 #endif /* test_config_h */

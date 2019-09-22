@@ -72,6 +72,7 @@ extern "C" {
         state_sequence_matrix   gamma;               // Gamma solve vector
         state_sequence_matrix   xi[NUM_STATES];      // Xi solve matrix
         double                  P;                   // Latest probability
+        kumaraswamy_t           k_dist;              // Kumaraswamy distribution
     } hidden_markov_model_t;
     
     static floating_t GetProbabilityFromEmission( emission_t * e, hmm_observation_t v )

@@ -34,9 +34,8 @@ void Set::Push(double a, double b)
 }
 pair<double, double> Set::Pull(void)
 {
-    if( V.size() > first_index )
-        first_index++;
-    return V[first_index];
+    if( V.size() == first_index ) first_index--;
+    return V[first_index++];
 }
 pair<double, double> Set::Pop(void)
 {
@@ -52,5 +51,5 @@ void Set::Reset(void)
 }
 int Set::Length(void)
 {
-    return (int)V.size()-1;
+    return (int)V.size();
 }

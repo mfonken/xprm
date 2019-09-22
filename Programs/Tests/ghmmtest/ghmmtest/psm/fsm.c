@@ -147,7 +147,7 @@ void UpdateFSMState( fsm_system_t * sys )
 void PrintFSMMap( transition_matrix_t * P, state_t s )
 {
 #ifdef FSM_DEBUG
-    LOG_FSM(FSM_DEBUG_2, "\t\t\t  ");
+    LOG_FSM(FSM_DEBUG_2, "\tn+1   n-> " );// "\t\t\t  ");
     for( uint8_t i = 0; i < NUM_STATES; i++ ) LOG_FSM_BARE(FSM_DEBUG_2, "%s-[%d]\t  ", stateString((uint8_t)i), i);
     LOG_FSM_BARE(FSM_DEBUG_2, "\n");
     for( uint8_t i = 0, j; i < NUM_STATES; i++ )

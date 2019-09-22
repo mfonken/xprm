@@ -19,7 +19,8 @@ extern "C" {
     
 #include "gmm.h"
     
-    void InitializeHMM(     hidden_markov_model_t *, transition_matrix_t *, observation_matrix_t *, state_vector_t * );
+    void InitializeHMM(     hidden_markov_model_t * ); //, transition_matrix_t *, observation_matrix_t *, state_vector_t * );
+    void InitializeTransitionMatrixHMM( hidden_markov_model_t * );
     uint8_t ReportObservationToHMM( hidden_markov_model_t *, hmm_observation_t );
     void BaumWelchSolveHMM( hidden_markov_model_t *, double );
     void PrintHMM(          hidden_markov_model_t * );
@@ -47,7 +48,8 @@ extern "C" {
     } hidden_markov_model_update_functions;
     typedef struct
     {
-        void   (*Initialize)(         hidden_markov_model_t *, transition_matrix_t *, observation_matrix_t *, state_vector_t * );
+        void   (*Initialize)(         hidden_markov_model_t * );//, transition_matrix_t *, observation_matrix_t *, state_vector_t * );
+        void   (*InitializeTransitionMatrix)( hidden_markov_model_t * );
         uint8_t (*ReportObservation)( hidden_markov_model_t *, hmm_observation_t );
         void   (*BaumWelchSolve)(     hidden_markov_model_t *, double );
         void   (*Print)(              hidden_markov_model_t * );
@@ -57,6 +59,7 @@ extern "C" {
     static const hidden_markov_model_functions_t HMMFunctions =
     {
         .Initialize = InitializeHMM,
+        .InitializeTransitionMatrix = InitializeTransitionMatrixHMM,
         .ReportObservation = ReportObservationToHMM,
         .BaumWelchSolve = BaumWelchSolveHMM,
         .Print = PrintHMM,
