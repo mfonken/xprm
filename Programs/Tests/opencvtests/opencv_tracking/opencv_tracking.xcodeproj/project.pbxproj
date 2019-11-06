@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		341D82FE23651FB900915816 /* Info.plist in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34373C2F23651AB1008FC8FC /* Info.plist */; };
 		3492B90022F90C1000BD287A /* centroid.c in Sources */ = {isa = PBXBuildFile; fileRef = 3492B8FE22F90C1000BD287A /* centroid.c */; };
 		34A9BE09225AAB6000F0C21F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34A9BE07225AAB6000F0C21F /* main.cpp */; };
 		34A9BE1B225B015200F0C21F /* image_utility.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34A9BE1A225B015200F0C21F /* image_utility.cpp */; };
@@ -15,16 +16,18 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		34A9BDF9225AAB4000F0C21F /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
+			buildActionMask = 12;
+			dstPath = "";
+			dstSubfolderSpec = 16;
 			files = (
+				341D82FE23651FB900915816 /* Info.plist in CopyFiles */,
 			);
-			runOnlyForDeploymentPostprocessing = 1;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		34373C2F23651AB1008FC8FC /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3492B8FE22F90C1000BD287A /* centroid.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = centroid.c; sourceTree = "<group>"; };
 		3492B8FF22F90C1000BD287A /* centroid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = centroid.h; sourceTree = "<group>"; };
 		34A9BDFB225AAB4000F0C21F /* opencv_tracking */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = opencv_tracking; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -64,6 +67,7 @@
 		34A9BDFD225AAB4000F0C21F /* opencv_tracking */ = {
 			isa = PBXGroup;
 			children = (
+				34373C2F23651AB1008FC8FC /* Info.plist */,
 				3492B8FF22F90C1000BD287A /* centroid.h */,
 				3492B8FE22F90C1000BD287A /* centroid.c */,
 				34A9BE19225B015200F0C21F /* image_utility.hpp */,
@@ -255,6 +259,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				HEADER_SEARCH_PATHS = "/usr/local/Cellar/opencv/**";
+				INFOPLIST_FILE = /Users/matthew/Desktop/marbl/Techincal/xprm/Programs/Tests/opencvtests/opencv_tracking/opencv_tracking/Info.plist;
 				LIBRARY_SEARCH_PATHS = "/usr/local/Cellar/opencv/**";
 				OTHER_LDFLAGS = (
 					"-I/usr/local/Cellar/opencv/4.0.1/include/opencv4/opencv2",
@@ -311,6 +316,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				HEADER_SEARCH_PATHS = "/usr/local/Cellar/opencv/**";
+				INFOPLIST_FILE = /Users/matthew/Desktop/marbl/Techincal/xprm/Programs/Tests/opencvtests/opencv_tracking/opencv_tracking/Info.plist;
 				LIBRARY_SEARCH_PATHS = "/usr/local/Cellar/opencv/**";
 				OTHER_LDFLAGS = (
 					"-I/usr/local/Cellar/opencv/4.0.1/include/opencv4/opencv2",

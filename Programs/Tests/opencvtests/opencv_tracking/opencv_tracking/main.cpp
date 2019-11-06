@@ -35,13 +35,33 @@ static inline double timeDiff( struct timeval a, struct timeval b ) { return ((b
 int num_orders = 1;
 int orders[] = { 200, 2000, 10000, 100000 };
 
-int dimensions[] = { 2000, 1750, 1500, 1250, 1000, 750, 500, 250, 100 };// 100, 250, 500, 750, 1000, 1250, 1500, 1750, 2000 };
+int dimensions[] = { 100, 250 };//500, 750, 1000, 1250, 1500, 1750, 2000 }; //2000, 1750, 1500, 1250, 1000, 750, 500, 250, 100 };
 int num_dimensions = sizeof(dimensions)/ sizeof(dimensions[0]);
 
 using namespace cv;
 using namespace std;
 
 ofstream file;
+
+#ifdef CAMERA_ID
+VideoCapture cam(CAMERA_ID);
+#endif
+
+void InitCamera()
+{
+    cam.set(CAP_PROP_FRAME_WIDTH,  CAM_WIDTH);
+    cam.set(CAP_PROP_FRAME_HEIGHT, CAM_HEIGHT);
+    cam.set(CAP_PROP_FPS,          CAM_FRAME_RATE);
+    
+    if (!cam.isOpened())
+    {
+        printf("Could not open or find camera.\n");
+        while(1);
+        return;
+    }
+    
+    printf("Initializing Camera: %dx%d @ %d fps.\n", (int)cam.get(CAP_PROP_FRAME_WIDTH), (int)cam.get(CAP_PROP_FRAME_HEIGHT), (int)cam.get(CAP_PROP_FPS));
+}
 
 // Convert to string
 #define SSTR( x ) static_cast< std::ostringstream & >( \
@@ -61,9 +81,9 @@ void run(int argc, const char *argv[], int dimension)
     // NOTE : GOTURN implementation is buggy and does not work.
     string trackerTypes[] =
     {
-//        "MEDIANFLOW",
+        "MEDIANFLOW",
 //        "CENTROIDS",
-        "CSRT",
+//        "CSRT",
 //        "BOOSTING",
 //        "MIL",
 //        "KCF",
@@ -84,8 +104,11 @@ void run(int argc, const char *argv[], int dimension)
             Rect A((double)dimension/2., (double)dimension/2.,1,1);
             // Read first frame
             Mat frame;
+#ifdef CAMERA_ID
+            cam >> frame;
+#else
             frame = util.getNextFrame();
-            
+#endif
             vector<Scalar> colors;
             
             // Create a tracker
@@ -313,6 +336,10 @@ int main(int argc, const char *argv[])
     file.open(FILE_NAME);
     file << "Algorithm,Dimension(px),Iterations,Total Time(s),Avg. Time(ms), Avg. Diff.(%), Std. Dev. Diff. (%)\n";
     file.close();
+    
+#ifdef CAMERA_ID
+    InitCamera();
+#endif
     
     for(uint8_t i = 0; i < num_dimensions; i++)
     {

@@ -13,12 +13,12 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		346AB1ED227EAEC90051350E /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
+			buildActionMask = 12;
+			dstPath = "";
+			dstSubfolderSpec = 16;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 1;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -241,6 +241,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				HEADER_SEARCH_PATHS = "/usr/local/Cellar/opencv/**";
+				INFOPLIST_FILE = /Users/matthew/Desktop/marbl/Techincal/xprm/Programs/Tests/opencvtests/threshtest/threshtest/Info.plist;
 				LIBRARY_SEARCH_PATHS = "/usr/local/Cellar/opencv/**";
 				OTHER_LDFLAGS = (
 					"-I/usr/local/Cellar/opencv/4.0.1/include/opencv4/opencv2",
@@ -297,6 +298,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				HEADER_SEARCH_PATHS = "/usr/local/Cellar/opencv/**";
+				INFOPLIST_FILE = /Users/matthew/Desktop/marbl/Techincal/xprm/Programs/Tests/opencvtests/threshtest/threshtest/Info.plist;
 				LIBRARY_SEARCH_PATHS = "/usr/local/Cellar/opencv/**";
 				OTHER_LDFLAGS = (
 					"-I/usr/local/Cellar/opencv/4.0.1/include/opencv4/opencv2",

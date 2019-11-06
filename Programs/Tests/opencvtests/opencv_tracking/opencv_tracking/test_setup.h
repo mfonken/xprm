@@ -13,7 +13,8 @@
 
 /* DEBUGGING */
 //#define MAIN_DEBUG
-//#define SHOW_IMAGES
+#define SHOW_IMAGES
+#define CAMERA_ID 0
 
 /* IMAGE PROCESSING */
 #define IMAGE_ROOT "/Users/matthew/Desktop/PersonalResources/TestImages"
@@ -24,6 +25,7 @@
 #define IMAGE_PATH IMAGE_ROOT IMAGE_GROUP IMAGE_NAME
 #define CAM_WIDTH   640
 #define CAM_HEIGHT  320
+#define CAM_FRAME_RATE 30
 
 #define THRESHOLD   150
 #define BRIGHTNESS  100
