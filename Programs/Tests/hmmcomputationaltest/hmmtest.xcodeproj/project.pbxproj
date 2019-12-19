@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		34944C702221132600570110 /* fsm.c in Sources */ = {isa = PBXBuildFile; fileRef = 34944C6C2221132600570110 /* fsm.c */; };
-		34AFF3DA222B1EFD00D3923A /* hmm.c in Sources */ = {isa = PBXBuildFile; fileRef = 34AFF3D8222B1EFD00D3923A /* hmm.c */; };
-		34F91E7B2210EDBB00F8CBBE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34F91E7A2210EDBB00F8CBBE /* main.cpp */; };
+		34E3FF4523A87B150074F3E6 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34E3FF3A23A87B140074F3E6 /* main.cpp */; };
+		34E3FF4623A87B150074F3E6 /* hmm.c in Sources */ = {isa = PBXBuildFile; fileRef = 34E3FF3C23A87B140074F3E6 /* hmm.c */; };
+		34E3FF4723A87B150074F3E6 /* fsm.c in Sources */ = {isa = PBXBuildFile; fileRef = 34E3FF4223A87B140074F3E6 /* fsm.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,16 +25,17 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		34944C6A222106D800570110 /* fsm_test.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fsm_test.h; sourceTree = "<group>"; };
-		34944C6B2221132600570110 /* control_types_test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = control_types_test.h; sourceTree = "<group>"; };
-		34944C6C2221132600570110 /* fsm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fsm.c; sourceTree = "<group>"; };
-		34944C6D2221132600570110 /* fsm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fsm.h; sourceTree = "<group>"; };
-		34944C6E2221132600570110 /* fsm_support.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fsm_support.h; sourceTree = "<group>"; };
-		34AFF3D6222B1EFD00D3923A /* control_structures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = control_structures.h; path = hmmtest/control_structures.h; sourceTree = SOURCE_ROOT; };
-		34AFF3D8222B1EFD00D3923A /* hmm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = hmm.c; path = hmmtest/hmm.c; sourceTree = SOURCE_ROOT; };
-		34AFF3D9222B1EFD00D3923A /* hmm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hmm.h; path = hmmtest/hmm.h; sourceTree = SOURCE_ROOT; };
+		34E3FF3A23A87B140074F3E6 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		34E3FF3B23A87B140074F3E6 /* fsm_test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fsm_test.h; sourceTree = "<group>"; };
+		34E3FF3C23A87B140074F3E6 /* hmm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hmm.c; sourceTree = "<group>"; };
+		34E3FF3D23A87B140074F3E6 /* hmm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hmm.h; sourceTree = "<group>"; };
+		34E3FF3F23A87B140074F3E6 /* control_types_test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = control_types_test.h; sourceTree = "<group>"; };
+		34E3FF4023A87B140074F3E6 /* fsm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fsm.h; sourceTree = "<group>"; };
+		34E3FF4123A87B140074F3E6 /* fsm_support.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fsm_support.h; sourceTree = "<group>"; };
+		34E3FF4223A87B140074F3E6 /* fsm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fsm.c; sourceTree = "<group>"; };
+		34E3FF4323A87B140074F3E6 /* control_structures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = control_structures.h; sourceTree = "<group>"; };
+		34E3FF4423A87B150074F3E6 /* data.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = data.h; sourceTree = "<group>"; };
 		34F91E772210EDBB00F8CBBE /* hmmtest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = hmmtest; sourceTree = BUILT_PRODUCTS_DIR; };
-		34F91E7A2210EDBB00F8CBBE /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -48,16 +49,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		34AFF3D5222B1EF200D3923A /* state control */ = {
+		34E3FF3E23A87B140074F3E6 /* state control */ = {
 			isa = PBXGroup;
 			children = (
-				34944C6B2221132600570110 /* control_types_test.h */,
-				34AFF3D6222B1EFD00D3923A /* control_structures.h */,
-				34944C6E2221132600570110 /* fsm_support.h */,
-				34944C6D2221132600570110 /* fsm.h */,
-				34944C6C2221132600570110 /* fsm.c */,
-				34AFF3D9222B1EFD00D3923A /* hmm.h */,
-				34AFF3D8222B1EFD00D3923A /* hmm.c */,
+				34E3FF3F23A87B140074F3E6 /* control_types_test.h */,
+				34E3FF4023A87B140074F3E6 /* fsm.h */,
+				34E3FF4123A87B140074F3E6 /* fsm_support.h */,
+				34E3FF4223A87B140074F3E6 /* fsm.c */,
 			);
 			path = "state control";
 			sourceTree = "<group>";
@@ -81,9 +79,13 @@
 		34F91E792210EDBB00F8CBBE /* hmmtest */ = {
 			isa = PBXGroup;
 			children = (
-				34AFF3D5222B1EF200D3923A /* state control */,
-				34944C6A222106D800570110 /* fsm_test.h */,
-				34F91E7A2210EDBB00F8CBBE /* main.cpp */,
+				34E3FF4323A87B140074F3E6 /* control_structures.h */,
+				34E3FF4423A87B150074F3E6 /* data.h */,
+				34E3FF3B23A87B140074F3E6 /* fsm_test.h */,
+				34E3FF3D23A87B140074F3E6 /* hmm.h */,
+				34E3FF3C23A87B140074F3E6 /* hmm.c */,
+				34E3FF3A23A87B140074F3E6 /* main.cpp */,
+				34E3FF3E23A87B140074F3E6 /* state control */,
 			);
 			path = hmmtest;
 			sourceTree = "<group>";
@@ -144,9 +146,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				34AFF3DA222B1EFD00D3923A /* hmm.c in Sources */,
-				34944C702221132600570110 /* fsm.c in Sources */,
-				34F91E7B2210EDBB00F8CBBE /* main.cpp in Sources */,
+				34E3FF4723A87B150074F3E6 /* fsm.c in Sources */,
+				34E3FF4623A87B150074F3E6 /* hmm.c in Sources */,
+				34E3FF4523A87B150074F3E6 /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

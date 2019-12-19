@@ -1,47 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Workspace
    version = "1.0">
-   <Group
-      location = "group:statecontrol"
-      name = "statecontrol">
-      <FileRef
-         location = "group:gmm.c">
-      </FileRef>
-      <FileRef
-         location = "group:control_types.h">
-      </FileRef>
-      <FileRef
-         location = "group:fsm.h">
-      </FileRef>
-      <FileRef
-         location = "group:psm.h">
-      </FileRef>
-      <FileRef
-         location = "group:hmm.h">
-      </FileRef>
-      <FileRef
-         location = "group:gmm.h">
-      </FileRef>
-      <FileRef
-         location = "group:kumaraswamy.h">
-      </FileRef>
-      <FileRef
-         location = "group:psm.c">
-      </FileRef>
-      <FileRef
-         location = "group:fsm_support.h">
-      </FileRef>
-      <FileRef
-         location = "group:control_structures.h">
-      </FileRef>
-      <FileRef
-         location = "group:fsm.c">
-      </FileRef>
-      <FileRef
-         location = "group:hmm.c">
-      </FileRef>
-   </Group>
    <FileRef
-      location = "self:hmmtest.xcodeproj">
+      location = "group:../hmmtest/control_structures.h">
+   </FileRef>
+   <FileRef
+      location = "group:../hmmtest/control_types.h">
+   </FileRef>
+   <FileRef
+      location = "group:../hmmtest/data.h">
+   </FileRef>
+   <FileRef
+      location = "group:../hmmtest/fsm_test.h">
+   </FileRef>
+   <FileRef
+      location = "group:../hmmtest/fsm.c">
+   </FileRef>
+   <FileRef
+      location = "group:../hmmtest/fsm.h">
+   </FileRef>
+   <FileRef
+      location = "group:../hmmtest/hmm.c">
+   </FileRef>
+   <FileRef
+      location = "group:../hmmtest/hmm.h">
+   </FileRef>
+   <FileRef
+      location = "group:../hmmtest/main.cpp">
+   </FileRef>
+   <FileRef
+      location = "self:">
    </FileRef>
 </Workspace>

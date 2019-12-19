@@ -175,11 +175,13 @@ extern "C" {
     typedef enum
     {
 #ifdef SPOOF
-        LOW = 0,
-        HIGH,
-#define UNKNOWN_STATE LOW
-#define UNSTABLE_NONE LOW
-
+//        LOW = 0,
+//        HIGH,
+        SNOW = 0,
+        RAIN,
+        SUNSHINE,
+#define UNKNOWN_STATE SNOW//LOW
+#define UNSTABLE_NONE SNOW//LOW
 #else
         UNKNOWN_STATE = -1,
         UNSTABLE_NONE,

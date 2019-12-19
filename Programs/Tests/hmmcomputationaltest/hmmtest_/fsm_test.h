@@ -27,8 +27,7 @@
 
 static double observations[]
 {
-    1,1,0,1,0,0,1,0,1,1,0,0,0,1
-//    0.1, 0.1, 0, 2, 1, 1.1, 0.9, 0, 0, 0
+    0.1, 0.1, 0, 2, 1, 1.1, 0.9, 0, 0, 0
 //    I, I, I, I, I,
 //    O, O, I
 //    , I, I
@@ -44,20 +43,14 @@ static band_list_t spoof_bands =
 
 static transition_matrix_t spoof_map =
 {
-    { 0.3, 0.3,  0.4  },
-    { 0.1, 0.45, 0.45 },
-    { 0.2, 0.3,  0.5  }
-//    { 0.5, 0.5 },
-//    { 0.3, 0.7 }
+    { 0.5, 0.5 },
+    { 0.3, 0.7 }
 };
 
 static observation_matrix_t spoof_omap =
 {
-    { 0.99,0.01   },
-    { 0.8, 0.2 },
-    { 0.3, 0.7 }
-//    { 0.7, 0.1 },
-//    { 0.2, 0.1 }
+    { 0.7, 0.1 },
+    { 0.2, 0.1 }
 };
 
 //static observation_matrix_t spoof_omap =
@@ -68,7 +61,7 @@ static observation_matrix_t spoof_omap =
 
 static double initial[NUM_STATES] =
 {
-    0, 0.2, 0.8
+    0.2, 0.8
 };
 #else
 typedef enum
