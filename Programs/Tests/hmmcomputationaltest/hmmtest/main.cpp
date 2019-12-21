@@ -13,13 +13,13 @@
 using namespace std;
 
 #define REPETITIONS 1
-#define DELTA 5.
+#define DELTA 100.
 
 hidden_markov_model_t hmm;
 
 int main(int argc, const char * argv[])
 {
-    HMMFunctions.Initialize( &hmm );
+    HMMFunctions.Initialize( &hmm, "hmm" );
     InitTest( &hmm );
     
     while(1)
@@ -30,8 +30,8 @@ int main(int argc, const char * argv[])
             for( uint8_t i = 0; i < n; i++ )
             {
                 PushToObservationBuffer(&hmm.O, observations[i]);
+                HMMFunctions.BaumWelchSolve( &hmm, DELTA );
             }
-            HMMFunctions.BaumWelchSolve( &hmm, DELTA );
         }
         HMMFunctions.Print( &hmm );
         while(1);

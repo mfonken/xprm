@@ -10,6 +10,7 @@
 #define fsm_test_h
 
 #include "hmm.h"
+#include "control_types.h"
 
 #ifdef SPOOF
 //typedef enum
@@ -25,7 +26,7 @@
 //    , I, I
 //};
 
-static double observations[]
+static hmm_observation_t observations[]
 {
     1,1,0,1,0,0,1,0,1,1,0,0,0,1
 //    0.1, 0.1, 0, 2, 1, 1.1, 0.9, 0, 0, 0
@@ -118,8 +119,7 @@ static void InitTest( hidden_markov_model_t * hmm )
     
     memcpy(&hmm->A, &spoof_map, sizeof(transition_matrix_t));
     memcpy(&hmm->B, &spoof_omap, sizeof(observation_matrix_t));
-    hmm->pi[0] = initial[0];
-    hmm->pi[1] = initial[1];
+    memcpy(&hmm->pi, initial, sizeof(state_vector_t));
 #else
     double beta = NUM_STATE_GROUPS + 1;
     double half_beta_step = 1 / ( beta );

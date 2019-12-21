@@ -5,46 +5,77 @@
 //  Created by Matthew Fonken on 2/10/19.
 //  Copyright © 2019 Matthew Fonken. All rights reserved.
 //
+
+#ifdef __PSM__
+
 #include "hmm.h"
 
-#define HMM_ERROR_PADDING 0.01
+#define HMM_ERROR_PADDING 1e-4
 #define SOFTEN(X) (X==1?(1-HMM_ERROR_PADDING):(X==0?HMM_ERROR_PADDING:X))
 
-void InitializeHMM( hidden_markov_model_t * model )
+void InitializeHMM( hidden_markov_model_t * model, const char * name )
 {
     memset( model, 0, sizeof(hidden_markov_model_t) );
+    model->name = name;
+    
+    KumaraswamyFunctions.Initialize( &model->k_dist, NUM_STATES + 1, (floating_t[])DEFAULT_KUMARASWAMY_BANDS );
+    HMMFunctions.InitializeTransitionMatrix( model );
+    
+    memcpy( &model->B, (emission_t[])DEFAULT_OBSERVATION_LIST, sizeof((emission_t[])DEFAULT_OBSERVATION_LIST) );
+    memcpy( &model->pi, (state_vector_t)DEFAULT_STATE_VECTOR, sizeof(state_vector_t) );
+    
+    HMMFunctions.Print( model );
 }
 
-//uint8_t ReportObservationToHMM( hidden_markov_model_t * model, observation_symbol_t o )
-//{
-//    return PushToObservationBuffer( &model->O, o );
-//}
+void InitializeTransitionMatrixHMM( hidden_markov_model_t * model )
+{
+    for( uint8_t i = 0; i < NUM_STATES; i++ )
+        KumaraswamyFunctions.GetVector( &model->k_dist, i + 1, model->A[i] );
+}
 
-double UpdateAllHMM( hidden_markov_model_t * model )
+uint8_t ReportObservationToHMM( hidden_markov_model_t * model, hmm_observation_t o )
+{
+#ifdef HMM_2D_EMISSIONS
+    LOG_HMM(HMM_REPORT, "Reporting: {%.4f, %.4f} - [%d]\n", o.a, o.b, model->O.index.next);
+#else
+    LOG_HMM(HMM_REPORT, "Reporting %.4f - [%d]\n", o, model->O.index.next);
+#endif
+    return PushToObservationBuffer( &model->O, o );
+}
+
+floating_t UpdateAllHMM( hidden_markov_model_t * model )
 {
     HMMFunctions.Update.Alpha(  model );
     HMMFunctions.Update.Beta(   model );
     HMMFunctions.Update.Gamma(  model );
     HMMFunctions.Update.Xi(     model );
-    return HMMFunctions.Update.Probability( model );
+    floating_t new_P = HMMFunctions.Update.Probability( model ),
+    delta_P = model->P - new_P;
+    model->P = new_P;
+//    LOG_HMM(HMM_DEBUG, "Update %s probability ∆: %.4f\n", model->name, delta_P);
+    return delta_P;
 }
 
 void UpdateAlphaHMM( hidden_markov_model_t * model )
 {
     memset( model->alpha, 0., sizeof(model->alpha) );
     uint8_t T = model->O.length;
-    double o = GetIndexObservationBuffer( &model->O, 0 ), p;
+    hmm_observation_t o = GetIndexObservationBuffer( &model->O, 0 );
+    floating_t p;
     
+    /* Source - https://en.wikipedia.org/wiki/Baum–Welch_algorithm#cite_note-6 */
     /* 1. α_i(0) = π_i x B_i(y_0) */
     for( uint8_t i = 0; i < NUM_STATES; i++ )
+    {
         model->alpha[0][i] = model->pi[i] * GetProbabilityFromEmission( &model->B[i], o );
+    }
     
     /*  2. α_i(t) = B_i(y_(t)) x ∑_{j=0}^N ( α_j(t-1) x A_{ji} ) */
     for( uint8_t t = 1; t < T; t++ )
     {
         for( uint8_t i = 0; i < NUM_STATES; i++ )
         {
-            double sum = 0;
+            floating_t sum = 0;
             for( uint8_t j = 0; j < NUM_STATES; j++ )
                 sum += model->alpha[t - 1][j] * model->A[j][i];
             o = GetIndexObservationBuffer( &model->O, t );
@@ -54,33 +85,14 @@ void UpdateAlphaHMM( hidden_markov_model_t * model )
     }
 }
 
-//double UpdateAlphaRecursiveHMM( hidden_markov_model_t * model, uint8_t t, uint8_t i )
-//{
-//    printf("AR[%d]: %d|%d\n", ar++, t, i);
-//    double o, p, sum = 0.;
-//    
-//    if( t == 0 ) sum = model->pi[i];
-//    else
-//        for( uint8_t j = 0; j < NUM_STATES; j++ )
-//            sum += UpdateAlphaRecursiveHMM( model, t - 1, j ) * model->A[j][i];
-//    o = GetIndexObservationBuffer( &model->O, t );
-//    p = GetProbabilityFromEmission( &model->B[i], o );
-//    return sum * p;
-//}
-//
-//void UpdateAlphaRecursiveBaseHMM( hidden_markov_model_t * model, uint8_t t )
-//{
-//    memset( model->alpha, 0., sizeof(model->alpha) );
-//    for( uint8_t i = 0; i < NUM_STATES; i++ )
-//        model->alpha[t][i] = UpdateAlphaRecursiveHMM( model, t, i );
-//}
-
 void UpdateBetaHMM(hidden_markov_model_t * model )
 {
     memset( model->beta, 0., sizeof(model->beta) );
     uint8_t T = model->O.length;
-    double o, p = 0.;
+    hmm_observation_t o;
+    floating_t p;
     
+    /* Source - https://en.wikipedia.org/wiki/Baum–Welch_algorithm#cite_note-6 */
     /* 1. β_i(T-1) = 1 */
     for( uint8_t i = 0; i < NUM_STATES; i++ )
         model->beta[T - 1][i] = 1.;
@@ -90,14 +102,14 @@ void UpdateBetaHMM(hidden_markov_model_t * model )
     {
         for( uint8_t i = 0; i < NUM_STATES; i++ )
         {
-            double sum = 0;
+            floating_t sum = 0;
             for( uint8_t j = 0; j < NUM_STATES; j++ )
             {
                 o = GetIndexObservationBuffer( &model->O, t + 1 );
                 p = GetProbabilityFromEmission( &model->B[j], o );
                 sum += model->beta[t + 1][j] * model->A[i][j] * p;
             }
-            model->beta[t][i] = sum;
+            model->beta[t][i] = SOFTEN( sum );
         }
     }
 }
@@ -107,15 +119,17 @@ void UpdateGammaHMM(hidden_markov_model_t * model )
     memset( model->gamma, 0., sizeof(model->gamma) );
     uint8_t T = model->O.length;
     
+    /* Source - https://en.wikipedia.org/wiki/Baum–Welch_algorithm#cite_note-6 */
     /* γ_i(t) = ( α_i(t) x β_i(t) ) / ( ∑_{j=1)^N ( α_j(t) x β_j(t) ) ) */
     for( uint8_t t = 0; t < T; t++ )
     {
-        double sum = 0;
+        floating_t sum = 0;
         for( uint8_t i = 0; i < NUM_STATES; i++ )
         {
             model->gamma[t][i] = model->alpha[t][i] * model->beta[t][i];
             sum += model->gamma[t][i];
         }
+        if( sum == 0 ) continue;
         for( uint8_t i = 0; i < NUM_STATES; i++ )
             model->gamma[t][i] /= sum;
     }
@@ -125,12 +139,14 @@ void UpdateXiHMM( hidden_markov_model_t * model )
 {
     memset( model->xi, 0., sizeof(model->xi) );
     uint8_t T = model->O.length;
-    double o, p;
+    hmm_observation_t o;
+    floating_t p;
     
+    /* Source - https://en.wikipedia.org/wiki/Baum–Welch_algorithm#cite_note-6 */
     /* ξ_{ij}(t) = ( α_i(t) x A_{ij} x β_j(t+1) x B_j(y_{t+1}) ) / ( ∑_{i=1}^N ∑_{j=1)^N ( α_i(t) x A_{ij} x β_j(t+1) x B_j(y_{t+1}) ) ) */
     for( uint8_t t = 0; t < T; t++ )
     {
-        double sum = 0;
+        floating_t sum = 0;
         for( uint8_t i = 0; i < NUM_STATES; i++ )
         {
             for( uint8_t j = 0; j < NUM_STATES; j++ )
@@ -141,15 +157,17 @@ void UpdateXiHMM( hidden_markov_model_t * model )
                 sum += model->xi[i][t][j];
             }
         }
+        if( sum == 0 ) continue;
         for( uint8_t i = 0; i < NUM_STATES; i++ )
             for( uint8_t j = 0; j < NUM_STATES; j++ )
                 model->xi[i][t][j] /= sum;
     }
 }
 
-double UpdateProbabilityHMM( hidden_markov_model_t * model )
+floating_t UpdateProbabilityHMM( hidden_markov_model_t * model )
 {
-    double sum = 0;
+    /* Source - http://www.utstat.toronto.edu/*rsalakhu/sta4273/notes/Lecture11.pdf - Computing Likelihood */
+    floating_t sum = 0;
     uint8_t T = model->O.length;
     
     /* P(T) = ∑_{i=1}^N α_i(T) */
@@ -158,29 +176,31 @@ double UpdateProbabilityHMM( hidden_markov_model_t * model )
     return sum;
 }
 
-mat2x2 ComputeObservationAAT( observation_t A )
-{
-    double aa = A.a * A.a,
-    ab = A.a * A.b,
-    bb = A.b * A.b;
-    return (mat2x2){ aa, ab, ab, bb };
-}
-
 void UpdateInitialProbabilitiesHMM( hidden_markov_model_t * model )
 {
+    /* Source - https://en.wikipedia.org/wiki/Baum–Welch_algorithm#cite_note-6 */
     /* π_i^* = γ_i(0) */
+    double sum = 0.;
     for( uint8_t i = 0; i < NUM_STATES; i++ )
+    {
+        sum += model->gamma[0][i];
         model->pi[i] = SOFTEN( model->gamma[0][i] );
+    }
+    if( sum == 0 )
+        model->pi[0] = SOFTEN( 1. );
+    /// TODO: Add better failure case
 }
 
 void UpdateTransitionProbabilitiesHMM( hidden_markov_model_t * model )
 {
     uint8_t T = model->O.length;
+    floating_t n = 0, d = 0;
     
+    /* Source - https://en.wikipedia.org/wiki/Baum–Welch_algorithm#cite_note-6 */
     /* A_{ij}^* = ( ∑_{t=1}^{T-1} ξ_{ij}(t) ) / ( ∑_{t=1}^{T-1} γ_i(t) ) */
-    double n = 0, d = 0;
     for( uint8_t i = 0; i < NUM_STATES; i++ )
     {
+        floating_t sum = 0, curr;
         for( uint8_t j = 0; j < NUM_STATES; j++ )
         {
             n = 0; d = 0;
@@ -189,44 +209,89 @@ void UpdateTransitionProbabilitiesHMM( hidden_markov_model_t * model )
                 n += model->xi[i][t][j];
                 d += model->gamma[t][i];
             }
-            model->A[i][j] = SOFTEN( n / d );
+            curr = ZDIV( n, d );
+            model->A[i][j] = SOFTEN( curr );
+            sum += curr;
         }
+        if( sum == 0 )
+            model->A[i][i] = SOFTEN( 1. );
+        /// TODO: Add better failure case (maybe with Beta(or K) distribution)
     }
 }
 
 void UpdateEmissionProbabilitiesHMM( hidden_markov_model_t * model )
 {
 #ifdef HMM_GAUSSIAN_EMISSIONS
+    /* Source - https://sambaiga.github.io/ml/hmm/2017/06/12/hmm-gausian.html */
     /* P( y_t | s_t=i ) = Ν(nu)( y_t | µ_i, ∑_i ) */
-    uint8_t T = model->O.length, o;
-    double sum = 0., gamma_sum = 0.;
-    double mean_diff = 0.;
-//    mat2x2 cov_est = { 0. };
     
-    /* µ_i = ( ∑_{t=1}^T γ_i(t) x y(t) ) / ( ∑_{t=1}^T γ_i(t) ) */
-    /* ∑_i = ( ∑_{t=1}^T γ_i(t) x [y(t) - µ_i][y(t) - µ_i]^T ) / ( ∑_{t=1}^T γ_i(t) ) */
+    uint8_t T = model->O.length;
+    floating_t gamma_sum = 0.;
+    hmm_observation_t o;
+#ifdef HMM_2D_EMISSIONS
+    vec2_t mean_diff = { 0. }, mean_sum = { 0. }, working_vec;
+    mat2x2 cov_est = { 0. }, cov_sum = { 0. }, working_mat;
+#else
+    floating_t mean_diff = 0., sum = 0.;
+#endif
+    
     for( uint8_t i = 0; i < NUM_STATES; i++ )
     {
-        sum = 0.; gamma_sum = 0.;
+        /* µ_i = ( ∑_{t=1}^T γ_i(t) x y(t) ) / ( ∑_{t=1}^T γ_i(t) ) */
+#ifdef HMM_2D_EMISSIONS
+        mean_sum = (vec2_t){ 0. };
+#else
+        sum = 0.;
+#endif
+        gamma_sum = 0.;
         for( uint8_t t = 0; t < T; t++ )
         {
             o = GetIndexObservationBuffer( &model->O, t );
+#ifdef HMM_2D_EMISSIONS
+            MatVec.Vec2.ScalarMultiply(model->gamma[t][i], &o, &working_vec);
+            MatVec.Vec2.Add( &mean_sum, &working_vec, &mean_sum );
+#else
             sum += model->gamma[t][i] * o;
+#endif
             gamma_sum += model->gamma[t][i];
         }
-        model->B[i].mean = SOFTEN( sum / gamma_sum );
+#ifdef HMM_2D_EMISSIONS
+        if( gamma_sum == 0 ) continue;
+        floating_t inv_gamma_sum = ZDIV( 1, gamma_sum );
+        MatVec.Vec2.ScalarMultiply( inv_gamma_sum, &mean_sum, &model->B[i].mean );
+#else
+        model->B[i].mean = SOFTEN( ZDIV( sum, gamma_sum ) );
+#endif
         
+        /* ∑_i = ( ∑_{t=1}^T γ_i(t) x [y(t) - µ_i][y(t) - µ_i]^T ) / ( ∑_{t=1}^T γ_i(t) ) */
+#ifdef HMM_2D_EMISSIONS
+        cov_sum = (mat2x2){ 0. };
+#else
         sum = 0.;
+#endif
         for( uint8_t t = 0; t < T; t++ )
         {
             o = GetIndexObservationBuffer( &model->O, t );
-            mean_diff = (double)o - model->B[i].mean;
-            //            cov_est = ComputeEmissionAAT( mean_diff );
-            sum += model->gamma[t][i] * mean_diff * mean_diff;// cov_est;
+#ifdef HMM_2D_EMISSIONS
+            MatVec.Vec2.Subtract( &o, &model->B[i].mean, &mean_diff );
+            MatVec.Vec2.AAT( &mean_diff, &cov_est );
+            MatVec.Mat2x2.ScalarMultiply( model->gamma[t][i], &cov_est, &working_mat );
+            MatVec.Mat2x2.Add( &cov_sum, &working_mat, &cov_sum );
+#else
+            mean_diff = (floating_t)o - model->B[i].mean;
+            sum += model->gamma[t][i] * mean_diff * mean_diff;
+#endif
         }
-        model->B[i].std_dev = SOFTEN( sum / gamma_sum );
+#ifdef HMM_2D_EMISSIONS
+        MatVec.Mat2x2.ScalarMultiply( gamma_sum, &cov_sum, &model->B[i].covariance );
+        MatVec.Gaussian2D.Covariance.Limit( &model->B[i].covariance );
+#else
+        model->B[i].std_dev = SOFTEN( ZDIV( sum, gamma_sum ) );
+#endif
     }
 #else
+    floating_t n, d; uint8_t T = model->O.length; hmm_observation_t o;
+    /* Source - https://en.wikipedia.org/wiki/Baum–Welch_algorithm#cite_note-6 */
     /* B_i^*(v_k) = ( ∑_{t=1}^{T-1} ( 1_{y_t=v_k} x γ_i(t) ) ) / ( ∑_{t=1}^{T-1} γ_i(t) ) */
     for( uint8_t j = 0; j < NUM_STATES; j++ )
     {
@@ -246,47 +311,44 @@ void UpdateEmissionProbabilitiesHMM( hidden_markov_model_t * model )
 #endif
 }
 
-void BaumWelchSolveHMM( hidden_markov_model_t * model, double DELTA )
+void BaumWelchSolveHMM( hidden_markov_model_t * model, floating_t DELTA )
 {
-    double prob_start = HMMFunctions.Update.All( model ),
-    prob_end = 0,
-    prob_delta = 0;
-    
+    if( model->O.length <= 1 ) return;
+    HMMFunctions.Update.All( model );
     do
     {
-        /* Update initial state probabilities */
         HMMFunctions.Update.Pi( model );
-        
-        /* Update transition matrix */
         HMMFunctions.Update.A( model );
-        
-        /* Update observation matrix */
         HMMFunctions.Update.B( model );
-        
-        prob_end = HMMFunctions.Update.All( model );
-        prob_delta = prob_end - prob_start;
-        prob_start = prob_end;
-    } while (prob_delta > DELTA);
+        HMMFunctions.Print( model );
+    } while( HMMFunctions.Update.All( model ) > DELTA );
 }
 
 void PrintHMM( hidden_markov_model_t * model )
 {
-    printf("\n");
-    printf("A:");
+    LOG_HMM(HMM_DEBUG, "%s:\n", model->name );
+    LOG_HMM_BARE(HMM_DEBUG, "A:\n");
     for( uint8_t i = 0; i < NUM_STATES; i++ )
     {
-        printf("[");
+        LOG_HMM_BARE(HMM_DEBUG, "\t[");
         for( uint8_t j = 0; j < NUM_STATES; j++ )
-            printf("%.4f%s", model->A[i][j], (j==NUM_STATES-1?"":","));
-        printf("]");
+            LOG_HMM_BARE(HMM_DEBUG, "%6.4f%s", model->A[i][j], (j==NUM_STATES-1?"":", "));
+        LOG_HMM_BARE(HMM_DEBUG, "]\n");
     }
-    printf("\n");
-    printf("B:");
+    LOG_HMM_BARE(HMM_DEBUG, "B:\n");
     for( uint8_t i = 0; i < NUM_STATES; i++ )
     {
-        printf("[");
-        printf("%.4f,%.4f", model->B[i].mean, model->B[i].std_dev);
-        printf("]");
+        LOG_HMM_BARE(HMM_DEBUG, "\t");
+#ifdef HMM_2D_EMISSIONS
+        LOG_HMM_BARE(HMM_DEBUG, "µ:(%8.4f, %8.4f) ∑:[%7.4f, %7.4f; %7.4f, %7.4f]", model->B[i].mean.a, model->B[i].mean.b, model->B[i].covariance.a, model->B[i].covariance.b, model->B[i].covariance.c, model->B[i].covariance.d);
+#else
+        LOG_HMM_BARE(HMM_DEBUG, "[%8.4f,%8.4f]", model->B[i].mean, model->B[i].std_dev);
+#endif
+        if( !i ) { LOG_HMM_BARE(HMM_DEBUG, " \tpi: "); }
+        else { LOG_HMM_BARE(HMM_DEBUG, " \t    "); }
+        LOG_HMM_BARE(HMM_DEBUG, "[%.4f]\n", model->pi[i]);
     }
-    printf("\n");
+    LOG_HMM_BARE(HMM_DEBUG, "\n");
 }
+
+#endif
