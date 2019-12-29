@@ -44,29 +44,11 @@ typedef uint32_t        address_t;
 #define density_2d_t_max        ( (sizeof(density_2d_t) << 3 ) - 1 )
 #define density_map_unit_t_max  ( (sizeof(density_map_unit_t) << 3 ) - 1 )
 
-#define USE_DECOUPLING
-#define USE_BACKGROUNDING
-// #define ALLOW_NEGATIVE_REDISTRIBUTION
-
-#define RHO_DEBUG               DEBUG_2
-#define RHO_DEBUG_2             DEBUG_1//2
-#define RHO_DEBUG_INIT          DEBUG_1
-#define RHO_DEBUG_UPDATE        DEBUG_1
-#define RHO_DEBUG_DETECT        DEBUG_1
-#define RHO_DEBUG_DETECT_2      DEBUG_1
-#define RHO_DEBUG_PREDICT       DEBUG_1
-#define RHO_DEBUG_PREDICT_2     DEBUG_1
-#define RHO_DEBUG_UPDATE        DEBUG_1
-#define RHO_DEBUG_UPDATE_2      DEBUG_1
-
-//#define KALMAN_DEBUG            RHO_DEBUG
-//#define KALMAN_DEBUG_2          RHO_DEBUG_2
-
 //#define PSM_DEBUG               DEBUG_2
 //#define PSM_DEBUG_2             DEBUG_1
 //#define PSM_DEBUG_UPDATE        PSM_DEBUG
-//#define HMM_DEBUG               RHO_DEBUG
-//#define HMM_REPORT              RHO_DEBUG_2
+#define HMM_DEBUG               //RHO_DEBUG
+#define HMM_REPORT              //RHO_DEBUG_2
 //#define GMM_DEBUG               PSM_DEBUG
 //#define GMM_DEBUG_2             PSM_DEBUG_2
 //#define GMM_DEBUG_CLUSTERS      PSM_DEBUG_2
@@ -78,26 +60,6 @@ typedef uint32_t        address_t;
 //#define PACKET_DEBUG            RHO_DEBUG
 //#define PACKET_DEBUG_2          RHO_DEBUG_2
 
-#ifdef RHO_DEBUG
-#define LOG_RHO(L,...)          LOG(L,"<Rho> " __VA_ARGS__)
-#define LOG_RHO_BARE(L,...)     LOG_BARE(L,"" __VA_ARGS__)
-#else
-#define LOG_RHO(...)
-#define LOG_RHO_BARE(L,...)
-#endif
-
-#ifdef KALMAN_DEBUG
-#define LOG_KALMAN(L,...)       LOG(L,"<Kalman> " __VA_ARGS__)
-#else
-#define LOG_KALMAN(...)
-#endif
-
-#ifdef PACKET_DEBUG
-#define LOG_PACKET(L,...)       LOG(L,"<Packet> " __VA_ARGS__)
-#else
-#define LOG_PACKET(...)
-#endif
-
 #ifdef PSM_DEBUG
 #define LOG_PSM(L,...)          LOG(L,"<PSM> " __VA_ARGS__)
 #define LOG_PSM_BARE(L,...)     LOG_BARE(L,"" __VA_ARGS__)
@@ -107,8 +69,8 @@ typedef uint32_t        address_t;
 #endif
 
 #ifdef HMM_DEBUG
-#define LOG_HMM(L,...)          LOG(L,"<HMM> " __VA_ARGS__)
-#define LOG_HMM_BARE(L,...)     LOG_BARE(L,"" __VA_ARGS__)
+#define LOG_HMM(L,...)          printf("<HMM> " __VA_ARGS__) // LOG(L,"<HMM> " __VA_ARGS__)
+#define LOG_HMM_BARE(L,...)     printf("" __VA_ARGS__) //LOG_BARE(L,"" __VA_ARGS__)
 #else
 #define LOG_HMM(...)
 #define LOG_HMM_BARE(...)

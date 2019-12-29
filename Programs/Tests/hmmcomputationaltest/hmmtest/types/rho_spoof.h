@@ -9,7 +9,6 @@
 #ifndef rho_spoof_h
 #define rho_spoof_h
 
-#define LOG_KALMAN(...)
 #define LOG_FSM(...)
 
 #ifndef BOUND

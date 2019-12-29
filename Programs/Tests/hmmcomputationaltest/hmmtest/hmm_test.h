@@ -6,117 +6,22 @@
 //  Copyright © 2019 Matthew Fonken. All rights reserved.
 //
 
-#ifndef fsm_test_h
-#define fsm_test_h
+#ifndef hmm_test_h
+#define hmm_test_h
 
 #include "hmm.h"
-#include "control_types.h"
 
-#ifdef SPOOF
-//typedef enum
-//{
-//    I = 0,
-//    O
-//} OBSERVATAION;
-//
-//static OBSERVATAION observations[]
-//{
-//    I, I, I, I, I,
-//    O, O, I
-//    , I, I
-//};
-
-static hmm_observation_t observations[]
-{
-    1,1,0,1,0,0,1,0,1,1,0,0,0,1
-//    0.1, 0.1, 0, 2, 1, 1.1, 0.9, 0, 0, 0
-//    I, I, I, I, I,
-//    O, O, I
-//    , I, I
-};
-
-static observation_buffer_t spoof_observataions;
-
-static band_list_t spoof_bands =
-{
-    NUM_STATE_GROUPS,
-    {0}
-};
-
-static transition_matrix_t spoof_map =
-{
-    { 0.3, 0.3,  0.4  },
-    { 0.1, 0.45, 0.45 },
-    { 0.2, 0.3,  0.5  }
-//    { 0.5, 0.5 },
-//    { 0.3, 0.7 }
-};
-
-static observation_matrix_t spoof_omap =
-{
-    { 0.99,0.01   },
-    { 0.8, 0.2 },
-    { 0.3, 0.7 }
-//    { 0.7, 0.1 },
-//    { 0.2, 0.1 }
-};
-
-//static observation_matrix_t spoof_omap =
-//{
-//    { 0.3, 0.7 },
-//    { 0.8, 0.2 }
-//};
-
-static double initial[NUM_STATES] =
-{
-    0, 0.2, 0.8
-};
+#ifdef DATA_SET_1
+#include "data_set_1.h"
+#elif DATA_SET_2
+#include "data_set_2.h"
 #else
-typedef enum
-{
-    ZERO = 0,
-    ONE,
-    TWO,
-    THREE,
-    FOUR
-} OBSERVATAION;
-
-static OBSERVATAION observations[]
-{
-//    ONE, ONE, ONE, ONE, TWO, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE, ONE
-    ONE, ZERO, THREE, TWO, FOUR, ONE, ZERO, THREE, TWO, FOUR, ONE, ZERO, THREE, TWO, FOUR, ONE, ZERO, THREE, TWO, FOUR
-//    ZERO, ZERO, ZERO, ONE, ONE, ONE, TWO, TWO, TWO, THREE, THREE, THREE, FOUR, FOUR, FOUR, THREE, THREE, TWO, TWO, ONE, ONE, ZERO, ZERO
-};
-
-static observation_buffer_t spoof_observataions;
-
-static band_list_t spoof_bands =
-{
-    NUM_STATE_GROUPS,
-    {0}
-};
-
-static fsm_map_t spoof_map =
-{
-    {0},
-    NUM_STATE_GROUPS
-};
-
-static observation_matrix_t spoof_omap =
-{
-    {0},
-    {0},
-    NUM_STATE_GROUPS
-};
-
-static double initial[NUM_STATES] =
-{0};
+#error "No data set specified!"
 #endif
 
 static void InitTest( hidden_markov_model_t * hmm )
 {
 #ifdef SPOOF    
-    
     memcpy(&hmm->A, &spoof_map, sizeof(transition_matrix_t));
     memcpy(&hmm->B, &spoof_omap, sizeof(observation_matrix_t));
     memcpy(&hmm->pi, initial, sizeof(state_vector_t));
@@ -166,8 +71,4 @@ static void InitTest( hidden_markov_model_t * hmm )
 #endif
 }
 
-static void UpdateFSM( fsm_system_t * fsm )
-{
-}
-
-#endif /* fsm_test_h */
+#endif /* hmm_test_h */

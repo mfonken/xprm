@@ -24,7 +24,9 @@ void InitializeHMM( hidden_markov_model_t * model, const char * name )
     memcpy( &model->B, (emission_t[])DEFAULT_OBSERVATION_LIST, sizeof((emission_t[])DEFAULT_OBSERVATION_LIST) );
     memcpy( &model->pi, (state_vector_t)DEFAULT_STATE_VECTOR, sizeof(state_vector_t) );
     
+#ifdef HMM_DEBUG_2
     HMMFunctions.Print( model );
+#endif
 }
 
 void InitializeTransitionMatrixHMM( hidden_markov_model_t * model )
@@ -38,7 +40,7 @@ uint8_t ReportObservationToHMM( hidden_markov_model_t * model, hmm_observation_t
 #ifdef HMM_2D_EMISSIONS
     LOG_HMM(HMM_REPORT, "Reporting: {%.4f, %.4f} - [%d]\n", o.a, o.b, model->O.index.next);
 #else
-    LOG_HMM(HMM_REPORT, "Reporting %.4f - [%d]\n", o, model->O.index.next);
+    LOG_HMM(HMM_REPORT, "Reporting %.4f - [%d]\n", (floating_t)o, model->O.index.next);
 #endif
     return PushToObservationBuffer( &model->O, o );
 }
@@ -305,7 +307,7 @@ void UpdateEmissionProbabilitiesHMM( hidden_markov_model_t * model )
                     n += model->gamma[t][j];
                 d += model->gamma[t][j];
             }
-            model->B[j][k] = SOFTEN( n / d );
+            model->B[j][k] = SOFTEN( ZDIV( n, d ) );
         }
     }
 #endif
@@ -320,7 +322,9 @@ void BaumWelchSolveHMM( hidden_markov_model_t * model, floating_t DELTA )
         HMMFunctions.Update.Pi( model );
         HMMFunctions.Update.A( model );
         HMMFunctions.Update.B( model );
+#ifdef HMM_DEBUG_2
         HMMFunctions.Print( model );
+#endif
     } while( HMMFunctions.Update.All( model ) > DELTA );
 }
 
@@ -339,10 +343,17 @@ void PrintHMM( hidden_markov_model_t * model )
     for( uint8_t i = 0; i < NUM_STATES; i++ )
     {
         LOG_HMM_BARE(HMM_DEBUG, "\t");
+#ifdef HMM_GAUSSIAN_EMISSIONS
 #ifdef HMM_2D_EMISSIONS
         LOG_HMM_BARE(HMM_DEBUG, "µ:(%8.4f, %8.4f) ∑:[%7.4f, %7.4f; %7.4f, %7.4f]", model->B[i].mean.a, model->B[i].mean.b, model->B[i].covariance.a, model->B[i].covariance.b, model->B[i].covariance.c, model->B[i].covariance.d);
 #else
         LOG_HMM_BARE(HMM_DEBUG, "[%8.4f,%8.4f]", model->B[i].mean, model->B[i].std_dev);
+#endif
+#else
+        LOG_HMM_BARE(HMM_DEBUG, "[");
+        for( uint8_t k = 0; k < NUM_OBSERVATION_SYMBOLS; k++)
+            LOG_HMM_BARE(HMM_DEBUG, "%8.4f%s", model->B[i][k], (k==NUM_OBSERVATION_SYMBOLS-1?"":","));
+        LOG_HMM_BARE(HMM_DEBUG, "]");
 #endif
         if( !i ) { LOG_HMM_BARE(HMM_DEBUG, " \tpi: "); }
         else { LOG_HMM_BARE(HMM_DEBUG, " \t    "); }

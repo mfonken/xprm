@@ -50,7 +50,13 @@ extern "C" {
 
 #ifdef __PSM__
     //#define NUM_STATES              10
-#define NUM_OBSERVATION_SYMBOLS 2//5 // Should be max number of clusters in GMM
+#ifdef DATA_SET_1
+#define NUM_OBSERVATION_SYMBOLS 2
+#elif defined DATA_SET_2
+#define NUM_OBSERVATION_SYMBOLS 4
+#else
+#define NUM_OBSERVATION_SYMBOLS 1
+#endif
 #ifndef MAX_OBSERVATIONS
 #define MAX_OBSERVATIONS        (1 << 7) // Length of history
 #endif
@@ -91,7 +97,12 @@ extern "C" {
 #define BOUNDARY_END(X)     !!(X>0)
 #endif
     
-//#define HMM_GAUSSIAN_EMISSIONS
+
+#ifdef DATA_SET_1
+#else
+#define HMM_GAUSSIAN_EMISSIONS
+#endif
+
 #ifdef USE_2D_OBSERVATIONS
 #define HMM_2D_EMISSIONS
 #endif
@@ -113,14 +124,17 @@ extern "C" {
     typedef enum
     {
         UNKNOWN_STATE = -1,
-//        NONE_POPULATED,
-//        UNDER_POPULATED,
-//        TARGET_POPULATED,
-//        OVER_POPULATED,
-//        CHAOTIC,
+#ifdef DATA_SET_1
         SNOW,
         RAIN,
         SUNSHINE,
+#else
+        NONE_POPULATED,
+        UNDER_POPULATED,
+        TARGET_POPULATED,
+        OVER_POPULATED,
+        CHAOTIC,
+#endif
         NUM_STATES
     } state_t;
 #define NUM_STATE_GROUPS NUM_STATES
